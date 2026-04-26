@@ -1,0 +1,28 @@
+{% extends 'base2.html' %}  <!-- Extend the base template -->
+
+{% block title %}Location Form{% endblock %}  <!-- Title for the page -->
+
+{% block content %}
+<head>
+    <meta charset="UTF-8">
+    <title>{% if location %}Edit Location{% else %}Create Location{% endif %}</title>
+</head>
+<body>
+    <h1>{% if location %}Edit Location: {{ location.name }}{% else %}Add New Location{% endif %}</h1>
+
+    <form method="post" novalidate>
+        {% csrf_token %}
+        {{ form.as_p }}  <!-- Render form fields as paragraphs -->
+
+        <button type="submit">Save Location</button>
+        <a href="{% url 'location_list' %}">Cancel</a>  <!-- Link to cancel and go back to the list -->
+    </form>
+
+    {% if location %}
+    <form method="post" action="{% url 'location_delete' location.id %}" style="margin-top: 10px;">
+        {% csrf_token %}
+        <button type="submit" style="background-color: rgb(69, 5, 5); color: white;">Delete</button>
+    </form>
+    {% endif %}
+</body>
+{% endblock %}

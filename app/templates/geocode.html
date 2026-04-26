@@ -1,0 +1,64 @@
+
+{% extends 'base2.html' %}
+{% load static %}
+{% block title %}GEOCODE{% endblock %}
+
+{% block content %}
+
+
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Geocode Address</title>
+    <script>
+        let map;
+        let marker;
+        
+
+        function initMap() {
+            // Default center (e.g., New York)
+            map = new google.maps.Map(document.getElementById("map"), {
+                center: { lat: 30.7128, lng: -94.0060 }, 
+                zoom: 12,
+            });
+            marker = new google.maps.Marker({ map: map });
+        }
+
+        function geocodeAddress() {
+            let address = document.getElementById("address").value;
+            fetch(`/geocode/address/?address=${encodeURIComponent(address)}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.latitude && data.longitude) {
+                    document.getElementById("result").innerHTML = 
+                        `<p>Latitude: ${data.latitude}, Longitude: ${data.longitude}</p>`;
+                    
+                    let latLng = { lat: data.latitude, lng: data.longitude };
+
+                    // Update the map with the new location
+                    map.setCenter(latLng);
+                    marker.setPosition(latLng);
+                } else {
+                    document.getElementById("result").innerHTML = "<p>Invalid address. Try again.</p>";
+                }
+            })
+            .catch(error => console.error("Error:", error));
+        }
+    </script>
+</head>
+<body onload="initMap()">
+    <h2>Geocode an Address</h2>
+    <input type="text" id="address" placeholder="Enter an address">
+    <button onclick="geocodeAddress()">Get Coordinates</button>
+    <div id="result"></div>
+
+    <!-- Map Container -->
+    <div id="map" style="width: 100%; height: 700px; margin-top: 20px;"></div>
+
+    <!-- Load Google Maps API -->
+    <script src="https://maps.googleapis.com/maps/api/js?key={{ GOOGLE_MAPS_API_KEY }}&callback=initMap" async defer></script>
+</body>
+
+
+{% endblock %}

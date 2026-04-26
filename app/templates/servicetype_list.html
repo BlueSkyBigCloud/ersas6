@@ -1,0 +1,62 @@
+{% extends 'base2.html' %}
+
+{% block title %}Service Types{% endblock %}  <!-- Title for the page -->
+
+{% block content %}
+
+<head>
+  <meta charset="UTF-8">
+  <title>Service Types</title>
+</head>
+<body>
+  <h1>Service Types</h1>
+
+    <div class="model-actions">
+      <a class="button add-model-btn" href="{% url 'create_servicetype' %}">Add New Service Type</a>
+    </div>
+
+
+    <div class="service-list">
+      {% for servicetype in servicetypes %}
+        <div class="service-container">
+            <a href="{% url 'servicetype_detail' servicetype.id %}">{{ servicetype.name }}</a>
+            <p><strong>Daily Rate:</strong> {{ servicetype.daily_rate }}</p>
+          </div>
+      {% empty %}
+        <p>No service types available.</p>
+      {% endfor %}  
+  </div>
+  <br>
+
+  
+    <!-- Pagination Controls -->
+    <div class="pagination">
+      <span>
+          Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+      </span>
+
+      <div>
+          {% if page_obj.has_previous %}
+              <a href="?page=1" class="pagination-link">First</a>
+              <a href="?page={{ page_obj.previous_page_number }}" class="pagination-link">Previous</a>
+          {% endif %}
+
+          {% for num in page_obj.paginator.page_range %}
+              {% if num == page_obj.number %}
+                  <strong class="pagination-current">{{ num }}</strong>
+              {% else %}
+                  <a href="?page={{ num }}" class="pagination-link">{{ num }}</a>
+              {% endif %}
+          {% endfor %}
+
+          {% if page_obj.has_next %}
+              <a href="?page={{ page_obj.next_page_number }}" class="pagination-link">Next</a>
+              <a href="?page={{ page_obj.paginator.num_pages }}" class="pagination-link">Last</a>
+          {% endif %}
+      </div>
+  </div>
+
+</body>
+
+{% endblock %}
+

@@ -1,0 +1,27 @@
+{% extends 'base2.html' %}
+
+{% block title %}Messages{% endblock %}
+
+{% block content %}
+<h1>Messages</h1>
+
+<div class="message-actions">
+    <a class="button add-message-btn" href="{% url 'create_message' %}">Post to Community</a>
+</div>
+
+<div class="message-actions">
+    <a class="button add-message-btn" href="{% url 'create_message' %}">Message Friend</a>
+</div>
+
+
+
+<ul>
+    {% for message in messages %}
+        <li>
+            {{ message.subject }}, {{ message.body }}
+        </li>
+    {% empty %}
+        <li>No locations available.</li>
+    {% endfor %}
+</ul>
+{% endblock %}

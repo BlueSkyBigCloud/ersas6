@@ -1,0 +1,35 @@
+{% extends 'base2.html' %}
+
+{% block title %}Invoice Detail{% endblock %}
+
+{% block content %}
+<main>
+<h2>Invoices for {{ customer.name }}</h2>
+<table>
+    <thead>
+        <tr>
+            <th>Invoice ID</th>
+            <th>Amount</th>
+            <th>Due Date</th>
+            <th>Status</th>
+            <th>View</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for invoice in invoices %}
+            <tr>
+                <td>{{ invoice.invoice_number }}</td>
+                <td>$ {{ invoice.total }}</td>
+                <td>{{ invoice.due_date }}</td>
+                <td>{{ invoice.status }}</td>
+                <td><a href="{% url 'invoice_detail' invoice.id %}">View</a></td>
+            </tr>
+        {% empty %}
+            <tr>
+                <td colspan="5">No invoices available for this customer.</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+</main>
+{% endblock %}

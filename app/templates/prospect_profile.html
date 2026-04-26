@@ -1,0 +1,53 @@
+{% extends "base2.html" %}
+
+{% block content %}
+  <div class="container">
+    <h1>Prospect Profile: {{ prospect.name }}</h1>
+
+    <div class="card mb-4">
+      <div class="card-body">
+        <p><strong>Email:</strong> {{ prospect.email }}</p>
+        <p><strong>Phone:</strong> {{ prospect.phone_number }}</p>
+        <p><strong>Address:</strong> {{ prospect.address }}</p>
+        <p><strong>Account Rep:</strong> {{ prospect.account_rep }}</p>
+        <p><strong>Status:</strong> {{ prospect.status }}</p>
+        <p><strong>Created At:</strong> {{ prospect.created_at|date:"Y-m-d H:i" }}</p>
+        
+        {% if not prospect.converted_customer %}
+        <a href="{% url 'convert_prospect_to_customer' prospect.pk %}" class="btn btn-success">
+          Convert to Customer
+        </a>
+        {% else %}
+          <p><em>Already converted to customer: {{ prospect.converted_customer.name }}</em></p>
+        {% endif %}
+      
+      </div>
+    </div>
+
+    <h2>Log New Action</h2>
+    <form method="post" class="mb-4">
+      {% csrf_token %}
+      {{ action_form.as_p }}
+      <button type="submit" class="btn btn-primary">Add Action</button>
+    </form>
+
+    <h2>Actions</h2>
+    {% if actions %}
+      <ul class="list-group">
+        {% for action in actions %}
+          <li class="list-group-item">
+            <strong>{{ action.action_type }}</strong>
+            ({{ action.date|date:"Y-m-d H:i" }}) — {{ action.description }}
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p>No actions logged yet.</p>
+    {% endif %}
+
+    <hr>
+    <a href="{% url 'edit_prospect' prospect.pk %}" class="btn btn-warning mb-3">Edit Prospect</a>
+    <br>
+    <a href="{% url 'prospect_dashboard' %}" class="btn btn-secondary">← Back to Dashboard</a>
+  </div>
+{% endblock %}

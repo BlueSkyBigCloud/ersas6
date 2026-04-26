@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bulk Create Employees</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 20px;
+        }
+        h2 {
+            text-align: center;
+        }
+        form {
+            max-width: 600px;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9f9f9;
+        }
+        input, button {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background: #007bff;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>Bulk Create Employees</h2>
+
+    <!-- CSV Upload Form -->
+    <form id="upload-form" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <label for="file">Upload CSV File:</label>
+        <input type="file" name="file" id="file" required>
+        <button type="submit">Upload</button>
+    </form>
+
+    <hr>
+
+    <!-- Manual Data Entry Form -->
+    <form id="manual-entry-form">
+        <h3>Or Enter Employee Data</h3>
+        <table id="employee-table">
+            <thead>
+                <tr>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>Employee Number</th>
+                    <th>Call Sign</th>
+                    <th>Position</th>
+                    <th>Department</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><input type="text" name="first_name[]" required></td>
+                    <td><input type="text" name="last_name[]" required></td>
+                    <td><input type="text" name="employee_number[]" required></td>
+                    <td><input type="text" name="callsign[]" required></td>
+                    <td><input type="text" name="position[]" required></td>
+                    <td><input type="text" name="department[]" required></td>
+                    <td><button type="button" onclick="removeRow(this)">Remove</button></td>
+                </tr>
+            </tbody>
+        </table>
+        <button type="button" onclick="addRow()">Add Employee</button>
+        <button type="submit">Submit Employees</button>
+    </form>
+
+    <script>
+        function addRow() {
+            let table = document.getElementById("employee-table").getElementsByTagName('tbody')[0];
+            let newRow = table.insertRow();
+            newRow.innerHTML = `
+                <td><input type="text" name="first_name[]" required></td>
+                <td><input type="text" name="last_name[]" required></td>
+                <td><input type="text" name="employee_number[]" required></td>
+                <td><input type="text" name="callsign[]" required></td>
+                <td><input type="text" name="position[]" required></td>
+                <td><input type="text" name="department[]" required></td>
+                <td><button type="button" onclick="removeRow(this)">Remove</button></td>
+            `;
+        }
+
+        function removeRow(button) {
+            button.closest('tr').remove();
+        }
+
+        document.getElementById("upload-form").onsubmit = async function(event) {
+            event.preventDefault();
+            let formData = new FormData(this);
+            let response = await fetch("{% url 'bulk_upload_employees' %}", {
+                method: "POST",
+                body: formData,
+                headers: { "X-CSRFToken": "{{ csrf_token }}" }
+            });
+            let result = await response.json();
+            alert(result.message || result.error);
+        };
+
+        document.getElementById("manual-entry-form").onsubmit = async function(event) {
+            event.preventDefault();
+            let employees = [];
+            let rows = document.querySelectorAll("#employee-table tbody tr");
+            rows.forEach(row => {
+                let inputs = row.querySelectorAll("input");
+                let employee = {
+                    first_name: inputs[0].value,
+                    last_name: inputs[1].value,
+                    employee_number: inputs[2].value,
+                    callsign: inputs[3].value,
+                    position: inputs[4].value,
+                    department: inputs[5].value,
+                };
+                employees.push(employee);
+            });
+
+            let response = await fetch("{% url 'bulk_create_employees' %}", {
+                method: "POST",
+                body: JSON.stringify(employees),
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": "{{ csrf_token }}"
+                }
+            });
+            let result = await response.json();
+            alert(result.message || result.error);
+        };
+    </script>
+
+</body>
+</html>

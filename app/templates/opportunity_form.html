@@ -1,0 +1,16 @@
+
+{% extends 'base2.html' %}  <!-- Extend the base template -->
+
+{% block title %}Service Request Note{% endblock %}  <!-- Title for the page -->
+
+{% block content %}
+
+<!-- crm/templates/crm/opportunity_form.html -->
+<h1>Create Opportunity</h1>
+<form method="POST">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Save</button>
+</form>
+
+{% endblock %}

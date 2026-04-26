@@ -1,0 +1,149 @@
+{% extends 'base2.html' %}
+{% load static %}
+{% block title %}Company Locations{% endblock %}
+
+{% block content %}
+<h2>Company Locations</h2>
+
+<!-- Locations List -->
+<div style="margin-bottom: 20px;">
+  <ul id="locations-list">
+    {% for loc in locations %}
+      <li>
+        <a href="#"
+           class="location-link"
+           data-name="{{ loc.name|escapejs }}"
+           data-address="{{ loc.address }} {{ loc.city }} {{ loc.state }}"
+           data-lat="{{ loc.latitude }}"
+           data-lng="{{ loc.longitude }}"
+           data-requests="{% for req in loc.service_requests_start.all %}{{ req.service_request_number }}:{{ req.status|escapejs }},{% endfor %}{% for req in loc.service_requests_end.all %}{{ req.service_request_number }}:{{ req.status|escapejs }},{% endfor %}">
+          {{ loc.name }}
+        </a>
+      </li>
+    {% endfor %}
+  </ul>
+</div>
+
+<!-- Map -->
+<div id="map"></div>
+
+<style>
+#map {
+  height: 700px;
+  width: 100%;
+}
+</style>
+
+<script src="https://maps.googleapis.com/maps/api/js?key={{ GOOGLE_MAPS_API_KEY }}"></script>
+<script src="https://unpkg.com/@googlemaps/markerclusterer/dist/index.min.js"></script>
+
+<script>
+function initMap() {
+    const defaultCenter = { lat: 39.8283, lng: -98.5795 }; // Center of USA
+    const map = new google.maps.Map(document.getElementById("map"), {
+        zoom: 4,
+        center: defaultCenter,
+        mapId: "DEMO_MAP_ID"
+    });
+
+    const bounds = new google.maps.LatLngBounds();
+    const markers = [];
+    const infoWindow = new google.maps.InfoWindow();
+
+    // Prepare locations data
+    const locations = [
+        {% for loc in locations %}
+        {
+            name: "{{ loc.name|escapejs }}",
+            address: "{{ loc.address|escapejs }} {{ loc.city|escapejs }} {{ loc.state|escapejs }}",
+            lat: {{ loc.latitude|default:'null' }},
+            lng: {{ loc.longitude|default:'null' }},
+            requests: [
+                {% for req in loc.unique_service_requests %}
+                { id: "{{ req.id }}", number: "{{ req.service_request_number }}", status: "{{ req.status|escapejs }}" },
+                {% endfor %}
+            ]   
+        },
+        {% endfor %}
+    ];
+
+    locations.forEach((loc) => {
+        if (loc.lat && loc.lng) {
+            const position = { lat: loc.lat, lng: loc.lng };
+            const marker = new google.maps.Marker({
+                position,
+                title: loc.name
+            });
+
+            marker.addListener("click", () => {
+                let content = `<strong>${loc.name}</strong><br>${loc.address}`;
+                if (loc.requests.length > 0) {
+                    content += "<br><br><strong>Service Requests:</strong><ul>";
+                    loc.requests.forEach(r => {
+                        content += `<li><a href="/service-request/detail/${r.id}/" target="_blank">${r.number}</a> - ${r.status}</li>`;
+                    });
+                    content += "</ul>";
+                }
+                infoWindow.setContent(content);
+                infoWindow.open(map, marker);
+            });
+
+            markers.push(marker);
+            bounds.extend(position);
+        }
+    });
+
+    // Apply clustering
+    new markerClusterer.MarkerClusterer({ map, markers });
+
+    if (!bounds.isEmpty()) {
+        map.fitBounds(bounds);
+    }
+
+    // Click-to-focus behavior from the location list
+    document.querySelectorAll(".location-link").forEach(link => {
+        link.addEventListener("click", (e) => {
+            e.preventDefault();
+            const lat = parseFloat(link.dataset.lat);
+            const lng = parseFloat(link.dataset.lng);
+            const name = link.dataset.name;
+            const address = link.dataset.address;
+
+            if (!lat || !lng) {
+                alert("This location has no coordinates.");
+                return;
+            }
+
+            const position = { lat, lng };
+            map.setCenter(position);
+            map.setZoom(17);
+
+            // Parse requests
+            let requests = [];
+            if (link.dataset.requests) {
+                requests = link.dataset.requests.split(",").filter(x => x).map(s => {
+                    const parts = s.split(":");
+                    return { number: parts[0], status: parts[1] };
+                });
+            }
+
+            let content = `<strong>${name}</strong><br>${address}`;
+            if (requests.length > 0) {
+                content += "<br><br><strong>Service Requests:</strong><ul>";
+                requests.forEach(r => {
+                    content += `<li><a href="/service-request/detail/${r.id}/" target="_blank">${r.number}</a> - ${r.status}</li>`;
+                });
+                content += "</ul>";
+            }
+
+            infoWindow.setContent(content);
+            infoWindow.setPosition(position);
+            infoWindow.open(map);
+        });
+    });
+}
+
+document.addEventListener("DOMContentLoaded", initMap);
+</script>
+
+{% endblock %}

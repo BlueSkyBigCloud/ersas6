@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Access Logs</title>
+    <style>
+        .blocked {
+            background-color: #f8d7da; /* light red for blocked IPs */
+        }
+        .whitelisted {
+            background-color: #d4edda; /* light green for whitelisted IPs */
+        }
+    </style>
+</head>
+<body>
+    <h1>Access Logs</h1>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>User</th>
+                <th>IP Address</th>
+                <th>Whitelisted?</th>
+                <th>Blocked?</th>
+                <th>Page Viewed</th>
+                <th>User Agent</th>
+                <th>Accessed At</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for log in logs %}
+            <tr
+                {% if log.ip_address in blocked_ips %}
+                    class="blocked"
+                {% elif log.is_whitelisted %}
+                    class="whitelisted"
+                {% endif %}
+            >
+                <td>{{ log.user }}</td>
+                <td>{{ log.ip_address }}</td>
+                <td>{{ log.is_whitelisted }}</td>
+                <td>{% if log.ip_address in blocked_ips %}Yes{% else %}No{% endif %}</td>
+                <td>{{ log.page_viewed }}</td>
+                <td>{{ log.user_agent }}</td>
+                <td>{{ log.accessed_at }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Pagination Controls -->
+    <div>
+        {% if logs.has_previous %}
+            <a href="?page=1">First</a>
+            <a href="?page={{ logs.previous_page_number }}">Previous</a>
+        {% endif %}
+
+        <span>Page {{ logs.number }} of {{ logs.paginator.num_pages }}</span>
+
+        {% if logs.has_next %}
+            <a href="?page={{ logs.next_page_number }}">Next</a>
+            <a href="?page={{ logs.paginator.num_pages }}">Last</a>
+        {% endif %}
+    </div>
+</body>
+</html>

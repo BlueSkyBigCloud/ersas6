@@ -1,0 +1,31 @@
+{% extends 'base2.html' %}
+{% load static %}
+{% load embed_video_tags %}
+
+{% block title %}Videos{% endblock %}
+
+{% block content %}
+<br>
+
+<main>
+
+<h2>Videos</h2>
+
+{% for item in videos %}
+
+    <div style="margin-bottom:40px;">
+        <h3>{{ item.name }}</h3>
+
+        {% video item.video 'medium' %}
+
+    </div>
+
+{% empty %}
+
+    <p>No videos available.</p>
+
+{% endfor %}
+
+</main>
+
+{% endblock %}

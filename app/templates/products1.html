@@ -1,0 +1,134 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}TRADE SEC 2.0{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/style.css' %}">
+<body>
+    <h2 style="text-align: center;">Now available: E2E Messenger and C2 Platform</h2>
+    <div style="text-align: center;";>
+        {% if apk %}
+            {% for apk_file in apk %}
+                <h2>{{ apk_file.name }}</h2>
+                <p>Download the Mobile App APK for Android: </p>
+                <p>$160 per month per organization.</p>
+                <br>
+                <br>
+                <p><a href="{% url 'download_apk' apk_file.id %}" class="btn btn-primary btn-lg">Download</a></p>
+            {% endfor %}
+        {% else %}
+            <p>No APK available.</p>
+        {% endif %}
+    </div>
+    <br><br><br><br>
+
+    <!-- Header Section -->
+    <h2 style="text-align: center;">Custom frameworks and infrastructure solutions for your company</h2>
+    <br>
+
+    <!-- Product Overview Section -->
+    <section id="product-overview" class="section" style="text-align: center;">
+        <div class="body">
+            <p>Our platform offers scalable, secure, and high-performance solutions designed for modern enterprises.</p>
+            <div class="feature-grid">
+                <div class="feature-item">
+                    <p>Organize your internal assets including human resources, physical assets, and service coordination.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    <br>
+
+    <!-- Pricing Section -->
+    <section id="pricing" class="section" style="text-align: center;">
+        <div class="body"></div>
+        <div>
+            <h2>Pricing Plans</h2>
+            <p>Choose a plan that fits your enterprise needs.</p>
+            <br>
+        </div>
+
+        <div class="pricing-table" style="display: flex; justify-content: center; gap: 10px;">
+            
+            <!-- Pro Plan -->
+            <div class="pricing-plan">
+                <h3>Pro Plan</h3>
+                <br>
+                <p>$5,990/month</p>
+                <br>
+                <ul style="list-style-type: none; padding: 0;">
+                    <li>Access to our industry leading platform</li>
+                    <li>Infrastructure Solutions</li>
+                    <li>Manage Service Requests</li>
+                    <li>Schedule your employees</li>
+                </ul>
+                <div class="product-option-wrapper" style="margin-top: 20px;">
+                    <form method="post">
+                        {% csrf_token %}
+                        <!-- Submit the Stripe Price ID instead of product name -->
+                        <button type="submit" name="price_id" value="price_1QLCfjGLcTDJWbqVMEpNzGZC">Get Started</button>
+                    </form>
+                </div>
+            </div>
+    
+            <!-- Pro Plus Plan -->
+            <div class="pricing-plan">
+                <h3>Pro Plus</h3>
+                <br>
+                <p>$7,990/month</p>
+                <br>
+                <ul style="list-style-type: none; padding: 0;">
+                    <li>All features included in Pro Plan</li>
+                    <li>Customize your service offering</li>
+                    <li>Priority Email Support</li>
+                    <li>Threat Management Monitoring</li>
+                </ul>
+                <div class="product-option-wrapper" style="margin-top: 20px;">
+                    <form method="post">
+                        {% csrf_token %}
+                        <!-- Replace with real Stripe Price ID -->
+                        <button type="submit" name="price_id" value="price_1QLCgRGLcTDJWbqVTqknioJC">Get Started</button>
+                    </form>
+                </div>
+            </div>
+    
+        </div>
+    </section>
+
+    <br><br><br><br><br>
+
+    <!-- Features Section -->
+    <section id="features" class="section" style="text-align: center;">
+        <div class="body">
+            <h2>Features</h2>
+            <div class="feature-list" style="display: flex; justify-content: center; gap: 20px;">
+                
+                <!-- Feature 1 -->
+                <div class="feature-item" style="gap: 10px;">
+                    <h3>Full Service Data Integratable Team</h3>
+                    <br>
+                    <p>Let our team integrate your current databases with our proprietary configurations.</p>
+                </div>
+
+                <!-- Feature 2 -->
+                <div class="feature-item" style="gap: 10px;">
+                    <h3>High Availability</h3>
+                    <br>
+                    <p>Ensure business continuity with our dedicated response team on our Pro Plus plan.</p>
+                </div>
+
+                <!-- Feature 3 -->
+                <div class="feature-item" style="gap: 10px;">
+                    <h3>Scalable Infrastructure</h3>
+                    <br>
+                    <p>Scale up as your enterprise grows, without compromising on performance.</p>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <br><br><br><br><br>
+
+</body>
+{% endblock %}

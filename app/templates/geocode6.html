@@ -1,0 +1,115 @@
+{% extends 'base2.html' %}
+{% load static %}
+{% block title %}Company Locations{% endblock %}
+
+{% block content %}
+<h2>Company Locations</h2>
+
+<!-- Locations List -->
+<div style="margin-bottom: 20px;">
+  <ul id="locations-list">
+    {% for loc in locations %}
+      <li>
+        <a href="#" class="location-link"
+           data-address="{{ loc.address }}"
+           data-lat="{{ loc.latitude }}"
+           data-lng="{{ loc.longitude }}">
+          {{ loc.name }}
+        </a>
+      </li>
+    {% endfor %}
+  </ul>
+</div>
+
+<!-- Map -->
+<div>
+  <gmpx-api-loader key="{{ GOOGLE_MAPS_API_KEY }}" solution-channel="GMP_GE_mapsandplacesautocomplete_v2">
+  </gmpx-api-loader>
+
+  <gmp-map id="company-map" center="40.749933,-73.98633" zoom="13" map-id="DEMO_MAP_ID">
+    <gmp-advanced-marker id="company-marker"></gmp-advanced-marker>
+  </gmp-map>
+</div>
+
+<script type="module" src="https://ajax.googleapis.com/ajax/libs/@googlemaps/extended-component-library/0.6.11/index.min.js"></script>
+
+<script>
+async function initMap() {
+  await customElements.whenDefined('gmp-map');
+
+  const map = document.querySelector('#company-map');
+  const marker = document.querySelector('#company-marker');
+  const infowindow = new google.maps.InfoWindow();
+  const geocoder = new google.maps.Geocoder();
+
+  document.querySelectorAll('.location-link').forEach(link => {
+    link.addEventListener('click', async (e) => {
+      e.preventDefault();
+
+      let lat = parseFloat(link.dataset.lat);
+      let lng = parseFloat(link.dataset.lng);
+      const address = link.dataset.address;
+
+      let position;
+
+      if (!lat || !lng) {
+        // Automatic geocoding if coordinates are missing
+        try {
+          const results = await geocodeAddress(address);
+          if (results) {
+            position = {
+              lat: results.lat,
+              lng: results.lng
+            };
+          } else {
+            alert("Could not geocode this address.");
+            return;
+          }
+        } catch (err) {
+          console.error(err);
+          alert("Error geocoding address.");
+          return;
+        }
+      } else {
+        position = { lat: lat, lng: lng };
+      }
+
+      // Center map & show marker
+      map.center = position;
+      map.zoom = 17;
+      marker.position = position;
+
+      infowindow.setContent(`<strong>${link.textContent}</strong><br>${address}`);
+      infowindow.open(map.innerMap, marker);
+    });
+  });
+
+  // Helper function for geocoding
+  async function geocodeAddress(address) {
+    return new Promise((resolve, reject) => {
+      const gmaps = map.innerMap;
+      const geocoderInstance = new google.maps.Geocoder();
+
+      geocoderInstance.geocode({ address: address }, (results, status) => {
+        if (status === 'OK' && results[0]) {
+          const loc = results[0].geometry.location;
+          resolve({ lat: loc.lat(), lng: loc.lng() });
+        } else {
+          resolve(null);
+        }
+      });
+    });
+  }
+}
+
+document.addEventListener('DOMContentLoaded', initMap);
+</script>
+
+<style>
+gmp-map {
+  height: 700px;
+  width: 100%;
+}
+</style>
+
+{% endblock %}

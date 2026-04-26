@@ -1,0 +1,15 @@
+<h1>Tenants for Domain: {{ domain_name }}</h1>
+
+{% if message %}
+    <p>{{ message }}</p>
+{% endif %}
+
+{% if tenants %}
+    <ul>
+        {% for tenant in tenants %}
+            <li>{{ tenant.name }}</li>  <!-- Display tenant name or other relevant info -->
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>No tenants found.</p>
+{% endif %}

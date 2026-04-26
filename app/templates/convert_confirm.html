@@ -1,0 +1,32 @@
+{% extends 'base2.html' %}
+{% load static %}
+{% block title %}Company Info{% endblock %}
+
+{% block content %}
+
+
+<head>
+    <title>Confirm Models to be Created</title>
+</head>
+<body>
+    <h1>Models to be Created</h1>
+    
+    {% if models_to_create %}
+        <ul>
+            {% for model in models_to_create %}
+                <li>{{ model }}</li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No models to be created based on the file.</p>
+    {% endif %}
+    
+    <form method="post">
+        {% csrf_token %}
+        <p>Do you want to proceed with creating these models?</p>
+        <button type="submit" name="action" value="confirm">Yes, create models</button>
+        <button type="submit" name="action" value="cancel">Cancel</button>
+    </form>
+</body>
+
+{% endblock %}

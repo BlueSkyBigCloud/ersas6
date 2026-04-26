@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Geocode 3</title>
+    <script src="https://maps.googleapis.com/maps/api/js?key={{ GOOGLE_MAPS_API_KEY }}&callback=initMap" async defer></script>
+    <style>
+        #map {
+            height: 900px; /* Set the height of the map */
+            width: 100%; /* Set the width of the map */
+        }
+    </style>
+</head>
+<body>
+    <h1>Geocode 3</h1>
+    <div id="map"></div>
+    <form>
+        <input type="text" id="id_latitude" readonly>
+        <input type="text" id="id_longitude" readonly>
+    </form>
+
+    <script>
+        let map;
+        let marker;
+
+        function initMap() {
+            map = new google.maps.Map(document.getElementById('map'), {
+                zoom: 10,
+                center: { lat: 32.7749, lng: -90.4194 } // Example coordinates
+            });
+
+            // Add click event listener for creating a marker
+            map.addListener('click', function(event) {
+                placeMarker(event.latLng);
+                document.getElementById('id_latitude').value = event.latLng.lat();
+                document.getElementById('id_longitude').value = event.latLng.lng();
+            });
+        }
+
+        function placeMarker(location) {
+            if (marker) {
+                marker.setPosition(location);
+            } else {
+                marker = new google.maps.Marker({
+                    position: location,
+                    map: map
+                });
+            }
+        }
+    </script>
+</body>
+</html>

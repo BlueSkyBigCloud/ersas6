@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Payment Cancelled - TRADESEC.US{% endblock %}
+
+{% block content %}
+<div style="text-align: center; padding: 50px;">
+    <h2>Payment Cancelled</h2>
+    <p>Your checkout session was cancelled. No charges were made.</p>
+    <p>You can return to the store and try again at any time.</p>
+    <br>
+    <br>
+    <a href="{% url 'equipmentstore' %}" class="btn btn-primary" style="padding:10px 20px; border-radius:5px;">Return to Store</a>
+</div>
+{% endblock %}

@@ -1,0 +1,21 @@
+{% extends 'base2.html' %}
+
+{% block title %}TRADE SEC 2.0{% endblock %}
+
+{% block content %}
+<br><br><br>
+
+<h2>IP Address Lookup</h2>
+
+<form method="post" action="{% url 'iplookup' %}">
+    {% csrf_token %}
+    <input type="text" name="ip_address" placeholder="Enter IP Address" required>
+    <button type="submit">Lookup</button>
+</form>
+
+{% if result %}
+    <h3>Lookup Result:</h3>
+    <pre>{{ result|safe }}</pre>
+{% endif %}
+
+{% endblock %}

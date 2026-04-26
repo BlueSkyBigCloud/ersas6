@@ -1,0 +1,77 @@
+
+
+{% extends 'base2.html' %}
+
+{% block title %}Messages{% endblock %}
+
+{% block content %}
+<h1>Messages</h1>
+
+<div class="message-actions">
+    <a class="button add-message-btn" href="{% url 'create_message' %}">Message Contact</a>
+</div>
+
+<h2>Company Messages</h2>
+<hr> <!-- Horizontal line -->
+
+<h2>Received Messages</h2>
+<div class="message-list">
+    {% for directmessage in directmessages %}
+        <div class="message-card">
+            <p><strong>From:</strong> {{ directmessage.created_by_user.username }}</p>
+            <p><strong>To:</strong> 
+                {% for user in directmessage.to_users.all %}
+                    {{ user.username }}{% if not forloop.last %}, {% endif %}
+                {% endfor %}
+            </p>
+            <p><strong>Body:</strong> {{ directmessage.body }}</p>
+        </div>
+    {% empty %}
+        <div class="message-card empty">No direct messages available.</div>
+    {% endfor %}
+</div>
+
+<h2>Sent Messages</h2>
+<div class="message-list">
+    {% for sent_message in sent_messages %}
+        <div class="message-card sent">
+            <p><strong>From:</strong> {{ sent_message.created_by_user.username }}</p>
+            <p><strong>To:</strong> 
+                {% for user in sent_message.to_users.all %}
+                    {{ user.username }}{% if not forloop.last %}, {% endif %}
+                {% endfor %}
+            </p>
+            <p><strong>Body:</strong> {{ sent_message.body }}</p>
+        </div>
+    {% empty %}
+        <div class="message-card empty">No direct messages available.</div>
+    {% endfor %}
+</div>
+
+<!-- Pagination Controls -->
+<div class="pagination">
+    <span>
+        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+    </span>
+
+    <div>
+        {% if page_obj.has_previous %}
+            <a href="?page=1" class="pagination-link">First</a>
+            <a href="?page={{ page_obj.previous_page_number }}" class="pagination-link">Previous</a>
+        {% endif %}
+
+        {% for num in page_obj.paginator.page_range %}
+            {% if num == page_obj.number %}
+                <strong class="pagination-current">{{ num }}</strong>
+            {% else %}
+                <a href="?page={{ num }}" class="pagination-link">{{ num }}</a>
+            {% endif %}
+        {% endfor %}
+
+        {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}" class="pagination-link">Next</a>
+            <a href="?page={{ page_obj.paginator.num_pages }}" class="pagination-link">Last</a>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

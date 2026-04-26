@@ -1,0 +1,29 @@
+{% extends "base2.html" %}
+
+{% block content %}
+  <h1>Quotes</h1>
+  <table>
+    <thead>
+      <tr>
+        <th>Quote #</th>
+        <th>Customer</th>
+        <th>Status</th>
+        <th>Total</th>
+        <th>Created At</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for quote in quotes %}
+        <tr>
+          <td><a href="{% url 'quote_detail' quote.id %}">{{ quote.quote_number }}</a></td>
+          <td>{{ quote.customer }}</td>
+          <td>{{ quote.status }}</td>
+          <td>{{ quote.total }}</td>
+          <td>{{ quote.created_at }}</td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="5">No quotes found.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}

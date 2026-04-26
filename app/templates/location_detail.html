@@ -1,0 +1,41 @@
+
+{% extends 'base2.html' %}  <!-- Extend the base template -->
+
+{% block title %}Account Information{% endblock %}  <!-- Title for the page -->
+{% load static %}
+{% block content %}
+
+<head>
+    <meta charset="UTF-8">
+    <title>Location Detail</title>
+</head>
+<body>
+
+    <h1>{{ location.name }}</h1>
+    <p><strong>Address:</strong> {{ location.address }}</p>
+    <p><strong>City:</strong> {{ location.city }}</p>
+    <p><strong>State:</strong> {{ location.state }}</p>
+    <p><strong>Description:</strong> {{ location.description }}</p>
+    
+    <p><strong>Map:</strong> {{ location.longitude }}</p>
+    <p><strong>Map:</strong> {{ location.latitude }}</p>
+    <br>
+
+    <a href="{% url 'location_list' %}">Back to Locations</a>
+    <a href="{% url 'location_edit' location.id %}">Edit Location</a>
+
+    <br>
+    <br> 
+
+    <!-- Button to send Address, City, State, and Country to geocode5_view -->
+    <form method="post" action="{% url 'geocode7' %}">
+        {% csrf_token %}
+        <input type="hidden" name="address" value="{{ location.address }}, {{ location.city }}, {{ location.state }}, {{ location.country }}">
+        <button type="submit">View on Map</button>
+    </form>
+
+
+</body>
+
+
+{% endblock %}

@@ -1,0 +1,131 @@
+{% extends 'base2.html' %}
+
+{% block title %}Service Request Details{% endblock %}
+
+{% block content %}
+<h1>Service Request Details</h1>
+
+<div class="service-request-container">
+
+    <!-- Service Request Information -->
+    <div class="section">
+        <p><strong>Start Date:</strong> {{ service_request.start_date }}</p>
+        <p><strong>End Date:</strong> {{ service_request.end_date }}</p>
+        <p><strong>Start Time:</strong> {{ service_request.start_time }}</p>
+        <p><strong>End Time:</strong> {{ service_request.end_time }}</p>
+    </div>
+
+    <!-- Locations -->
+    <div class="section">
+        <h3>Locations</h3>
+        <p><strong>Start Location:</strong> <a href="{% url 'location_detail' service_request.start_location.id %}">{{ service_request.start_location.name }}</a></p>
+        <p><strong>End Location:</strong> <a href="{% url 'location_detail' service_request.end_location.id %}">{{ service_request.end_location.name }}</a></p>
+    </div>
+
+    <!-- Assigned Employees -->
+    <div class="section">
+        <h3>Employees Assigned</h3>
+        {% for assigned_employee in assigned_employees %}
+        <div class="content">
+            <p><strong>{{ assigned_employee.first_name }}</strong></p>
+            <P><strong>{{ assigned_employee.last_name }}</strong></P>
+        </div>
+        {% empty %}
+        <p>No employees assigned.</p>
+        {% endfor %}
+        <a class="button add-notes-btn" href="{% url 'assign_employee_servicerequest' service_request.id %}">Assign Employee</a>
+    </div>
+
+    <!-- Equipment Details -->
+    <div class="section">
+        <h3>Equipment Details</h3>
+        <p><strong>Name:</strong> <a href="{% url 'equipment_detail' service_request.equipment.id %}">{{ service_request.equipment.name }}</a></p>
+        <p><strong>Quantity:</strong> {{ service_request.equipment.quantity }}</p>
+    </div>
+
+    <!-- Service Details -->
+    <div class="section">
+        <h3>Service Details</h3>
+        <p><strong>Service Type:</strong> {{ service_request.service_type.name }}</p>
+        <p><strong>Assigned Employee:</strong> <a href="{% url 'employee_detail' service_request.employee.id %}">{{ service_request.employee.first_name }} {{ service_request.employee.last_name }}</a></p>
+        <p><strong>Call Sign:</strong> {{ service_request.employee.callsign }}</p>
+    </div>
+
+    <!-- Created By -->
+    <div class="section">
+        <h3>Created By</h3>
+        <p><strong>User:</strong> {{ service_request.created_by_user.username }}</p>
+        <p><strong>Timestamp:</strong> {{ service_request.created_timestamp }}</p>
+    </div>
+
+    <!-- Notes Section -->
+    <div class="section">
+        <h3>Notes</h3>
+        {% for note in notes %}
+        <div class="note">
+            <p><strong>{{ note.title }}</strong></p>
+            <p>{{ note.text }}</p>
+        </div>
+        {% empty %}
+        <p>No notes available.</p>
+        {% endfor %}
+        <a class="button add-notes-btn" href="{% url 'add_note' service_request.id %}">Add Note</a>
+    </div>
+
+    <!-- Invoices Section -->
+    <div class="section">
+        <h3>Invoices</h3>
+        {% for invoice in invoices %}
+        <div class="invoice">
+            <p><strong>Invoice #{{ invoice.invoice_number }}</strong> - {{ invoice.customer }}</p>
+            <p><strong>Total:</strong> ${{ invoice.total }}</p>
+            <p><strong>Status:</strong> {{ invoice.payment_status }}</p>
+            <a class="button view-invoice-btn" href="{% url 'invoice_detail' invoice.id %}">View Invoice</a>
+        </div>
+        {% empty %}
+        <p>No invoices available.</p>
+        {% endfor %}
+        <form action="{% url 'create_invoice' service_request.id %}" method="post">
+            {% csrf_token %}
+            <button type="submit" class="button add-invoice-btn">Create New Invoice</button>
+        </form>
+    </div>
+
+    <div class="section">
+        <h3>Quotes</h3>
+        {% for quote in quotes %}
+        <div class="quote">
+            <p><strong>Quote #{{ quote.quote_number }}</strong> - {{ quote.customer }}</p>
+            <p><strong>Total:</strong> ${{ quote.total }}</p>
+            <p><strong>Status:</strong> {{ quote.status }}</p>
+            <a class="button view-quote-btn" href="{% url 'quote_detail' quote.id %}">View Quote</a>
+        </div>
+        {% empty %}
+        <p>No quotes available.</p>
+        {% endfor %}
+        <form action="{% url 'create_quote' service_request.id %}" method="post">
+            {% csrf_token %}
+            <button type="submit" class="button add-quote-btn">Create Quote</button>
+        </form>
+    </div>
+
+    <div class="section">
+    <h3>Actions</h3>
+
+    <a class="button view-costsheet-btn" 
+       href="{% url 'cost_sheet_view' service_request.id %}">
+       View / Create Cost Sheet
+    </a>
+
+    <a class="button edit-btn" href="{% url 'servicerequest_edit' service_request.id %}">Edit Service Request</a>
+
+    <form action="{% url 'servicerequest_delete' service_request.id %}" method="post" style="display:inline;">
+        {% csrf_token %}
+        <button type="submit" class="button delete-btn" onclick="return confirm('Are you sure you want to delete this service request?');">
+            Delete Service Request
+        </button>
+    </form>
+    </div>
+
+</div>
+{% endblock %}

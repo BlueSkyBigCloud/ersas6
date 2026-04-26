@@ -1,0 +1,36 @@
+
+{% extends 'base2.html' %}  <!-- Extend the base template -->
+
+{% block title %}Service Request Note{% endblock %}  <!-- Title for the page -->
+
+{% block content %}
+
+<h1>Opportunities</h1>
+<table>
+    <thead>
+        <tr>
+            <th>Customer</th>
+            <th>Stage</th>
+            <th>Value</th>
+            <th>Assigned To</th>
+            <th>Created At</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for opportunity in opportunities %}
+        <tr>
+            <td>{{ opportunity.customer.name }}</td>
+            <td>{{ opportunity.get_stage_display }}</td>
+            <td>${{ opportunity.value }}</td>
+            <td>{{ opportunity.assigned_to.username }}</td>
+            <td>{{ opportunity.created_at }}</td>
+            <td><a href="{% url 'opportunity_edit' opportunity.id %}">Edit</a></td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<a href="{% url 'opportunity_create' %}">Create Opportunity</a>
+
+{% endblock %}
+

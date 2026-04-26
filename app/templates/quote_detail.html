@@ -1,0 +1,24 @@
+{% extends "base2.html" %}
+{% load static %}
+{% block content %}
+<main>
+    <h2>Quote Detail</h2>
+
+    <div class="quote-container">
+        <h3>Quote #{{ quote.quote_number }}</h3>
+        <p><strong>Customer:</strong> {{ quote.customer.name }}</p>
+        <p><strong>Issue Date:</strong> {{ quote.issue_date }}</p>
+        <p><strong>Valid Until:</strong> {{ quote.valid_until }}</p>
+        <p><strong>Amount:</strong> ${{ quote.total }}</p>
+        <p><strong>Status:</strong> {{ quote.get_status_display }}</p>
+        <p><strong>Created By:</strong> {{ quote.created_by_user }}</p>
+        <p><strong>Notes:</strong> {{ quote.notes }}</p>
+    </div>
+
+    <br>
+    <a href="{% url 'edit_quote' quote.id %}">Edit Line Items</a>
+    <a href="{% url 'print_quote_pdf' quote.id %}" class="btn">Print Quote</a>
+    <a href="{% url 'convert_quote_to_invoice' quote.id %}" class="btn btn-success">Convert to Invoice</a>
+    <a href="{% url 'quote_list' %}" class="button">Back to Quotes</a>
+</main>
+{% endblock %}

@@ -1,0 +1,14 @@
+{% extends 'base2.html' %}
+{% block title %}Edit Cost Sheet{% endblock %}
+
+{% block content %}
+<h1>Edit Cost Sheet for Service Request {{ service_request.id }}</h1>
+
+<form method="POST">
+    {% csrf_token %}
+    {{ form.as_p }}
+
+    <button type="submit" class="button">Save</button>
+    <a class="button" href="{% url 'cost_sheet_view' service_request.id %}">Cancel</a>
+</form>
+{% endblock %}

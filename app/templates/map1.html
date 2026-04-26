@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Map</title>
+    <script src="https://maps.googleapis.com/maps/api/js?key={{ google_maps_api_key }}&callback=initMap" async defer></script>
+    <script>
+        let map;
+        let marker;
+
+        function initMap() {
+            // Default map center
+            const center = { lat: 32.7749, lng: -92.4194 };
+
+            map = new google.maps.Map(document.getElementById('map'), {
+                zoom: 12,
+                center: center
+            });
+
+            marker = new google.maps.Marker({
+                position: center,
+                map: map
+            });
+
+            {% if latitude and longitude %}
+                const position = { lat: {{ latitude|float }}, lng: {{ longitude|float }} };
+                map.setCenter(position);
+                marker.setPosition(position);
+            {% endif %}
+        }
+    </script>
+</head>
+<body>
+    <h1>Map</h1>
+
+    <form method="POST">
+        {% csrf_token %}
+        <label for="address">Enter Address:</label>
+        <input type="text" id="address" name="address" required>
+        <button type="submit">Search</button>
+    </form>
+
+    <div id="map" style="height: 500px; width: 100%;"></div>
+</body>
+</html>

@@ -1,0 +1,898 @@
+{% extends 'base2.html' %}
+{% block title %}Retail Security Industry Market Pricing - Level 2, Level 3, & Level 4{% endblock %}
+
+{% block content %}
+<style>
+
+/* Bell Curve Section */
+#bellcurve-section {
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 15px;
+  background-color: #f9f9f9;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+#bellcurve-section h2 {
+  margin-bottom: 10px;
+}
+
+#bellCurveChart {
+  width: 60% !important;   /* half the container width */
+  margin: 0 auto;          /* center horizontally */
+  display: block; 
+}
+
+#bellcurve-placeholder {
+  height: 100px;
+  width: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1em;
+  color: #555;
+  border: 1px dashed #bbb;
+  border-radius: 6px;
+  margin-bottom: 10px;
+}
+
+.earnings-inputs {
+  margin-top: 10px;
+}
+
+#hoursInput {
+  width: 50%;
+  margin: 10px 0;
+}
+
+.earnings-output {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  font-size: 1.2em;
+  margin-top: 10px;
+}
+
+/* Layout */
+#container {
+  display: flex;
+  gap: 20px;
+}
+
+#map {
+  flex: 2 1 70%;
+  height: 600px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  position: relative;
+  z-index: 0; 
+}
+
+#sidebar {
+  flex: 1 1 28%;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Sidebar top: states */
+#state-prices {
+  border: 1px solid #ccc;
+  padding: 10px;
+  border-radius: 8px;
+}
+
+#state-prices ul {
+  list-style: none;
+  padding-left: 0;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+#state-prices li {
+  padding: 5px;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+#state-prices li.selected {
+  background-color: #ffcc00;
+  font-weight: bold;
+}
+
+/* ZIP input */
+#zip-form {
+  border: 1px solid #ccc;
+  padding: 10px;
+  border-radius: 8px;
+}
+
+/* Pricing table and ZIP list side-by-side */
+#zip-pricing-container {
+  display: flex;
+  gap: 10px;
+  height: 300px;
+  border: 1px solid #ccc;
+  padding: 10px;
+  border-radius: 8px;
+  overflow-y: auto;
+}
+
+#pricing-table {
+  flex: 1;
+  overflow-y: auto;
+}
+
+#pricing-table table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+#pricing-table th, #pricing-table td {
+  padding: 8px;
+  text-align: left;
+  border: 1px solid #ccc;
+}
+
+#pricing-table th {
+  background-color: #f2f2f2;
+}
+
+#zip-list {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(60px, 1fr)); /* multiple columns */
+  gap: 5px;
+  overflow-y: auto;
+  max-height: 300px;
+}
+
+#zip-list div.zip-item {
+  font-size: 16px;       /* larger font */
+  text-align: center;
+  padding: 4px 2px;
+  border-radius: 4px;
+  cursor: pointer;
+  border: 1px solid #ccc;
+}
+
+#zip-list div.zip-item:hover {
+  background-color: #ffcc00;
+  font-weight: bold;
+}
+
+#zip-list table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+#zip-list th, #zip-list td {
+  padding: 4px;
+  text-align: left;
+  border: 1px solid #ccc;
+  font-size: 12px;
+}
+
+#zip-list th {
+  background-color: #f2f2f2;
+}
+
+/* ZIP variance below map */
+#zip-variance {
+  margin-top: 20px;
+  border: 1px solid #ccc;
+  padding: 15px;
+  border-radius: 8px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+#zip-variance table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+#zip-variance th, #zip-variance td {
+  padding: 8px;
+  text-align: left;
+  border: 1px solid #ccc;
+}
+
+#zip-variance th {
+  background-color: #f2f2f2;
+}
+
+/* ZIP code labels on map */
+.leaflet-tooltip.zip-label {
+  background-color: rgba(255, 255, 255, 0.7);
+  border: 1px solid #333;
+  color: #000;
+  font-weight: bold;
+  font-size: 12px;
+  text-align: center;
+  padding: 2px 4px;
+  border-radius: 4px;
+  pointer-events: none;
+}
+
+#service-type-table .clickable-service {
+  cursor: pointer;
+  color: #007bff;
+}
+
+#service-type-table .clickable-service:hover {
+  text-decoration: underline;
+}
+</style>
+
+<h1>Retail Security Industry Market Pricing - Level 2, Level 3, & Level 4</h1>
+
+<div id="zipItemSection" style="margin-top: 1em; display: none;">
+  <label for="zipItemSelect"><strong>Available Items for this ZIP:</strong></label><br>
+  <select id="zipItemSelect" style="width: 60%; padding: 5px; margin-right: 10px;">
+    <option value="">Select an item</option>
+  </select>
+  <button id="selectZipItemBtn">Select Item</button>
+</div>
+
+<!-- Bell Curve and Earnings Calculator -->
+<div id="bellcurve-section">
+  <h2>Market Earnings Distribution</h2>
+
+  <div id="bellcurve-placeholder">
+    <p>Select ZIP Code</p>
+  </div>
+
+  <canvas id="bellCurveChart" height="120" style="display:none;"></canvas>
+
+  <div class="earnings-inputs">
+  <label for="hoursInput">Hours Worked per Week:</label>
+  <input type="number" id="hoursInput" min="1" max="80" value="40" step="1" style="width: 80px; margin-left:10px;">
+  <span id="hoursDisplay">40 hours/week</span>
+  </div>
+
+  <div class="earnings-inputs" style="margin-top: 10px; display:none;">
+    <select id="serviceTypeSelect" style="width: 50%; padding: 5px; margin-left: 10px;">
+      <option value="">Select a service type</option>
+    </select>
+  </div>
+
+  <div class="earnings-inputs" style="margin-top: 10px;">
+    <label for="rateInput">Hourly Rate:</label>
+    <input type="range" id="rateInput" min="0" max="100" value="0" step="0.5" style="width:50%; margin-left: 10px;">
+    <span id="rateDisplay">— $/hr</span>
+  </div>
+
+  <div class="earnings-output">
+    <div><strong>$<span id="hourlyRate">—</span>/hr</strong></div>
+    <div>$<span id="monthlyRate">—</span>/month</div>
+    <div>$<span id="yearlyRate">—</span>/year</div>
+  </div>
+</div>
+
+
+<!-- ZIP variance panel below map -->
+<div id="zip-variance">
+  <h3>Price Variance by ZIP</h3>
+  <div id="zip-content">Select a ZIP from the map or enter a ZIP above</div>
+</div>
+
+<div id="container">
+  <!-- Map -->
+  <div id="map"></div>
+
+  <!-- Sidebar -->
+  <div id="sidebar">
+    <div id="state-prices">
+      <h3>States</h3>
+      <ul id="state-price-list"></ul>
+    </div>
+
+    <div id="zip-form">
+      <label for="zipInput">Enter ZIP Code:</label><br>
+      <input type="text" id="zipInput" maxlength="5" placeholder="75001">
+      <button id="zipBtn">Get ZIP Price Data</button>
+    </div>
+
+    <!-- Pricing table left, ZIP list right -->
+    <div id="zip-pricing-container">
+      <div id="pricing-table">
+        <h3 id="pricing-title">Select a state or enter ZIP</h3>
+        <div id="pricing-content"></div>
+      </div>
+
+      <div id="zip-list">
+        <h3>ZIP Codes</h3>
+        <div id="zip-content-list">Select a state</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@1.2.1/dist/chartjs-plugin-annotation.min.js"></script>
+
+<script>
+
+function populateZipItems(items) {
+  window.currentZipItems = items; // store globally
+  const section = document.getElementById("zipItemSection");
+  const select = document.getElementById("zipItemSelect");
+
+  // Clear existing options
+  select.innerHTML = '<option value="">Select an item</option>';
+
+  if (!items || items.length === 0) {
+    const option = document.createElement("option");
+    option.textContent = "No items available for this ZIP";
+    option.disabled = true;
+    select.appendChild(option);
+    section.style.display = "block";
+    return;
+  }
+
+  // Add items to dropdown
+  items.forEach(item => {
+    const option = document.createElement("option");
+    option.value = item.id;
+    option.textContent = `${item.name} – $${item.price.toFixed(2)}`;
+    select.appendChild(option);
+  });
+
+  // Show the section
+  section.style.display = "block";
+}
+
+const zipItemSelect = document.getElementById("zipItemSelect");
+zipItemSelect.addEventListener("change", () => {
+  const selectedItemId = zipItemSelect.value;
+  if (!selectedItemId) return;
+
+  const items = window.currentZipItems || [];
+  const item = items.find(i => i.id == selectedItemId);
+  if (!item) return;
+
+  // Update earnings outputs only
+  currentHourlyRate = item.price;
+  updateEarningsDisplay(currentHourlyRate);
+
+  // Highlight selected item on bell curve
+  updateBellCurveHighlight(currentHourlyRate);
+});
+
+const zipPriceDataUrl = "{% url 'priceanalysis:zip_price_data' %}";
+let selectedStateCode = null;
+let selectedStateName = null;
+let selectedLayer = null;
+let zipLayerGroup = null;
+let stateLayers = {};
+let selectedSidebarItem = null;
+let zipGeoJsonData = null;
+const minZoomToShowZips = 6;
+
+// Map styles
+const defaultStyle = { color:"#333", weight:1, fillColor:"#d9edf7", fillOpacity:0.6 };
+const highlightStyle = { color:"#000", weight:2, fillColor:"#ffcc00", fillOpacity:0.8 };
+const zipDefaultStyle = { color:"#666", weight:1, fillColor:"#e0e0e0", fillOpacity:0.5 };
+const zipHighlightStyle = { color:"#000", weight:2, fillColor:"#ff9999", fillOpacity:0.7 };
+
+const stateNameToCode = {
+  "Alabama":"AL","Alaska":"AK","Arizona":"AZ","Arkansas":"AR","California":"CA","Colorado":"CO",
+  "Connecticut":"CT","Delaware":"DE","Florida":"FL","Georgia":"GA","Hawaii":"HI","Idaho":"ID",
+  "Illinois":"IL","Indiana":"IN","Iowa":"IA","Kansas":"KS","Kentucky":"KY","Louisiana":"LA",
+  "Maine":"ME","Maryland":"MD","Massachusetts":"MA","Michigan":"MI","Minnesota":"MN",
+  "Mississippi":"MS","Missouri":"MO","Montana":"MT","Nebraska":"NE","Nevada":"NV",
+  "New Hampshire":"NH","New Jersey":"NJ","New Mexico":"NM","New York":"NY","North Carolina":"NC",
+  "North Dakota":"ND","Ohio":"OH","Oklahoma":"OK","Oregon":"OR","Pennsylvania":"PA",
+  "Rhode Island":"RI","South Carolina":"SC","South Dakota":"SD","Tennessee":"TN","Texas":"TX",
+  "Utah":"UT","Vermont":"VT","Virginia":"VA","Washington":"WA","West Virginia":"WV",
+  "Wisconsin":"WI","Wyoming":"WY", "Puerto Rico": "PR"
+};
+
+// Initialize map
+const map = L.map("map").setView([37.8, -96], 4);
+L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom:18, attribution:"© OpenStreetMap contributors" }).addTo(map);
+
+// ------------------ Helpers ------------------
+function updatePricingTable(data, titleText){
+  const title = document.getElementById("pricing-title");
+  const container = document.getElementById("pricing-content");
+  title.textContent = titleText;
+  if(!data || data.data.length === 0){
+    container.innerHTML = "<p>No data available</p>";
+    return;
+  }
+  let html = "<table><tr><th>Service Type</th><th>Avg</th><th>Min</th><th>Max</th><th>Variance</th></tr>";
+  data.data.forEach(item=>{
+    html += `<tr>
+      <td>${item.service_type}</td>
+      <td>$${item.avg_price.toFixed(2)}</td>
+      <td>$${item.min_price.toFixed(2)}</td>
+      <td>$${item.max_price.toFixed(2)}</td>
+      <td>$${item.variance.toFixed(2)}</td>
+    </tr>`;
+  });
+  html += "</table>";
+  container.innerHTML = html;
+}
+
+function updateZipList(data){
+  const container = document.getElementById("zip-content-list");
+  if(!data || data.data.length === 0){
+    container.innerHTML = "<p>No ZIPs available</p>";
+    return;
+  }
+
+  container.innerHTML = ""; // clear previous content
+  data.data.sort((a,b) => a.zip_code.localeCompare(b.zip_code));
+
+  data.data.forEach(item => {
+    const div = document.createElement("div");
+    div.className = "zip-item";
+    div.textContent = item.zip_code;
+
+    div.addEventListener("click", () => {
+      fetch(`${zipPriceDataUrl}?state=${selectedStateCode}&zip=${item.zip_code}`)
+        .then(resp => resp.json())
+        .then(data => updateZipVariancePanel(item.zip_code, data))
+        .catch(err => console.error(err));
+    });
+
+    container.appendChild(div);
+  });
+}
+let currentServiceTypeData = null; // {avg, min, max}
+
+function updateZipVariancePanel(zip, data) {
+  const container = document.getElementById("zip-content");
+  const serviceSelect = document.getElementById("serviceTypeSelect");
+serviceSelect.addEventListener("change", () => {
+    const selectedId = serviceSelect.value;
+    if (!selectedId) return;
+
+    const items = zipGeoJsonData ? zipGeoJsonData.features.map(f => f.properties) : window.currentZipItems || [];
+    const selectedItem = Array.from(serviceSelect.options)
+        .filter(opt => opt.value == selectedId)[0];
+
+    // Fetch avg, min, max from option dataset
+    const avg = parseFloat(selectedItem.dataset.price); // avg price
+    const optionData = window.currentZipItems.find(i => i.id == selectedId);
+    if (!optionData) return;
+
+    currentServiceTypeData = {
+        avg: optionData.avg_price,
+        min: optionData.min_price,
+        max: optionData.max_price
+    };
+
+    currentHourlyRate = avg;
+
+    // Update earnings & bell curve
+    updateEarningsDisplay(currentHourlyRate);
+    updateBellCurve(optionData.avg_price, optionData.min_price, optionData.max_price);
+});
+
+  // Default to first service type
+if(data.data.length > 0){
+    const firstItem = data.data[0];
+    currentHourlyRate = firstItem.avg_price;
+    currentServiceTypeData = {
+        avg: firstItem.avg_price,
+        min: firstItem.min_price,
+        max: firstItem.max_price
+    };
+    serviceSelect.value = firstItem.id; 
+    updateEarningsDisplay(firstItem.avg_price);
+
+    // Update bell curve using first service type
+    updateBellCurve(firstItem.avg_price, firstItem.min_price, firstItem.max_price);
+}
+
+  // Populate service type select
+  serviceSelect.innerHTML = '<option value="">Select a service type</option>';
+  data.data.forEach(item => {
+    const option = document.createElement("option");
+    option.value = item.id; 
+    option.dataset.price = item.avg_price;
+    option.textContent = item.service_type;
+    serviceSelect.appendChild(option);
+  });
+
+
+  // Display table
+let html = `<p>Prices for ZIP: ${zip}</p>`;
+html += "<table id='service-type-table'><tr><th>Service Type</th><th>Avg</th><th>Min</th><th>Max</th><th>Variance</th></tr>";
+data.data.forEach(item => {
+  html += `<tr data-id="${item.id}" data-avg="${item.avg_price}" data-min="${item.min_price}" data-max="${item.max_price}">
+    <td class="clickable-service">${item.service_type}</td>
+    <td>$${item.avg_price.toFixed(2)}</td>
+    <td>$${item.min_price.toFixed(2)}</td>
+    <td>$${item.max_price.toFixed(2)}</td>
+    <td>$${item.variance.toFixed(2)}</td>
+  </tr>`;
+});
+html += "</table>";
+container.innerHTML = html;
+
+// Add click event for each service type cell
+document.querySelectorAll("#service-type-table .clickable-service").forEach(td => {
+  td.addEventListener("click", () => {
+    const tr = td.parentElement;
+    const avg = parseFloat(tr.dataset.avg);
+    const min = parseFloat(tr.dataset.min);
+    const max = parseFloat(tr.dataset.max);
+    const id = tr.dataset.id;
+
+    currentServiceTypeData = { avg, min, max };
+    currentHourlyRate = avg;
+
+    // Update bell curve
+    updateBellCurve(avg, min, max);
+    updateEarningsDisplay(avg);
+
+    // Also update dropdown to match
+    const serviceSelect = document.getElementById("serviceTypeSelect");
+    serviceSelect.value = id;
+  });
+});
+}
+// ------------------ Color scale ------------------
+function getZipColor(avgPrice, minPrice, maxPrice) {
+  if(avgPrice == null) return "#e0e0e0";
+  const percent = (avgPrice - minPrice) / (maxPrice - minPrice || 1);
+  const r = Math.floor(255 * percent);
+  const g = Math.floor(200 * (1 - percent));
+  const b = 75;
+  return `rgb(${r},${g},${b})`;
+}
+
+// ------------------ Load US states ------------------
+fetch("https://raw.githubusercontent.com/PublicaMundi/MappingAPI/master/data/geojson/us-states.json")
+.then(res=>res.json())
+.then(statesData=>{
+  const stateList = document.getElementById("state-price-list");
+  L.geoJson(statesData, {
+    style: defaultStyle,
+    onEachFeature: function(feature, layer){
+      const stateName = feature.properties.name;
+      stateLayers[stateName] = layer;
+
+      // Sidebar item
+      const li = document.createElement("li");
+      li.textContent = stateName;
+      li.addEventListener("click", ()=> selectState(stateName));
+      stateList.appendChild(li);
+      layer.sidebarItem = li;
+
+      // Map click
+      layer.on("click", ()=> selectState(stateName));
+    }
+  }).addTo(map);
+});
+
+// ------------------ State selection ------------------
+function selectState(stateName){
+  const layer = stateLayers[stateName];
+  if(!layer) return;
+
+  if(selectedLayer) selectedLayer.setStyle(defaultStyle);
+  if(selectedSidebarItem) selectedSidebarItem.classList.remove("selected");
+
+  layer.setStyle(highlightStyle);
+  selectedLayer = layer;
+  selectedSidebarItem = layer.sidebarItem;
+  selectedSidebarItem.classList.add("selected");
+
+  selectedStateName = stateName;
+  selectedStateCode = stateNameToCode[stateName];
+  if(!selectedStateCode){ alert("State code not found!"); return; }
+
+  map.fitBounds(layer.getBounds());
+
+  if(zipLayerGroup){ map.removeLayer(zipLayerGroup); zipLayerGroup=null; }
+  zipGeoJsonData = null;
+
+  // Load ZIP GeoJSON
+  const zipGeoJsonUrl = `https://raw.githubusercontent.com/OpenDataDE/State-zip-code-GeoJSON/master/${selectedStateCode}.zip.geojson`;
+  fetch(zipGeoJsonUrl)
+  .then(res=>res.json())
+  .then(data=>{
+    zipGeoJsonData = data;
+    showZipLayerIfZoomed();
+  }).catch(err=>console.error("ZIP GeoJSON error:", err));
+
+  fetch(`${zipPriceDataUrl}?state=${selectedStateCode}`)
+  .then(resp => resp.json())
+  .then(data => {
+    updateZipList(data);                // update ZIP list
+    updatePricingTable(data, `Zip Codes in ${selectedStateName}`); // update pricing table
+  })
+  .catch(err => console.error(err));
+}
+
+// ------------------ Show/hide ZIPs with color and labels ------------------
+function showZipLayerIfZoomed(){
+  if(!zipGeoJsonData) return;
+
+
+  if(map.getZoom() >= minZoomToShowZips){
+    if(zipLayerGroup) map.removeLayer(zipLayerGroup);
+
+    zipLayerGroup = L.geoJson(zipGeoJsonData, {
+      style: zipDefaultStyle,
+      onEachFeature: function(zipFeature, zipLayer){
+        const zipCode = zipFeature.properties.ZCTA5CE10;
+
+        zipLayer.bindTooltip(zipCode, { permanent:true, direction:"center", className:"zip-label" });
+
+        fetch(`${zipPriceDataUrl}?state=${selectedStateCode}&zip=${zipCode}`)
+          .then(resp=>resp.json())
+          .then(data=>{
+            if(data.data.length > 0){
+              const avgPrice = data.data[0].avg_price;
+              const minPrice = Math.min(...data.data.map(d=>d.min_price));
+              const maxPrice = Math.max(...data.data.map(d=>d.max_price));
+              zipLayer.setStyle({fillColor: getZipColor(avgPrice, minPrice, maxPrice)});
+            }
+          });
+
+        zipLayer.on({
+          mouseover: e => e.target.setStyle(zipHighlightStyle),
+          mouseout: e => e.target.setStyle(zipDefaultStyle),
+          click: () => {
+            fetch(`${zipPriceDataUrl}?state=${selectedStateCode}&zip=${zipCode}`)
+              .then(resp => resp.json())
+              .then(data => updateZipVariancePanel(zipCode, data))
+              .catch(err => console.error(err));
+          }
+        });
+      }
+    }).addTo(map);
+  } else {
+    if(zipLayerGroup){ map.removeLayer(zipLayerGroup); zipLayerGroup=null; }
+  }
+}
+
+map.on("zoomend", showZipLayerIfZoomed);
+// ------------------ ZIP search with auto state detection ------------------
+document.getElementById("zipBtn").addEventListener("click", () => {
+  const zip = document.getElementById("zipInput").value.trim();
+
+  if (!zip.match(/^[0-9]{5}$/)) {
+    alert("Enter a valid 5-digit ZIP");
+    return;
+  }
+
+  // Fetch ZIP info from API
+  fetch(`https://api.zippopotam.us/us/${zip}`)
+    .then(resp => {
+      if (!resp.ok) throw new Error("ZIP not found");
+      return resp.json();
+    })
+    .then(data => {
+      const stateAbbr = data.places[0]["state abbreviation"];
+      const stateName = Object.keys(stateNameToCode).find(k => stateNameToCode[k] === stateAbbr);
+      if (!stateName) throw new Error("State not found for ZIP");
+
+      // Auto-select and highlight state
+      selectState(stateName);
+
+      // Center map on ZIP
+      const lat = parseFloat(data.places[0].latitude);
+      const lng = parseFloat(data.places[0].longitude);
+      map.setView([lat, lng], 9);
+
+      // Fetch and display ZIP-specific pricing
+      fetch(`${zipPriceDataUrl}?state=${stateAbbr}&zip=${zip}`)
+        .then(resp => resp.json())
+        .then(zipData => {
+          updateZipVariancePanel(zip, zipData);
+          updateBellCurveForZip(zipData);
+        })
+        .catch(err => console.error("ZIP price fetch error:", err));
+    })
+    .catch(err => {
+      console.error(err);
+      alert("ZIP code not found or unavailable.");
+    });
+});
+
+// Helper to update the bell curve when ZIP data is fetched
+function updateBellCurveForZip(data) {
+  if (!data || data.data.length === 0) {
+    updateBellCurve(null, null, null);
+    updateEarningsDisplay(null);
+    return;
+  }
+
+  const avgPrices = data.data.map(d => d.avg_price);
+  const minPrices = data.data.map(d => d.min_price);
+  const maxPrices = data.data.map(d => d.max_price);
+  const mean = avgPrices.reduce((a, b) => a + b, 0) / avgPrices.length;
+  const min = Math.min(...minPrices);
+  const max = Math.max(...maxPrices);
+
+  currentHourlyRate = mean;
+  updateBellCurve(mean, min, max);
+  updateEarningsDisplay(mean);
+}
+
+// ------------------ Bell Curve Chart ------------------
+let bellCurveChart = null;
+const ctx = document.getElementById("bellCurveChart").getContext("2d");
+const placeholder = document.getElementById("bellcurve-placeholder");
+const chartCanvas = document.getElementById("bellCurveChart");
+
+
+function updateBellCurve(mean, min, max) {
+  if (mean == null || min == null || max == null) {
+    placeholder.style.display = "flex";
+    chartCanvas.style.display = "none";
+    return;
+  }
+
+  placeholder.style.display = "none";
+  chartCanvas.style.display = "block";
+
+  // 95% range (mean ± 2 std dev)
+  const stdDev = (max - min) / 4;
+
+  // Dynamic scale: half of min to double of max
+  const scaleMin = Math.max(0, min / 2);
+  const scaleMax = max * 1.1;
+
+  function normalPDF(x, mean, stdDev) {
+    return (1 / (stdDev * Math.sqrt(2 * Math.PI))) * Math.exp(-0.5 * ((x - mean) / stdDev) ** 2);
+  }
+
+  const labels = [];
+  const dataPoints = [];
+  const step = 1; // 1$ increments
+
+  for (let x = 10; x <= 150; x += step) {
+    labels.push(x);
+    dataPoints.push(normalPDF(x, mean, stdDev));
+  }
+
+  if (bellCurveChart) bellCurveChart.destroy();
+
+  bellCurveChart = new Chart(ctx, {
+    type: "line",
+    data: {
+      labels: labels,
+      datasets: [{
+        label: "Market Distribution",
+        data: dataPoints,
+        borderColor: "#007bff",
+        backgroundColor: "rgba(0,123,255,0.2)",
+        fill: true,
+        tension: 0.3,
+      }]
+    },
+    scales: {
+      x: { 
+        type: "linear",
+        title: { display: true, text: "Hourly Rate ($)" },
+        min: 10,
+        max: 150
+      },
+      y: { display: false },
+    }
+  });
+
+  // Adjust slider to dynamic scale
+  rateInput.min = scaleMin.toFixed(2);
+  rateInput.max = scaleMax.toFixed(2);
+  rateInput.value = Math.min(Math.max(mean, scaleMin), scaleMax).toFixed(2);
+
+  updateEarningsDisplay(mean);
+}
+
+function updateBellCurveHighlight(rateInput) {
+  if (!currentServiceTypeData) return;
+
+  const zipAvg = currentServiceTypeData.avg;
+  const diffPercent = ((rateInput - zipAvg) / zipAvg) * 100;
+  const displayElem = document.querySelector("#bellcurve-section h2");
+
+  if (diffPercent > 0) {
+    displayElem.innerHTML = `Market Earnings Distribution <span style="color:green;">(+${diffPercent.toFixed(1)}% above average)</span>`;
+  } else if (diffPercent < 0) {
+    displayElem.innerHTML = `Market Earnings Distribution <span style="color:red;">(${diffPercent.toFixed(1)}% below average)</span>`;
+  } else {
+    displayElem.innerHTML = `Market Earnings Distribution <span style="color:gray;">(at average)</span>`;
+  }
+
+  // Add vertical line for selected hourly wage
+  if (bellCurveChart) {
+    const shiftedValue = rateInput - 9.87;
+    bellCurveChart.options.plugins.annotation = {
+      annotations: {
+        line1: {
+          type: 'line',
+          xMin: shiftedValue,
+          xMax: shiftedValue,
+          borderColor: 'orange',
+          borderWidth: 2,
+                    
+          label: {
+            content: 'Selected',
+            enabled: true,
+            position: 'start'
+          }
+        }
+      }
+    };
+    bellCurveChart.update();
+  }
+}
+
+// ------------------ Earnings Calculator ------------------
+const hoursInput = document.getElementById("hoursInput");
+const hoursDisplay = document.getElementById("hoursDisplay");
+const rateInput = document.getElementById("rateInput");
+const rateDisplay = document.getElementById("rateDisplay");
+const hourlyRateSpan = document.getElementById("hourlyRate");
+const monthlyRateSpan = document.getElementById("monthlyRate");
+const yearlyRateSpan = document.getElementById("yearlyRate");
+
+let currentHourlyRate = null;
+let zipAverageRate = null;
+
+function updateEarningsDisplay(rate) {
+  if (!rate) {
+    hourlyRateSpan.textContent = "—";
+    monthlyRateSpan.textContent = "—";
+    yearlyRateSpan.textContent = "—";
+    rateDisplay.textContent = "— $/hr";
+    return;
+  }
+
+  const hours = parseFloat(hoursInput.value);
+  const weeklyEarnings = rate * hours;
+  const monthlyEarnings = weeklyEarnings * 4.33;
+  const yearlyEarnings = weeklyEarnings * 52;
+
+  hoursDisplay.textContent = `${hours} hours/week`;
+  hourlyRateSpan.textContent = rate.toFixed(2);
+  monthlyRateSpan.textContent = monthlyEarnings.toLocaleString(undefined, { minimumFractionDigits: 2 });
+  yearlyRateSpan.textContent = yearlyEarnings.toLocaleString(undefined, { minimumFractionDigits: 2 });
+  rateDisplay.textContent = `$${rate.toFixed(2)}/hr`;
+
+  updateBellCurveHighlight(rate); // highlight percentage comparison
+}
+
+// input events
+hoursInput.addEventListener("input", () => updateEarningsDisplay(currentHourlyRate));
+rateInput.addEventListener("input", (e) => {
+  currentHourlyRate = parseFloat(e.target.value);
+  updateEarningsDisplay(currentHourlyRate);
+});
+
+// Default state
+updateBellCurve(null, null, null);
+updateEarningsDisplay(null);
+
+
+document.getElementById("selectZipItemBtn").addEventListener("click", () => {
+  const select = document.getElementById("zipItemSelect");
+  const selectedItemId = select.value;
+  const selectedText = select.options[select.selectedIndex].text;
+
+  if (!selectedItemId) {
+    alert("Please select an item first.");
+    return;
+  }
+
+  alert(`You selected: ${selectedText}`);
+  // TODO: Replace alert with custom action
+  // e.g., showItemDetails(selectedItemId);
+  // or addToCart(selectedItemId);
+});
+
+</script>
+{% endblock %}

@@ -1,0 +1,52 @@
+{% extends 'base2.html' %}
+{% load static %}
+
+{% block content %}
+<h1>Inventory</h1>
+
+<h2>Add New Item</h2>
+<form method="post">
+    {% csrf_token %}
+    {{ item_form.as_p }}
+    <button type="submit" name="add_item">Add Item</button>
+</form>
+
+<h2>Add Transaction</h2>
+<form method="post">
+    {% csrf_token %}
+    {{ transaction_form.as_p }}
+    <button type="submit" name="add_transaction">Add Transaction</button>
+</form>
+
+<hr>
+
+<h2>Inventory Items</h2>
+<ul>
+    {% for item in items %}
+        <li>
+            <strong>{{ item.name }}</strong> ({{ item.sku }})  
+            – Quantity: {{ item.quantity }}
+        </li>
+    {% empty %}
+        <li>No items yet.</li>
+    {% endfor %}
+</ul>
+
+<hr>
+
+<h2>Transactions</h2>
+<ul>
+    {% for tx in transactions %}
+        <li>
+            <strong>{{ tx.date|date:"Y-m-d H:i" }}</strong> – 
+            {{ tx.get_transaction_type_display }}  
+            <em>{{ tx.item.name }}</em> : {{ tx.quantity }}
+            {% if tx.notes %}
+                <br><small>Notes: {{ tx.notes }}</small>
+            {% endif %}
+        </li>
+    {% empty %}
+        <li>No transactions yet.</li>
+    {% endfor %}
+</ul>
+{% endblock %}

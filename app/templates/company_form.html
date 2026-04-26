@@ -1,0 +1,19 @@
+{% extends 'base2.html' %}  <!-- Extend the base template -->
+
+{% block title %}Company Form{% endblock %}  <!-- Title for the page -->
+
+{% block content %}
+<head>
+    <meta charset="UTF-8">
+    <title>{% if employee %}Edit Company{% else %}Add Company{% endif %}</title>
+</head>
+<body>
+    <form method="post" novalidate>
+        {% csrf_token %}
+        {{ form.as_p }}  <!-- Render form fields as paragraphs -->
+
+        <button type="submit">Save</button>
+        <a href="{% url 'company' %}">Cancel</a>  <!-- Link to cancel and go back to the list -->
+    </form>
+</body>
+{% endblock %}

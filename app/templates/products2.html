@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}TRADE SEC 2.0{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/style.css' %}">
+<body>
+
+    <div class="product-images" style="text-align: center; margin-top: 80px;">
+            <div style="margin-bottom: 60px;">
+                <img src="{% static 'images/signup_promo3_web.jpg' %}" alt="Map View"
+                     style="width: 80%; max-width: 700px; border-radius: 16px; box-shadow: 0 6px 18px rgba(0,0,0,0.3); display: block; margin: 0 auto;">
+            </div>
+        </div>
+
+    <h2 style="text-align: center;">TradeSec Digital Solutions - Pricing Analysis</h2>
+    <br>
+
+    <!-- Product Overview Section -->
+    <section id="product-overview" class="section" style="text-align: center;">
+        <div class="body">
+            <p>Our platform offers up to date, accurate, and competitive information for the physical security industry.</p>
+            <div class="feature-grid">
+                <div class="feature-item">
+                    <br>
+                    <p>Perfect for the security contractor to organize internal assets including human resources, physical assets, and service coordination.</p>
+                    <br>
+                    <p>Confidently charge more for your services today with access to our industry leading pricing platform!</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    <br>
+
+    <!-- Pricing Section -->
+    <section id="pricing" class="section" style="text-align: center;">
+        <div class="body"></div>
+        <div>
+            <br>
+        </div>
+
+        <div class="pricing-table" style="display: flex; justify-content: center; gap: 10px;">
+            
+                            <!-- Pro Plan -->
+                <div class="pricing-plan" style="font-size: 200%;">
+                    <h3>TradeSec Digital Solutions - CRM + Pricing Analysis + 10% Off All Equipment Purchases</h3>
+                    <h3>Unlimited Users!!!</h3>
+                    <br>
+
+                    <p>
+                        <span style="color: #28a745; font-weight: bold;"> → $59!!!</span>
+                    </p>
+                    <p>per organization</p>
+
+                    <br>
+                    <ul style="list-style-type: none; padding: 0;"></ul>
+
+                    <div class="centered-div">
+                        <h1><a href="{% url 'signup' %}" class="signup-button">Start Now</a></h1>
+                    </div>
+                </div>
+    
+        </div>
+
+        
+        <!-- Product Images -->
+        <div class="product-images" style="text-align: center; margin-top: 80px;">
+            <div style="margin-bottom: 60px;">
+                <img src="{% static 'images/ts_map_view.jpg' %}" alt="Map View"
+                     style="width: 80%; max-width: 900px; border-radius: 16px; box-shadow: 0 6px 18px rgba(0,0,0,0.3); display: block; margin: 0 auto;">
+                <p style="margin-top: 15px; font-size: 1.1em;">Compare pricing for similar services in your area</p>
+            </div>
+            <br>
+
+            <div>
+                <img src="{% static 'images/normalcurve.jpg' %}" alt="Service Request"
+                     style="width: 50%; max-width: 900px; border-radius: 16px; box-shadow: 0 6px 18px rgba(0,0,0,0.3); display: block; margin: 0 auto;">
+                <p style="margin-top: 15px; font-size: 1.1em;">Apply advanced analyis to determine the most competitive bid for your client.</p>
+            </div>
+            <br>
+            <br>
+            <br>
+
+            <div>
+                <img src="{% static 'images/ts_defined_servicerequest1.jpg' %}" alt="Service Request"
+                     style="width: 50%; max-width: 300px; border-radius: 16px; box-shadow: 0 6px 18px rgba(0,0,0,0.3); display: block; margin: 0 auto;">
+                <p style="margin-top: 15px; font-size: 1.1em;">Schedule Service Requests, create invoices, and bill your customers.</p>
+            </div>
+            <br>
+            <br>
+            <br>
+
+        </div>
+
+    </section>
+
+    <br><br><br><br><br>
+
+
+</body>
+{% endblock %}

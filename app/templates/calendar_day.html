@@ -1,0 +1,54 @@
+{% extends 'base2.html' %}
+{% load static %}
+
+{% block title %}Service Requests for {{ date_obj }}{% endblock %}
+
+{% block content %}
+<h2>Service Requests on {{ date_obj }}</h2>
+
+<h3>
+    <a href="{{ prev_url }}">&laquo; Previous Day</a>
+    {{ date_obj }}
+    <a href="{{ next_url }}">Next Day &raquo;</a>
+</h3>
+
+{% if service_requests %}
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Service Type</th>
+                <th>Employee</th>
+                <th>Location</th>
+                <th>Start Date</th>
+                <th>End Date</th>
+                <th>Status</th>
+                <th>Link</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for service_request in service_requests %}
+                <tr>
+                    <td>{{ service_request.service_type }}</td>
+                    <td>{{ service_request.employee.first_name }} {{ service_request.employee.last_name }}</td>
+                    <td>{{ service_request.start_location }} {{ service_request.end_location }}</td>
+                    <td>{{ service_request.start_date }}</td>
+                    <td>{{ service_request.end_date }}</td>
+                    <td>{{ service_request.status }}</td>
+                    <td> <a class="button" href="{% url 'servicerequest_detail' service_request.id %}">Open Service Request</a> </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    <p>No service requests for this day.</p>
+{% endif %}
+
+<h3>
+    <a href="{{ prev_url }}">&laquo; Previous Day</a>
+    {{ date_obj }}
+    <a href="{{ next_url }}">Next Day &raquo;</a>
+</h3>
+
+<a href="{% url 'calendar_by_month' year month %}">Back to Calendar</a>
+
+{% endblock %}

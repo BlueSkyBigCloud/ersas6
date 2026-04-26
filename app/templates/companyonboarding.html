@@ -1,0 +1,85 @@
+{% extends 'base2.html' %}
+{% load static %}
+{% block title %}Company Info{% endblock %}
+
+{% block content %}
+<br><br>
+<h2 style="text-align: center;">
+    Welcome to TRADESEC! The Enterprise leader in security management. 
+</h2>
+
+{% if display_case == "company_assigned" %}
+    <!-- Case 1: User is already assigned to a company -->
+    <div class="info-container" style="border: 1px solid #ccc; padding: 15px; margin: 20px auto; text-align: center;">
+        <h3>Company Pending approval. If more than 24 hours have passed, please email payment reference number, REF# to contact@tradesec.us.</h3>
+        <p><strong>Company Name:</strong> {{ company.name }}</p>
+        <p><strong>Address:</strong> {{ company.address }}</p>
+        <p><strong>City:</strong> {{ company.city }}</p>
+        <p><strong>State:</strong> {{ company.state }}</p>
+        <p><strong>Zip:</strong> {{ company.zip }}</p>
+    </div>
+
+    <!-- Pricing Section -->
+    <section id="pricing" class="section" style="text-align: center;">
+        <div class="body"></div>
+        <div><br></div>
+
+        <div class="pricing-table" style="display: flex; justify-content: center; gap: 10px;">
+            <!-- Pro Plan -->
+            <div class="pricing-plan">
+                <h3>TradeSec Digital Solutions - Pricing Analysis</h3>
+                <br>
+                <p><strong>$59 /month</strong></p>
+                <br>
+                <ul style="list-style-type: none; padding: 0;">
+                    <li>Access to our industry leading pricing platform</li>
+                    <li>Schedule Service Requests</li>
+                    <li>Regional Pricing Analysis</li>
+                </ul>
+                <div class="product-option-wrapper" style="margin-top: 20px;">
+                    <form method="post" action="{% url 'make_payment' %}">
+                        {% csrf_token %}
+                        <button type="submit" name="price_id" value="price_1SHVT1GLcTDJWbqVgmemWiuC" class="btn btn-primary">
+                            Get Started
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+{% elif display_case == "invitation_pending" %}
+    <!-- Case 2: User has a pending invitation -->
+    <div class="invitation-container" style="border: 1px solid #ccc; padding: 15px; margin: 20px auto; text-align: center;">
+        <h3>You have been invited to join {{ invitation.company.name }}</h3>
+        <p><strong>Invited by:</strong> {{ invitation.sent_by }}</p>
+        <p><strong>Invitation Status:</strong> 
+            {% if invitation.accepted %}
+                Accepted
+            {% else %}
+                Pending
+            {% endif %}
+        </p>
+    </div>
+
+    {% if not invitation.accepted %}
+        <div style="text-align: center; margin-top: 20px;">
+            <form method="POST">
+                {% csrf_token %}
+                <button type="submit" name="accept_invitation" class="btn btn-success">Accept Invitation</button>
+            </form>
+        </div>
+    {% endif %}
+
+{% elif display_case == "create_company" %}
+    <!-- Case 3: No company and no invitation, show company creation form -->
+    <div class="company-edit-container">
+        <h2>Enter Company Information</h2>
+        <form method="POST" class="company-edit-form">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="btn btn-primary">Create Company</button>
+        </form>
+    </div>
+{% endif %}
+{% endblock %}

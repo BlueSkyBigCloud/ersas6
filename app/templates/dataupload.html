@@ -1,0 +1,35 @@
+{% extends 'base2.html' %}
+{% load static %}
+{% block title %}Data Upload Test{% endblock %}
+
+{% block content %}
+    <h2>Data Upload</h2>
+
+    <h2>Uploaded Files</h2>
+    <form action="{% url 'upload_file' %}" method="POST" enctype="multipart/form-data">
+
+        {% csrf_token %}
+        <input type="file" name="file" required>
+        <button type="submit">Upload & Analyze</button>
+    </form>
+    </form>
+
+    
+    {% if file_fields %}
+        <h3>File Columns:</h3>
+        <ul>
+            {% for field in file_fields %}
+                <li>{{ field }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+    
+    {% if matched_models %}
+        <h3>Matching Models and Fields:</h3>
+        <ul>
+            {% for model, fields in matched_models.items %}
+                <li><strong>{{ model }}</strong>: {{ fields|join:", " }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+{% endblock %}

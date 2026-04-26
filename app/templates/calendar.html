@@ -1,0 +1,84 @@
+{% extends 'base2.html' %}
+
+{% load static %}  
+{% load custom_filters %}
+
+{% block title %}Service Requests Calendar{% endblock %}
+
+{% block content %}
+<head>
+    <title>Calendar</title>
+    <style>
+        table {
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            vertical-align: top;
+            text-align: left;
+        }
+        th {
+            height: 100px;
+            background-color: #f2f2f2;
+        }
+        td {
+            width: 200px;
+            height: 200px;
+            background-color: #ffffff;
+        }
+        a {
+            text-decoration: none;
+            color: blue;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<h3>{{ month_name }} {{ year }}</h3>
+
+<table border="1">
+    <thead>
+        <tr>
+            <th>Mon</th>
+            <th>Tue</th>
+            <th>Wed</th>
+            <th>Thu</th>
+            <th>Fri</th>
+            <th>Sat</th>
+            <th>Sun</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for day in days %}
+            {% if forloop.first %}<tr>{% endif %}
+            
+            {% if day == 0 %}
+                <td></td>  {# Empty cell for padding #}
+            {% else %}
+                <td>
+                    <strong>
+                        <a href="{% url 'calendar_by_day' year month day %}">{{ day }}</a>
+                        <br>
+                        {% if sr_count|index:day > 0 %}
+                            {{ sr_count|index:day }} Service Requests
+                        {% endif %}
+                    </strong>
+                </td>
+            {% endif %}
+            
+            {% if forloop.counter|divisibleby:7 %}</tr><tr>{% endif %}
+        {% endfor %}
+        </tr>
+    </tbody>
+</table>
+
+<h3>
+    <a href="{{ prev_url }}">&laquo; Previous</a>
+    {{ month_name }} {{ year }}
+    <a href="{{ next_url }}">Next &raquo;</a>
+</h3>
+
+
+{% endblock %}

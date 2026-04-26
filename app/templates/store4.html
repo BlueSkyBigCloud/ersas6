@@ -1,0 +1,159 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Store - TRADE SEC 2.0{% endblock %}
+
+
+{% block content %}
+<h2>Store - 10% Off All Equipment Purchases with Platform Subscription!!!</h2>
+
+<!-- Products -->
+<div class="products-container" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 30px; margin-bottom: 150px;">
+{% for product in products %}
+  <div class="store-item" style="border: 1px solid #ccc; padding: 20px; text-align: center; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); display: flex; flex-direction: column; align-items: center;">
+
+  {% if product.image_filename %}
+            <img src="{% static 'images/'|add:product.image_filename %}" alt="{{ product.name }}" style="width: 60%; height: auto; border-radius: 8px; margin-bottom: 15px;">
+    {% endif %}
+    
+    <h3>{{ product.name }}</h3>
+    <p>${{ product.price }}</p>
+
+    {% if product.sizes.exists %}
+    <label>Size:</label>
+    <select class="productSize" data-product-id="{{ product.id }}">
+      <option value="">Select</option>
+      {% for size in product.sizes.all %}
+      <option value="{{ size.id }}">{{ size.size }}</option>
+      {% endfor %}
+    </select>
+    <br>
+    {% endif %}
+
+    {% if product.colors.exists %}
+    <label>Color:</label>
+    <select class="productColor" data-product-id="{{ product.id }}">
+      <option value="">Select</option>
+      {% for color in product.colors.all %}
+      <option value="{{ color.id }}">{{ color.color }}</option>
+      {% endfor %}
+    </select>
+    <br>
+    {% endif %}
+
+    <form class="addToCartForm" data-product-id="{{ product.id }}">
+      <input type="hidden" name="quantity" value="1">
+      <button type="submit">Add to Cart</button>
+    </form>
+
+  </div>
+{% endfor %}
+</div>
+
+<div id="miniCart" style="position:fixed; bottom:20px; right:20px; width:350px; max-height:70vh; border:1px solid #ccc; padding:20px; background:#fff; border-radius:15px; box-shadow:0 4px 8px rgba(0,0,0,0.1); overflow:hidden;">
+  <div id="cartHeader" style="cursor:pointer; display:flex; justify-content:space-between; align-items:center;">
+    <h4 style="margin:0;">Cart (<span id="cartCount">{{ cart_items|length }}</span>)</h4>
+    <span id="toggleCart" style="font-weight:bold; font-size:18px;">&#x25BC;</span>
+  </div>
+  
+  <div id="cartContent" style="max-height:400px; overflow-y:auto; margin-top:10px;">
+    <ul id="cartList" style="list-style:none; padding:0;">
+      {% for item in cart_items %}
+      <li style="border-bottom:1px solid #ddd; padding:10px 0;">
+        <strong>{{ item.name }}</strong><br>
+        {% if item.size %}Size: {{ item.size }}<br>{% endif %}
+        {% if item.color %}Color: {{ item.color }}<br>{% endif %}
+        Qty: {{ item.quantity }}<br>
+        Subtotal: ${{ item.subtotal }}<br>
+        <button class="removeBtn" data-key="{{ item.key }}" style="padding:5px 8px; border:none; border-radius:5px; background:#dc3545; color:#fff; cursor:pointer;">Remove</button>
+      </li>
+      {% endfor %}
+    </ul>
+    <p style="margin-top:15px;"><strong>Total: $<span id="cartTotal">{{ total_price }}</span></strong></p>
+    <a href="{% url 'cart' %}" style="display:block; text-align:center; padding:10px 0; background:#007bff; color:#fff; border-radius:5px; text-decoration:none; font-weight:bold;">Checkout</a>
+  </div>
+</div>
+
+
+<script>
+
+const cartHeader = document.getElementById('cartHeader');
+const cartContent = document.getElementById('cartContent');
+const toggleIcon = document.getElementById('toggleCart');
+
+cartHeader.addEventListener('click', () => {
+  if (cartContent.style.display === 'none' || cartContent.style.display === '') {
+    cartContent.style.display = 'block';
+    toggleIcon.innerHTML = '&#x25BC;'; // Down arrow
+  } else {
+    cartContent.style.display = 'none';
+    toggleIcon.innerHTML = '&#x25B2;'; // Up arrow
+  }
+});
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        document.cookie.split(';').forEach(cookie => {
+            cookie = cookie.trim();
+            if (cookie.startsWith(name + '=')) cookieValue = decodeURIComponent(cookie.substring(name.length+1));
+        });
+    }
+    return cookieValue;
+}
+
+// Add to cart
+document.querySelectorAll('.addToCartForm').forEach(form => {
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+    const productId = form.dataset.productId;
+
+    // Validate size and color
+    const sizeSelect = document.querySelector('.productSize[data-product-id="'+productId+'"]');
+    const colorSelect = document.querySelector('.productColor[data-product-id="'+productId+'"]');
+
+    if (sizeSelect && !sizeSelect.value) {
+      alert('Please select a size.');
+      sizeSelect.focus();
+      return;
+    }
+
+    if (colorSelect && !colorSelect.value) {
+      alert('Please select a color.');
+      colorSelect.focus();
+      return;
+    }
+
+    // Add to cart
+    const formData = new FormData(form);
+    if (sizeSelect) formData.append('size_id', sizeSelect.value);
+    if (colorSelect) formData.append('color_id', colorSelect.value);
+
+    fetch(`/add-to-cart/${productId}/`, {
+      method: 'POST',
+      body: formData,
+      headers: {'X-CSRFToken': getCookie('csrftoken')}
+    }).then(r => r.json()).then(data => {
+      document.getElementById('cartCount').textContent = data.cart_count;
+      location.reload();
+    });
+  });
+});
+
+document.querySelectorAll('.removeBtn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const key = btn.dataset.key;
+        const formData = new FormData();
+        formData.append('key', key);
+
+        fetch(`/remove-from-cart/`, {
+            method: 'POST',
+            body: formData,
+            headers: {'X-CSRFToken': getCookie('csrftoken')}
+        }).then(r => r.json()).then(data => {
+            document.getElementById('cartCount').textContent = data.cart_count;
+            location.reload();
+        });
+    });
+});
+</script>
+{% endblock %}

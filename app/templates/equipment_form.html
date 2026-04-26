@@ -1,0 +1,28 @@
+{% extends 'base2.html' %}  <!-- Extend the base template -->
+
+{% block title %}Equipment Form{% endblock %}  <!-- Title for the page -->
+
+{% block content %}
+<head>
+    <meta charset="UTF-8">
+    <title>{% if equipment %}Edit Equipment{% else %}Add Equipment{% endif %}</title>
+</head>
+<body>
+    <h1>{% if equipment %}Edit Equipment: {{ equipment.name }}{% else %}Add New Equipment{% endif %}</h1>
+
+    <form method="post" novalidate>
+        {% csrf_token %}
+        {{ form.as_p }}  <!-- Render form fields as paragraphs -->
+
+        <button type="submit">Save Equipment</button>
+        <a href="{% url 'equipment_list' %}">Cancel</a>  <!-- Link to cancel and go back to the list -->
+    </form>
+
+    {% if equipment %}
+    <form method="post" action="{% url 'equipment_delete' equipment.id %}" style="margin-top: 10px;">
+        {% csrf_token %}
+        <button type="submit" style="background-color: rgb(69, 5, 5); color: white;">Delete</button>
+    </form>
+    {% endif %}
+</body>
+{% endblock %}

@@ -1,0 +1,58 @@
+{% extends 'base2.html' %}
+
+{% block title %}Locations{% endblock %}
+
+{% block content %}
+<main>
+<h1>Locations</h1>
+
+<div class="location-actions">
+    <a class="button add-location-btn" href="{% url 'location_create' %}">Add New Location</a>
+</div>
+
+
+<div class="service-list">
+    {% for location in locations %}
+        <div class="service-container">
+                <a href="{% url 'location_detail' location.id %}">{{ location.name }}</a> - 
+                {{ location.city }}, {{ location.state }}
+                {{ location.name }}
+                {{ location.address }}
+                {{ location.state }}, {{ location.country }}
+        </div>
+    {% empty %}
+        <li>No locations available.</li>
+    {% endfor %}
+        
+</div>
+
+<br>
+    <!-- Pagination Controls -->
+<div class="pagination">
+    <span>
+        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+    </span>
+
+    <div>
+        {% if page_obj.has_previous %}
+            <a href="?page=1" class="pagination-link">First</a>
+            <a href="?page={{ page_obj.previous_page_number }}" class="pagination-link">Previous</a>
+        {% endif %}
+
+        {% for num in page_obj.paginator.page_range %}
+            {% if num == page_obj.number %}
+                <strong class="pagination-current">{{ num }}</strong>
+            {% else %}
+                <a href="?page={{ num }}" class="pagination-link">{{ num }}</a>
+            {% endif %}
+        {% endfor %}
+
+        {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}" class="pagination-link">Next</a>
+            <a href="?page={{ page_obj.paginator.num_pages }}" class="pagination-link">Last</a>
+        {% endif %}
+    </div>
+</div>
+</main>
+
+{% endblock %}

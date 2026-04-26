@@ -1,0 +1,12 @@
+<form method="POST">
+    {% csrf_token %}
+    <textarea name="data" placeholder="Enter data to encrypt"></textarea><br>
+    <input type="password" name="password" placeholder="Enter your password"><br>
+    <button type="submit">Encrypt</button>
+</form>
+
+{% if encrypted_data %}
+    <p>Encrypted Data: {{ encrypted_data }}</p>
+    <p>IV: {{ iv }}</p>
+    <p>Salt: {{ salt }}</p>
+{% endif %}

@@ -1,0 +1,92 @@
+{% extends 'base2.html' %}
+
+{% load static %}
+
+{% block title %}Business Center{% endblock %}
+
+{% block content %}
+<head>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        a {
+            text-decoration: none;
+            color: blue;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        h1 {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .add-customer {
+            margin: 20px 0;
+            text-align: right;
+        }
+        .add-customer a {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+        .add-customer a:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <h1>Business Center</h1>
+    <div class="add-customer">
+        <a href="{% url 'add_customer' %}">Add New Customer</a>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Address</th>
+                <th>Email</th>
+                <th>Subscription</th>
+                <th>Payment Method</th>
+                <th>Phone Number</th>
+                <th>Account Representative</th>
+                <th>Profile</th>
+                <th>Invoices</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for customer in customers %}
+                <tr>
+                    <td>{{ customer.id }}</td>
+                    <td>{{ customer.name }}</td>
+                    <td>{{ customer.address }}</td>
+                    <td>{{ customer.email }}</td>
+                    <td>{{ customer.payment_terms }}</td>
+                    <td>{{ customer.payment_method }}</td>
+                    <td>{{ customer.phone_number }}</td>
+                    <td>{{ customer.account_rep }}</td>
+                    <td><a href="{% url 'businesscustomer_view' customer.id %}">Profile</a></td>
+                    <td><a href="{% url 'invoice_customer_list' customer.id %}">View Invoices</a></td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="10">No customers available.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+{% endblock %}

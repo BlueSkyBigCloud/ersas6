@@ -1,0 +1,74 @@
+{% extends 'base2.html' %}
+
+{% load static %}
+
+{% block title %}Customer Profile - {{ customer.name }}{% endblock %}
+
+{% block content %}
+<style>
+    .profile-container {
+        max-width: 800px;
+        margin: 20px auto;
+        padding: 20px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        background-color: #f9f9f9;
+    }
+    .profile-header {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+    .profile-header h1 {
+        margin: 0;
+        font-size: 24px;
+        color: #333;
+    }
+    .profile-details {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+    .profile-details p {
+        margin: 0;
+        padding: 10px;
+        background-color: #fff;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+    }
+    .profile-actions {
+        margin-top: 20px;
+        text-align: center;
+    }
+    .profile-actions a {
+        background-color: #4CAF50;
+        color: white;
+        padding: 10px 20px;
+        text-decoration: none;
+        border-radius: 5px;
+        margin: 0 10px;
+    }
+    .profile-actions a:hover {
+        background-color: #45a049;
+    }
+</style>
+
+<div class="profile-container">
+    <div class="profile-header">
+        <h1>{{ customer.name }}'s Profile</h1>
+    </div>
+    <div class="profile-details">
+        <p><strong>ID:</strong> {{ customer.id }}</p>
+        <p><strong>Name:</strong> {{ customer.name }}</p>
+        <p><strong>Address:</strong> {{ customer.address }}</p>
+        <p><strong>Email:</strong> {{ customer.email }}</p>
+        <p><strong>Subscription:</strong> {{ customer.payment_terms }}</p>
+        <p><strong>Payment Method:</strong> {{ customer.payment_method }}</p>
+        <p><strong>Phone Number:</strong> {{ customer.phone_number }}</p>
+        <p><strong>Account Representative:</strong> {{ customer.account_rep }}</p>
+    </div>
+    <div class="profile-actions">
+        <a href="{% url 'edit_customer' customer.id %}">Edit Profile</a>
+        <a href="{% url 'invoice_list' %}">View Invoices</a>
+    </div>
+</div>
+{% endblock %}

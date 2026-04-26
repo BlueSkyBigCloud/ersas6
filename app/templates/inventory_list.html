@@ -1,0 +1,61 @@
+{% extends 'base2.html' %}  <!-- Extend the base template -->
+
+{% block title %}Account Information{% endblock %}  <!-- Title for the page -->
+
+{% block content %}
+
+<head>
+    <meta charset="UTF-8">
+    <title>Inventory List</title>
+</head>
+
+<body>
+    <h1>Inventory</h1>
+
+    <div class="model-actions">
+        <a class="button add-model-btn" href="{% url 'inventory_create' %}">Add New Inventory</a>
+    </div>
+
+<div class="service-list">
+    {% for inventory in inventorys %}
+            <div class="service-container">
+                <a href="{% url 'inventory_detail' inventory.id %}">{{ inventory.name }}</a>
+                {{ inventory.name }}
+                {{ inventory.description }}
+                {{ inventory.location }}
+            </div>
+    {% empty %} 
+        <li>No inventory available.</li> 
+    {% endfor %}
+
+</div>
+<br>
+
+<div class="pagination">
+    <span>
+        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+    </span>
+
+    <div>
+        {% if page_obj.has_previous %}
+            <a href="?page=1" class="pagination-link">First</a>
+            <a href="?page={{ page_obj.previous_page_number }}" class="pagination-link">Previous</a>
+        {% endif %}
+
+        {% for num in page_obj.paginator.page_range %}
+            {% if num == page_obj.number %}
+                <strong class="pagination-current">{{ num }}</strong>
+            {% else %}
+                <a href="?page={{ num }}" class="pagination-link">{{ num }}</a>
+            {% endif %}
+        {% endfor %}
+
+        {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}" class="pagination-link">Next</a>
+            <a href="?page={{ page_obj.paginator.num_pages }}" class="pagination-link">Last</a>
+        {% endif %}
+    </div>
+</div>
+</body>
+
+{% endblock %}

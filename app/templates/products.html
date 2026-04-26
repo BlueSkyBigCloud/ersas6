@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}TradeSec Digital Solutions{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/style.css' %}">
+<body>
+
+    <div class="product-images" style="text-align: center; margin-top: 80px;">
+            <div style="margin-bottom: 60px;">
+                <img src="{% static 'images/signup_promo3_web.jpg' %}" alt="Map View"
+                     style="width: 80%; max-width: 700px; border-radius: 16px; box-shadow: 0 6px 18px rgba(0,0,0,0.3); display: block; margin: 0 auto;">
+                <p style="margin-top: 15px; font-size: 1.1em;">Compare pricing for similar services in your area</p>
+            </div>
+        </div>
+
+    <!-- Header Section -->
+    <h2 style="text-align: center; margin-top: 40px;">
+        Custom frameworks and infrastructure solutions for your company
+    </h2>
+
+    <!-- Product Overview Section -->
+    <section id="product-overview" class="section" style="text-align: center; margin-top: 40px;">
+        <div class="body">
+            <p>Our platform offers scalable, secure, and high-performance solutions designed for modern enterprises.</p>
+            <div class="feature-grid">
+                <div class="feature-item">
+                    <p>Organize your internal assets including human resources, physical assets, and service coordination.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section id="pricing" class="section" style="text-align: center; margin-top: 80px;">
+        <div>
+            <h2>Pricing Plans</h2>
+            <p>Choose a plan that fits your enterprise needs.</p>
+        </div>
+
+        <div class="pricing-table" style="display: flex; justify-content: center; gap: 40px; margin-top: 40px;">
+            <!-- Pro Plan -->
+            <div class="pricing-plan" style="max-width: 300px;">
+                <h3>Pro Plan</h3>
+                <p style="font-size: 1.2em; margin: 10px 0;">$5,990/month</p>
+                <ul style="list-style-type: none; padding: 0;">
+                    <li>Access to our industry leading platform</li>
+                    <li>Infrastructure Solutions</li>
+                    <li>Manage Service Requests</li>
+                    <li>Schedule your employees</li>
+                </ul>
+                <div class="product-option-wrapper" style="margin-top: 20px;">
+                    <form method="post">
+                        {% csrf_token %}
+                        <button type="submit" name="product_option" value="Pro Plan">Get Started</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Pro Plus Plan -->
+            <div class="pricing-plan" style="max-width: 300px;">
+                <h3>Pro Plus</h3>
+                <p style="font-size: 1.2em; margin: 10px 0;">$7,990/month</p>
+                <ul style="list-style-type: none; padding: 0;">
+                    <li>All features included in Pro Plan</li>
+                    <li>Customize your service offering</li>
+                    <li>Priority Email Support</li>
+                    <li>Threat Management Monitoring</li>
+                </ul>
+                <div class="product-option-wrapper" style="margin-top: 20px;">
+                    <form method="post">
+                        {% csrf_token %}
+                        <button type="submit" name="product_option" value="Pro Plus">Get Started</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="section" style="text-align: center; margin-top: 100px;">
+        <div class="body">
+            <h2>Features</h2>
+            <div class="feature-list" style="display: flex; justify-content: center; gap: 40px; flex-wrap: wrap; margin-top: 30px;">
+                <div class="feature-item" style="max-width: 250px;">
+                    <h3>Full Service Data Integratable Team</h3>
+                    <p>Let our team integrate your current databases with our proprietary configurations.</p>
+                </div>
+                <div class="feature-item" style="max-width: 250px;">
+                    <h3>High Availability</h3>
+                    <p>Ensure business continuity with our dedicated response team on our Pro Plus plan.</p>
+                </div>
+                <div class="feature-item" style="max-width: 250px;">
+                    <h3>Scalable Infrastructure</h3>
+                    <p>Scale up as your enterprise grows, without compromising on performance.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Product Images -->
+        <div class="product-images" style="text-align: center; margin-top: 80px;">
+            <div style="margin-bottom: 60px;">
+                <img src="{% static 'images/ts_map_view.jpg' %}" alt="Map View"
+                     style="width: 80%; max-width: 900px; border-radius: 16px; box-shadow: 0 6px 18px rgba(0,0,0,0.3); display: block; margin: 0 auto;">
+                <p style="margin-top: 15px; font-size: 1.1em;">Compare pricing for similar services in your area</p>
+            </div>
+
+            <div>
+                <img src="{% static 'images/ts_defined_servicerequest1.jpg' %}" alt="Service Request"
+                     style="width: 50%; max-width: 300px; border-radius: 16px; box-shadow: 0 6px 18px rgba(0,0,0,0.3); display: block; margin: 0 auto;">
+                <p style="margin-top: 15px; font-size: 1.1em;">Schedule Service Requests</p>
+            </div>
+
+            <div>
+                <img src="{% static 'images/ts_invoice.jpg' %}" alt="Service Request"
+                     style="width: 50%; max-width: 300px; border-radius: 16px; box-shadow: 0 6px 18px rgba(0,0,0,0.3); display: block; margin: 0 auto;">
+                <p style="margin-top: 15px; font-size: 1.1em;">Create Invoices and Bill your customers</p>
+            </div>
+        </div>
+    </section>
+
+</body>
+{% endblock %}

@@ -1,0 +1,48 @@
+{% extends 'base2.html' %}
+
+{% block title %}Bulk Pricing Upload{% endblock %}
+
+{% block content %}
+<h1>Bulk Pricing Upload</h1>
+
+<!-- Display Django messages -->
+{% if messages %}
+  <ul class="messages">
+    {% for message in messages %}
+      <li class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}">
+        {{ message }}
+      </li>
+    {% endfor %}
+  </ul>
+{% endif %}
+
+<!-- CSV Upload Form -->
+<form method="post" enctype="multipart/form-data" style="margin-top: 20px;">
+  {% csrf_token %}
+  <div class="form-group">
+    <label for="file">Upload CSV File:</label>
+    <input type="file" name="file" id="file" accept=".csv" class="form-control" required>
+  </div>
+
+  <button type="submit" class="btn btn-primary mt-3">Upload Pricing Data</button>
+</form>
+
+<!-- Instructions -->
+<div style="margin-top:20px;">
+  <h4>CSV Format Instructions:</h4>
+  <p>The CSV file must have exactly 6 columns in the following order:</p>
+  <ol>
+    <li><strong>zip_code</strong> (5-digit ZIP)</li>
+    <li><strong>state_code</strong> (2-letter state code, e.g., TX, NY)</li>
+    <li><strong>service_type</strong> (e.g., Unarmed Guard, Armed Guard)</li>
+    <li><strong>avg_price</strong> (average price, numeric)</li>
+    <li><strong>min_price</strong> (minimum price, numeric)</li>
+    <li><strong>max_price</strong> (maximum price, numeric)</li>
+  </ol>
+  <p>Example:</p>
+  <pre>
+75001,TX,Unarmed Guard,22.50,20.00,25.00
+10001,NY,Armed Guard,40.00,35.00,45.00
+  </pre>
+</div>
+{% endblock %}

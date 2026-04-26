@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Security Solutions for Modern Security Companies | TradeSec{% endblock %}
+
+{% block content %}
+<section class="container py-5">
+    <h1>Comprehensive Security Solutions by TradeSec</h1>
+    <p>TradeSec provides integrated <strong>security solutions</strong> that empower private security companies to manage guards, clients, reports, and schedules efficiently.</p>
+
+    <br>
+    <h2>Our Security Solutions Include</h2>
+    <br>
+    <ul>
+        <li>CRM and client management tools</li>
+        <li>Guard scheduling and operations tracking</li>
+        <li>Incident reporting and compliance logging</li>
+        <li>Data analytics and insights for performance</li>
+        <li>Cloud-based access for teams anywhere</li>
+    </ul>
+
+    <h3>Built for Private Security Growth</h3>
+    <p>Whether you manage one site or multiple patrol contracts, TradeSec offers scalable software solutions that adapt to your security firm’s needs.</p>
+
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+
+    <div class="text-center mt-4">
+        <a href="{% url 'signup' %}" class="btn btn-primary btn-lg">Explore TradeSec Solutions</a>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,42 @@
+{% extends 'base2.html' %}
+{% load static %}
+{% block title %}Map Locations{% endblock %}
+
+{% block content %}
+<h1>Map Locations</h1>
+<br>
+<script src="https://ajax.googleapis.com/ajax/libs/@googlemaps/extended-component-library/0.6.11/index.min.js"defer></script>
+<script>
+    function initMap() {
+        const map = new google.maps.Map(document.getElementById("map"), {
+            zoom: 4,
+            center: { lat: 39.1141, lng: -94.6275 } // Kansas City, Kansas
+        });
+
+        {% for location in locations %}
+            new google.maps.Marker({
+                position: { lat: {{ location.latitude }}, lng: {{ location.longitude }} },
+                map: map,
+                title: "{{ location.name|escapejs }}" // Escape for JS safety
+            });
+        {% endfor %}
+
+        map.addListener('click', function(event) {
+            addMarker(event.latLng, map);
+            document.getElementById('id_latitude').value = event.latLng.lat();
+            document.getElementById('id_longitude').value = event.latLng.lng();
+        });
+    }
+
+    function addMarker(location, map) {
+        new google.maps.Marker({
+            position: location,
+            map: map
+        });
+    }
+
+    window.onload = initMap;
+</script>
+
+
+{% endblock %}

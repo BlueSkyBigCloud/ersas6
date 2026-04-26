@@ -1,0 +1,15 @@
+{% extends 'base2.html' %}
+{% load static %}
+{% block title %}Invite{% endblock %}
+
+{% block content %}
+<main>
+    <h2>Invite a User</h2>
+    <form method="post" action="{% url 'create_invite' %}">
+        {% csrf_token %}
+        <label for="email">Enter Email Address:</label><br>
+        <input type="email" id="email" name="email" placeholder="user@example.com" required>
+        <button type="submit">Send Invite</button>
+    </form>
+</main>
+{% endblock %}

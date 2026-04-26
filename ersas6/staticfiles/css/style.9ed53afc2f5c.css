@@ -1,0 +1,387 @@
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #891414;   /* Dark red background */
+    color: #333;                 /* Dark gray text color */
+    margin: 0;
+    padding: 20px;
+    box-sizing: border-box;      /* Ensures padding doesn't affect the width */
+}
+
+
+header {
+    background: #791717;        /* Dark red background for the header */
+    color: #fff;                 /* White text for better contrast */
+    padding: 20px 0;             /* Increased padding for a more spacious header */
+    text-align: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);  /* Subtle shadow to lift the header */
+}
+
+footer {
+    text-align: center;
+    padding: 10px 0;
+    background: #35424a;
+    color: #ffffff;
+    position: relative;
+    bottom: 0;
+    width: 100%;
+}
+
+/* General body styles */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+/* Header styles */
+header {
+    display: flex;
+    justify-content: space-between; /* Space between header items */
+    align-items: center; /* Center items vertically */
+    padding: 20px;
+    background-color: #f8f9fa; /* Light background color */
+}
+
+h2 {
+    margin-bottom: 20px;         /* Adds space below the h2 heading */
+}
+
+/* Buttons styling */
+button {
+    background-color: #791717;   /* Dark red background for buttons */
+    color: #fff;                 /* White text */
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #891414;  /* Slightly lighter red on hover */
+}
+
+
+nav ul {
+    list-style: none; /* Remove default list styling */
+    padding: 0;
+    margin: 0;
+    display: flex; /* Arrange items in a row */
+    gap: 20px; /* Spacing between buttons */
+    justify-content: flex-start; /* Align to the left (default) */
+}
+
+nav ul li {
+    display: inline; /* Display links inline */
+    margin-right: 15px; /* Spacing between links */
+}
+
+nav ul li a {
+    text-decoration: none; /* Remove underline from links */
+    color: #007bff; /* Link color */
+}
+
+nav ul li a:hover {
+    text-decoration: underline; /* Underline on hover */
+}
+
+/* Login button styles */
+.login-container {
+    border: 0px solid #007bff; /* Border color */
+    border-radius: 5px; /* Rounded corners */
+    padding: 5px; /* Padding inside the box */
+}
+
+.login-button {
+    padding: 20px 30px; /* Padding for the button */
+    background-color: #007bff; /* Button background color */
+    color: white; /* Button text color */
+    border: none; /* Remove border */
+    border-radius: 5px; /* Rounded corners */
+    cursor: pointer; /* Pointer cursor on hover */
+    text-decoration: none; /* Remove underline from links */
+}
+
+.login-button:hover {
+    background-color: #0056b3; /* Darker blue on hover */
+}
+
+/* Footer styles */
+footer {
+    text-align: center; /* Center text in footer */
+    padding: 20px;
+    background-color: #f8f9fa; /* Same background color as header */
+}
+
+/* Main content styles */
+main {
+    padding: 20px; /* Padding for main content */
+}
+
+/* Additional styles can be added here */
+
+.account-edit-container {
+    max-width: 400px;
+    margin: 0 auto;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 8px;
+    box-sizing: border-box;
+}
+
+.btn {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.container {
+    color: rgb(0, 0, 0);
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+}
+
+.btn:hover {
+    background-color: #45a049;
+}
+
+.products-container {
+    text-align: center;
+}
+
+.product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));  /* Responsive grid */
+    gap: 20px;
+    padding: 20px;
+}
+
+.product-card {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    overflow: hidden;
+    transition: box-shadow 0.3s ease;
+    text-align: left;
+}
+
+.product-card a {
+    text-decoration: none;
+    color: inherit;
+}
+
+.product-card:hover {
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.product-image img {
+    width: 100%;
+    height: auto;
+}
+
+.product-info {
+    padding: 15px;
+}
+
+.product-info h3 {
+    font-size: 1.25em;
+    margin: 0 0 10px;
+}
+
+.product-info p {
+    margin: 0 0 10px;
+    font-size: 0.9em;
+    color: #666;
+}
+
+.product-price {
+    font-weight: bold;
+    color: #000;
+}
+
+.centered-heading {
+    text-align: center;
+}
+
+.userlogin-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    max-width: 400px;  /* Set a width for the form */
+    margin: 0 auto;    /* Center the container */
+    padding: 2000px;
+    border: 1px solid #ccc;  /* Optional: Add border for styling */
+    border-radius: 8px;      /* Optional: Rounded corners */
+    background-color: #f9f9f9;  /* Optional: Background color */
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+/* Body */
+body {
+    background-color: #f4f4f9;
+    color: #333;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* Header styling */
+header {
+    background-color: #e6ecf0;
+    color: white;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+header h1 a {
+    color: white;
+    text-decoration: none;
+    font-size: 1.8em;
+    font-weight: bold;
+}
+
+nav ul {
+    list-style: none;
+    display: flex;
+    gap: 15px;
+}
+
+nav a {
+    color: white;
+    text-decoration: none;
+    font-size: 1.1em;
+    padding: 8px 12px;
+    transition: background 0.3s;
+}
+
+nav a:hover {
+    background-color: #0078b8;
+    border-radius: 5px;
+}
+
+/* Login button */
+.login-container {
+    margin-left: auto;
+}
+
+.login-button {
+    color: #005f99;
+    background-color: white;
+    padding: 8px 16px;
+    border: 1px solid white;
+    border-radius: 5px;
+    text-decoration: none;
+    font-weight: bold;
+    transition: background 0.3s, color 0.3s;
+}
+
+.login-button:hover {
+    background-color: #004066;
+    color: white;
+}
+
+/* Main content */
+main {
+    padding: 40px;
+    flex: 1;
+}
+
+/* Footer styling */
+footer {
+    background-color: #333;
+    color: #fff;
+    text-align: center;
+    padding: 15px;
+    font-size: 0.9em;
+}
+
+.home-button {
+    font-family: Arial, sans-serif;
+    font-size: 1.2em;        /* Slightly larger font for emphasis */
+    color: #ffffff;          /* White text color */
+    background-color: #000c16; /* Professional blue background */
+    padding: 10px 20px;      /* Padding for a button-like appearance */
+    border-radius: 5px;      /* Rounded corners */
+    text-decoration: none;   /* Remove underline */
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2); /* Soft shadow */
+    transition: background-color 0.3s ease; /* Smooth hover transition */
+}
+
+.home-button:hover {
+    background-color: #0056b3; /* Darker blue on hover */
+}
+
+.dashboard-footer {
+    text-align: center;
+    padding: 11px;
+    background-color: #000d1b;
+    color: #dde8eb;
+    position: fixed;
+    width: 100%;
+    bottom: 0;
+}
+
+.dashboard-footer p {
+    margin: 0;
+}
+
+html, body {
+    height: 100%;  /* Ensure full height */
+    margin: 0;     /* Remove default margin */
+    overflow-x: hidden;  /* Prevent horizontal scrolling */
+}
+
+body {
+    overflow-y: auto;  /* Allow vertical scrolling */
+}
+
+/* Hide logo by default */
+.mobile-logo {
+    display: none;
+    width: 50px; /* Adjust size as needed */
+    height: auto;
+    margin-left: 10px;
+}
+
+/* Show logo on smaller screens or when resized */
+@media screen and (max-width: 768px) {
+    .mobile-logo {
+        display: inline-block; /* Show the logo on mobile */
+    }
+
+    .home-button {
+        font-size: 1.2em;  /* Optional: Adjust home button size for mobile */
+    }
+    h1 {
+        display: none;  /* Hide the h1 element on smaller screens */
+    }
+}

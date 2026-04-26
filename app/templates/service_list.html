@@ -1,0 +1,87 @@
+{% extends 'base2.html' %}  <!-- Extending the base template -->
+{% load static %}
+{% block title %}Service List{% endblock %}
+
+{% block content %}
+<main>
+    <style>
+        h1 {
+            text-align: center;
+        }
+    </style>
+    <h1>Service Request Management</h1>
+    <br>
+    <div center class="service-actions-container" style="display: flex; justify-content: center; gap: 10px;">
+        <div class="service-actions">
+            <a class="button-calendar-btn" href="{% url 'location_list' %}">Locations</a>
+        </div>
+        <div class="service-actions">
+            <a class="button-calendar-btn" href="{% url 'equipment_list' %}">Equipment</a>
+        </div>
+        <div class="service-actions">
+            <a class="button-calendar-btn" href="{% url 'employee_list' %}">Employees</a>
+        </div>
+        <div class="service-actions">
+            <a class="button-calendar-btn" href="{% url 'servicetype_list' %}">Service Types</a>
+        </div>
+        <div class="service-actions">
+            <a class="button-calendar-btn" href="{% url 'calendar_view' %}">Calendar</a>
+        </div>
+    </div>
+    <br>
+    <br>
+    <div class="service-actions">
+        <a class="button add-services-btn" href="{% url 'create_service_request' %}">Add New Service Request</a>
+    </div>
+    <br>
+
+    <!-- List of Services -->
+    <div class="service-list">
+        {% for service in page_obj.object_list %}
+            <div class="service-container">
+                <h3>{{ service.customer }}</h3>  <!-- Display service type -->
+                <p><strong>Start Date:</strong> {{ service.start_date }}</p>
+                <p><strong>End Date:</strong> {{ service.end_date }}</p>
+                <p><strong>Start Location:</strong> {{ service.start_location.name }}</p>
+                <p><strong>Employee:</strong> {{ service.employee }}</p>
+                <p><strong>Equipment:</strong> {{ service.equipment }}</p>
+                <br>
+
+                <a class="button add-services-btn" href="{% url 'servicerequest_detail' service.id %}">Open Service Request</a>
+
+            </div>
+        {% empty %}
+            <p>No services found.</p>
+        {% endfor %}
+    </div>
+    <br>
+
+    <!-- Pagination Controls -->
+    <div class="pagination">
+        <span>
+            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+        </span>
+
+        <div>
+            {% if page_obj.has_previous %}
+                <a href="?page=1" class="pagination-link">First</a>
+                <a href="?page={{ page_obj.previous_page_number }}" class="pagination-link">Previous</a>
+            {% endif %}
+
+            {% for num in page_obj.paginator.page_range %}
+                {% if num == page_obj.number %}
+                    <strong class="pagination-current">{{ num }}</strong>
+                {% else %}
+                    <a href="?page={{ num }}" class="pagination-link">{{ num }}</a>
+                {% endif %}
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}" class="pagination-link">Next</a>
+                <a href="?page={{ page_obj.paginator.num_pages }}" class="pagination-link">Last</a>
+            {% endif %}
+        </div>
+    </div>
+</main>
+
+{% endblock %}

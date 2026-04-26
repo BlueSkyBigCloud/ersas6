@@ -1,0 +1,42 @@
+{% extends 'base2.html' %}  <!-- Extend the base template -->
+
+{% block title %}Bulk Upload{% endblock %}  <!-- Title for the page -->
+
+{% block content %}
+<br><br><br><br>
+<h1>Bulk Upload</h1>
+
+<style>
+    .service-actions-container {
+        display: flex;
+        flex-direction: column;
+        align-items: left;
+        gap: 10px;
+        padding-right: 20px;
+    }
+
+    .upload-button {
+        display: block;
+        width: 100px;
+        padding: 10px;
+        text-align: center;
+        background-color: #007bff;
+        color: white;
+        text-decoration: none;
+        border-radius: 5px;
+        font-weight: bold;
+    }
+
+    .upload-button:hover {
+        background-color: #0056b3;
+    }
+</style>
+
+<div class="service-actions-container">
+    <a href="{% url 'bulkuploademployees' %}" class="upload-button">Employees</a>
+    <a href="{% url 'bulkuploadequipment' %}" class="upload-button">Equipment</a>
+    <a href="{% url 'bulkuploadlocations' %}" class="upload-button">Locations</a>
+    <a href="{% url 'bulkpricing_upload' %}" class="upload-button">Pricing Data</a>
+</div>
+
+{% endblock %}

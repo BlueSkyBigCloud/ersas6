@@ -1,0 +1,30 @@
+{% extends 'base2.html' %}  <!-- Extend the base template -->
+
+{% block title %}Equipment Detail{% endblock %}  <!-- Title for the page -->
+
+{% block content %}
+<head>
+    <meta charset="UTF-8">
+    <title>Equipment Detail</title>
+</head>
+<body>
+    <h1>{{ equipment.name }}</h1>
+    <p><strong>Description:</strong> {{ equipment.description }}</p>
+    <p><strong>Category:</strong> {{ equipment.category }}</p>
+    <p><strong>Quantity:</strong> {{ equipment.quantity }}</p>
+    
+    <p><strong>Location:</strong> 
+        {% if equipment.location %}
+            {{ equipment.location.name }} 
+            <a href="{% url 'location_detail' equipment.location.id %}">Location Link</a>
+        {% else %}
+            <em>No location assigned</em>
+        {% endif %}
+    </p>
+    
+    <p><strong>Date Added:</strong> {{ equipment.date_added|date:"F j, Y" }}</p>  <!-- Format date if applicable -->
+
+    <a href="{% url 'equipment_list' %}">Back to Equipment List</a>
+    <a href="{% url 'equipment_edit' equipment.id %}">Edit Equipment</a>
+</body>
+{% endblock %}

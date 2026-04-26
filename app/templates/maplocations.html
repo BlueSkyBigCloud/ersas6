@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Map Locations</title>
+    <script src="https://maps.googleapis.com/maps/api/js?key={{ GOOGLE_MAPS_API_KEY }}&callback=initMap" async defer></script>
+    <script>
+        function initMap() {
+            const map = new google.maps.Map(document.getElementById("map"), {
+                center: { lat: 0, lng: 0 },
+                zoom: 2,
+            });
+
+            // Parse the locations passed from the view
+            const locations = JSON.parse("{{ locations_json|escapejs }}");
+            if (locations.length > 0) {
+                map.setCenter({ lat: locations[0].latitude, lng: locations[0].longitude });
+                map.setZoom(10);
+            }
+
+            // Add markers for each location
+            locations.forEach(location => {
+                new google.maps.Marker({
+                    position: { lat: location.latitude, lng: location.longitude },
+                    map,
+                    title: location.name
+                });
+            });
+        }
+    </script>
+    <style>
+        #map {
+            height: 500px;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <h2>Saved Locations</h2>
+    <div id="map"></div> <!-- Map container -->
+
+    <ul>
+        {% for location in locations %}
+            <li>{{ location.name }} - ({{ location.latitude }}, {{ location.longitude }})</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

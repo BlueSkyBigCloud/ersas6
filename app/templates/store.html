@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Store - TRADE SEC 2.0{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/style.css' %}">
+
+<body>
+    <h2 style="text-align: center;">Store</h2>
+    <p style="text-align: center;">Purchase official merchandise directly from our store.</p>
+
+    <div style="display: flex; justify-content: center; margin-top: 40px;">
+        <div class="store-item" style="border: 1px solid #ccc; padding: 20px; width: 300px; text-align: center; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+            
+            <img src="{% static 'images/body_armor_male.jpg' %}" alt="Protective Gear" style="width: 100%; border-radius: 8px; margin-bottom: 15px;">
+
+            
+            <h3>Protective Gear</h3>
+            <p>Ballistic Resistant - Millenium</p>
+            <p><strong>$790.00</strong></p>
+
+            <form method="post">
+                {% csrf_token %}
+                <button type="submit" name="price_id" value="price_1S1q85GLcTDJWbqVxjXRgawv" style="padding: 10px 20px; border: none; border-radius: 6px; background-color: #007bff; color: #fff; font-size: 16px; cursor: pointer;">
+                    Buy Now
+                </button>
+            </form>
+        </div>
+    </div>
+</body>
+{% endblock %}

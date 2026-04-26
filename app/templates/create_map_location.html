@@ -1,0 +1,54 @@
+{% extends 'base2.html' %}
+{% load static %}
+{% block title %} Maps and Places Autocomplete{% endblock %}
+
+{% block content %}
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Map Location</title>
+    <script src="https://maps.googleapis.com/maps/api/js?key={{ GOOGLE_MAPS_API_KEY }}&callback=initMap" async defer></script>
+    <script>
+        let map;
+        let marker;
+
+        function initMap() {
+            map = new google.maps.Map(document.getElementById('map'), {
+                zoom: 10,
+                center: { lat: 32.7749, lng: -90.4194 } // Example coordinates
+            });
+
+            // Add click event listener for creating a marker
+            map.addListener('click', function(event) {
+                placeMarker(event.latLng);
+                document.getElementById('id_latitude').value = event.latLng.lat();
+                document.getElementById('id_longitude').value = event.latLng.lng();
+            });
+        }
+
+        function placeMarker(location) {
+            if (marker) {
+                marker.setPosition(location);
+            } else {
+                marker = new google.maps.Marker({
+                    position: location,
+                    map: map
+                });
+            }
+        }
+    </script>
+</head>
+<body>
+    <h1>Create Map Location</h1>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Save Location</button>
+    </form>
+
+    <h2>Map</h2>
+    <div id="map" style="height: 500px; width: 100%;"></div>
+</body>
+
+{% endblock %}

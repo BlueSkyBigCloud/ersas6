@@ -1,0 +1,27 @@
+{% extends 'base2.html' %}  <!-- Extend the base template -->
+
+{% block title %}Employee Form{% endblock %}  <!-- Title for the page -->
+
+{% block content %}
+<head>
+    <meta charset="UTF-8">
+    <title>{% if employee %}Edit Employee{% else %}Add Employee{% endif %}</title>
+</head>
+<body>
+    <h1>{% if employee %}Edit Employee: {{ employee.first_name }} {{ employee.last_name }}{% else %}Add New Employee{% endif %}</h1>
+
+    <form method="post" novalidate>
+        {% csrf_token %}
+        {{ form.as_p }}  <!-- Render form fields as paragraphs -->
+
+        <button type="submit">Save</button>
+        <a href="{% url 'employee_list' %}">Cancel</a>  <!-- Link to cancel and go back to the list -->
+    </form>
+    {% if employee %}
+    <form method="post" action="{% url 'employee_delete' employee.id %}" style="margin-top: 10px;">
+        {% csrf_token %}
+        <button type="submit" style="background-color: rgb(69, 5, 5); color: white;">Delete</button>
+    </form>
+    {% endif %}
+</body>
+{% endblock %}

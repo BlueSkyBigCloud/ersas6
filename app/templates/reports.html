@@ -1,0 +1,23 @@
+{% extends 'base2.html' %}
+{% load static %}
+{% block title %}Reports{% endblock %}
+
+{% block content %}
+<main>
+    <h2>Reports Settings</h2>
+</main><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reports</title>
+</head>
+<body>
+
+    <form method="get" action="{% url 'reports' %}">
+        <input type="hidden" name="export" value="csv">
+        <button type="submit">Download CSV</button>
+    </form>
+
+</body>
+
+
+{% endblock %}

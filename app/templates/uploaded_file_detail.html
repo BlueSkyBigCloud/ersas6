@@ -1,0 +1,13 @@
+<h2>Uploaded File Details</h2>
+
+<h3>Mismatched Columns</h3>
+{% for model_name, details in mismatched_columns.items %}
+    <h4>{{ model_name }}</h4>
+    <p><strong>Model Columns:</strong> {{ details.model_columns }}</p>
+    <p><strong>CSV Columns:</strong> {{ details.csv_columns }}</p>
+{% endfor %}
+
+<h3>Download Formatted File</h3>
+<a href="/path/to/your/formatted_file.csv" download>Download Formatted File</a>
+
+

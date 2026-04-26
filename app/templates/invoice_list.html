@@ -1,0 +1,34 @@
+{% extends 'base2.html' %}  <!-- Extending the base template -->
+{% load static %}
+{% block title %}Invoice List{% endblock %}
+
+{% block content %}
+<main>
+    <h2>Invoices</h2>
+
+    <!-- List of Invoices -->
+    <div class="invoice-list">
+        {% for invoice in invoices %}
+            <div class="invoice-container">
+                <h3>Invoice #{{ invoice.invoice_number }}</h3>  <!-- Display invoice number -->
+                <p><strong>Customer:</strong> {{ invoice.customer.name }}</p>
+                <p><strong>Issue Date:</strong> {{ invoice.issue_date }}</p>
+                <p><strong>Due Date:</strong> {{ invoice.due_date }}</p>
+                <p><strong>Amount:</strong> ${{ invoice.total }}</p>
+                <p><strong>Status:</strong> {{ invoice.get_payment_status_display }}</p>  <!-- Show payment status -->
+                <p><strong>Created By:</strong> {{ invoice.created_by_user }}</p>
+                <br>
+
+                <a class="button view-invoice-btn" href="{% url 'invoice_detail' invoice.id %}">View Invoice</a>
+            </div>
+        {% empty %}
+            <p>No invoices found.</p>
+        {% endfor %}
+    </div>
+
+    <div class="invoice-actions">
+        <a class="button add-invoice-btn" href="{% url 'business_center' %}">Back to Business Center</a>
+    </div>
+</main>
+
+{% endblock %}

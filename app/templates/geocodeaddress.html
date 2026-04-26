@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Geocode Address</title>
+    <script>
+        function geocodeAddress() {
+            let address = document.getElementById("address").value;
+            fetch(`/geocode/address/?address=${encodeURIComponent(address)}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.latitude && data.longitude) {
+                    document.getElementById("result").innerHTML = 
+                        `<p>Latitude: ${data.latitude}, Longitude: ${data.longitude}</p>`;
+                } else {
+                    document.getElementById("result").innerHTML = "<p>Invalid address. Try again.</p>";
+                }
+            })
+            .catch(error => console.error("Error:", error));
+        }
+    </script>
+</head>
+<body>
+    <h2>Geocode an Address</h2>
+    <input type="text" id="address" placeholder="Enter an address">
+    <button onclick="geocodeAddress()">Get Coordinates</button>
+    <div id="result"></div>
+</body>
+</html>

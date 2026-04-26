@@ -1,0 +1,23 @@
+{% extends 'base2.html' %}  <!-- Extend the base template -->
+
+{% block title %}Account Information{% endblock %}  <!-- Title for the page -->
+
+{% block content %}
+<main>
+    <h2>Account Information</h2>
+    <a class="button" href="{% url 'edit_account' %}">Edit Account</a>  <!-- Link to edit account -->
+    <div class="account-info">
+        <ul>
+            <li><strong>Email:</strong> {{ user.email }}</li>
+            <li><strong>Username:</strong> {{ user.username }}</li>
+            <li><strong>First Name:</strong> {{ user.first_name }}</li>
+            <li><strong>Last Name:</strong> {{ user.last_name }}</li>
+            <li><strong>Phone Number:</strong> {{ user.phone_number }}</li>
+            <li><strong>Date Joined:</strong> {{ user.date_joined|date:"F j, Y" }}</li>
+        </ul>
+    </div>
+    <div class="account-actions">
+        <a class="button" href="{% url 'location_list' %}">Locations</a>  <!-- Link to edit account -->
+    </div>
+</main>
+{% endblock %}

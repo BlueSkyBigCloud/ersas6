@@ -1,0 +1,27 @@
+{% extends 'base2.html' %}  <!-- Extend the base template -->
+
+{% block title %}Employee Detail{% endblock %}  <!-- Title for the page -->
+
+{% block content %}
+<head>
+    <meta charset="UTF-8">
+    <title>Employee Detail</title>
+</head>
+<body>
+    <h1>{{ employee.first_name }} {{ employee.last_name }}</h1>
+    <p><strong>Email:</strong> {{ employee.email }}</p>
+    <p><strong>Phone Number:</strong> {{ employee.phone_number }}</p>
+    <p><strong>Position:</strong> {{ employee.position }}</p>
+    <p><strong>Level:</strong> {{ employee.level }}</p>
+    <p><strong>Department:</strong> {{ employee.department }}</p>
+    <p><strong>Date Hired:</strong> {{ employee.date_hired|date:"F j, Y" }}</p>  <!-- Format date if applicable -->
+    <p><strong>Location:</strong> {{ employee.location }}</p>  <!-- Assuming you have a location field -->
+
+    <p><strong>Assigned User:</strong> {{ employee.assigned_user }}</p>  <!-- Assuming you have a location field -->
+    <p><strong>Assigned User Email:</strong> {{ employee.assigned_user.email }}</p>  <!-- Assuming you have a location field -->
+
+
+    <a href="{% url 'employee_list' %}">Back to Employee List</a>
+    <a href="{% url 'employee_edit' employee.id %}">Edit Employee</a>  <!-- Link to edit the employee, if applicable -->
+</body>
+{% endblock %}

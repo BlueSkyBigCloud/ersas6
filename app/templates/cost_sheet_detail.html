@@ -1,0 +1,21 @@
+{% extends 'base2.html' %}
+{% block title %}Cost Sheet{% endblock %}
+
+{% block content %}
+<h1>Cost Sheet for Service Request {{ service_request.id }}</h1>
+
+<div class="section">
+    <p><strong>Employee:</strong> {{ cost_sheet.employee }}</p>
+    <p><strong>Equipment:</strong> {{ cost_sheet.equipment }}</p>
+    <p><strong>Location:</strong> {{ cost_sheet.location }}</p>
+    <p><strong>Service Type:</strong> {{ cost_sheet.service_type }}</p>
+    <p><strong>Start Date:</strong> {{ cost_sheet.start_date }}</p>
+    <p><strong>End Date:</strong> {{ cost_sheet.end_date }}</p>
+    <p><strong>Labor Cost:</strong> ${{ cost_sheet.labor_cost }}</p>
+    <p><strong>Equipment Cost:</strong> ${{ cost_sheet.equipment_cost }}</p>
+    <p><strong>Total Cost:</strong> ${{ cost_sheet.total_cost }}</p>
+</div>
+
+<a class="button" href="{% url 'cost_sheet_edit' service_request.id %}">Edit Cost Sheet</a>
+<a class="button" href="{% url 'servicerequest_detail' service_request.id %}">Back to Service Request</a>
+{% endblock %}

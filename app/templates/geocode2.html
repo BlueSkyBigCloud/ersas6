@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Geocoding</title>
+</head>
+<body>
+    <h1>Geocode an Address</h1>
+    
+    <form method="POST">
+        {% csrf_token %}
+        <label for="address">Enter Address:</label>
+        <input type="text" name="address" id="address" value="{{ address }}" required>
+        <button type="submit">Geocode</button>
+    </form>
+
+    {% if geocode_result %}
+        <h2>Geocode Result for "{{ address }}"</h2>
+        <ul>
+            <li><strong>Formatted Address:</strong> {{ geocode_result.0.formatted_address }}</li>
+            <li><strong>Latitude:</strong> {{ geocode_result.0.geometry.location.lat }}</li>
+            <li><strong>Longitude:</strong> {{ geocode_result.0.geometry.location.lng }}</li>
+        </ul>
+    {% elif address %}
+        <p>No results found for "{{ address }}".</p>
+    {% endif %}
+</body>
+</html>

@@ -1,0 +1,76 @@
+{% extends "base2.html" %}
+{% block content %}
+<h1>Prospect Dashboard</h1>
+
+<a href="{% url 'create_prospect' %}" class="btn btn-primary mb-3">Create Prospect</a>
+
+<!-- Search & Sort Form -->
+<form id="searchForm" class="row g-2 mb-3">
+    <div class="col-auto">
+        <input type="text" name="search" id="searchInput" class="form-control" placeholder="Search..." value="{{ search_query }}">
+    </div>
+    <div class="col-auto">
+        <select name="sort" id="sortSelect" class="form-select">
+            <option value="-created_at" {% if sort_by == "-created_at" %}selected{% endif %}>Newest</option>
+            <option value="created_at" {% if sort_by == "created_at" %}selected{% endif %}>Oldest</option>
+            <option value="last_action_date" {% if sort_by == "last_action_date" %}selected{% endif %}>Last Action Oldest</option>
+            <option value="-last_action_date" {% if sort_by == "-last_action_date" %}selected{% endif %}>Last Action Newest</option>
+            <option value="name" {% if sort_by == "name" %}selected{% endif %}>Name A-Z</option>
+            <option value="-name" {% if sort_by == "-name" %}selected{% endif %}>Name Z-A</option>
+            <option value="business_type" {% if sort_by == "business_type" %}selected{% endif %}>Business Type A-Z</option>
+            <option value="-business_type" {% if sort_by == "-business_type" %}selected{% endif %}>Business Type Z-A</option>
+            <option value="status" {% if sort_by == "status" %}selected{% endif %}>Status A-Z</option>
+            <option value="-status" {% if sort_by == "-status" %}selected{% endif %}>Status Z-A</option>
+        </select>
+    </div>
+</form>
+
+<h2>Existing Prospects</h2>
+<table class="table table-striped">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Business Type</th>
+        <th>Contact</th>
+        <th>Email</th>
+        <th>Phone</th>
+        <th>Website</th>
+        <th>Address</th>
+        <th>Status</th>
+        <th>Created</th>
+        <th>Last Action</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody id="prospectTableBody">
+      {% include 'partials/prospect_table_rows.html' %}
+    </tbody>
+</table>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const searchInput = document.getElementById("searchInput");
+    const sortSelect = document.getElementById("sortSelect");
+    const tableBody = document.getElementById("prospectTableBody");
+
+    function updateTable() {
+        const search = searchInput.value;
+        const sort = sortSelect.value;
+
+        fetch(`?search=${encodeURIComponent(search)}&sort=${encodeURIComponent(sort)}`, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            tableBody.innerHTML = data.html;
+        });
+    }
+
+    searchInput.addEventListener("input", updateTable);
+    sortSelect.addEventListener("change", updateTable);
+});
+</script>
+
+{% endblock %}

@@ -1,0 +1,44 @@
+{% extends "base2.html" %}
+
+{% block content %}
+<div class="container">
+    <h2>Billing History</h2>
+
+    {% if error %}
+        <p>{{ error }}</p>
+    {% elif billing_history %}
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Invoice ID</th>
+                    <th>Amount Paid</th>
+                    <th>Currency</th>
+                    <th>Status</th>
+                    <th>Date</th>
+                    <th>Download</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for invoice in billing_history %}
+                <tr>
+                    <td>{{ invoice.id }}</td>
+                    <td>${{ invoice.amount_paid }}</td>
+                    <td>{{ invoice.currency }}</td>
+                    <td>{{ invoice.status|title }}</td>
+                    <td>{{ invoice.date|date:"Y-m-d H:i" }}</td>
+                    <td><a href="{{ invoice.pdf }}" target="_blank">Download</a></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No billing history found.</p>
+    {% endif %}
+
+    <div class="mt-4">
+        <a href="{% url 'make_payment' %}" class="btn btn-primary">Make Payment</a>
+    </div>
+
+    <br>
+</div>
+{% endblock %}

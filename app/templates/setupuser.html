@@ -1,0 +1,22 @@
+
+{% extends 'base2.html' %}  <!-- Extend the base template -->
+
+{% block title %}Welcome to our platform!!!{% endblock %}  <!-- Title for the page -->
+
+{% block content %}
+<head>
+    <meta charset="UTF-8">
+    <title>New Company Registration</title>
+</head>
+<body>
+    <h1>Please provide the following information about your company to complete your Trade SEc profile.</h1>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Save Posting</button>
+    </form>
+    <a href="{% url 'message_list' %}">Back to Postings</a>
+</body>
+
+
+{% endblock %}

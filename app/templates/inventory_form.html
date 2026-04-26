@@ -1,0 +1,22 @@
+
+{% extends 'base2.html' %}  <!-- Extend the base template -->
+
+{% block title %}Inventory Information{% endblock %}  <!-- Title for the page -->
+
+{% block content %}
+<head>
+    <meta charset="UTF-8">
+    <title>Create Inventory</title>
+</head>
+<body>
+    <h1>Add Inventory</h1>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Save Inventory</button>
+    </form>
+    <a href="{% url 'inventory_list' %}">Back to Inventory</a>
+</body>
+
+
+{% endblock %}

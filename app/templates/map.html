@@ -1,0 +1,88 @@
+{% extends 'base2.html' %}
+{% load static %}
+{% block title %} Maps and Places Autocomplete{% endblock %}
+
+{% block content %}
+
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/@googlemaps/extended-component-library/0.6.11/index.min.js"></script>
+
+    <gmpx-api-loader key="{{ GOOGLE_MAPS_API_KEY }}" solution-channel="GMP_GE_mapsandplacesautocomplete_v2">
+    </gmpx-api-loader>
+
+    <script>
+      async function init() {
+        await customElements.whenDefined('gmp-map');
+
+        const map = document.querySelector('gmp-map');
+        const marker = document.querySelector('gmp-advanced-marker');
+        const placePicker = document.querySelector('gmpx-place-picker');
+        const infowindow = new google.maps.InfoWindow();
+
+        map.innerMap.setOptions({
+          mapTypeControl: false
+        });
+
+        placePicker.addEventListener('gmpx-placechange', () => {
+          const place = placePicker.value;
+
+          if (!place.location) {
+            window.alert(
+              "No details available for input: '" + place.name + "'"
+            );
+            infowindow.close();
+            marker.position = null;
+            return;
+          }
+
+          if (place.viewport) {
+            map.innerMap.fitBounds(place.viewport);
+          } else {
+            map.center = place.location;
+            map.zoom = 17;
+          }
+
+          marker.position = place.location;
+          infowindow.setContent(
+            `<strong>${place.displayName}</strong><br>
+             <span>${place.formattedAddress}</span>`
+          );
+          infowindow.open(map.innerMap, marker);
+        });
+      }
+
+      document.addEventListener('DOMContentLoaded', init);
+    </script>
+
+    <style>
+      html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+
+      .place-picker-container {
+        padding: 20px;
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        z-index: 5;
+        width: 300px;
+      }
+
+      gmp-map {
+        height: 800px;
+        width: 100%;
+      }
+    </style>
+
+
+    <br>
+    <br>
+    <gmp-map center="32.749933,-92.98633" zoom="13" map-id="MAPSPLAT">
+      <div slot="control-block-start-inline-start" class="place-picker-container">
+        <gmpx-place-picker placeholder="Enter an address"></gmpx-place-picker>
+      </div>
+      <gmp-advanced-marker></gmp-advanced-marker>
+    </gmp-map>
+
+{% endblock %}

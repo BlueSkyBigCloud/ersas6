@@ -1,0 +1,16 @@
+{% extends 'base2.html' %}
+
+{% block title %}Add New Customer{% endblock %}
+
+{% block content %}
+
+<body>
+    <h1>Add New Customer</h1>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Save Customer</button>
+    </form>
+    <a href="{% url 'business_center' %}">Back to Business Center</a>
+</body>
+{% endblock %}

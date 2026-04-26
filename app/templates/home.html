@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}TradeSec{% endblock %}
+
+{% block content %}
+    <h2 style="text-align: center;">Security Resource Management</h2>
+    <br>
+    <p></p>
+    <p> </p>
+    <br>
+    <p style="text-align: center;">Schedule your assets from a single dashboard and securely plan and deliver your services all while implementing robust encryption.</p>
+    
+    <br>
+    <br>
+    <br>
+    <br>
+
+    <div style="text-align: center;">
+        <img src="{% static 'images/logo2_crop.jpg' %}" alt="Security Resource Management" style="max-width: 40%; height: auto;">
+    </div>   
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <div class="centered-div">
+        <h1><a href="{% url 'signup' %}" class="signup-button">Start Now</a></h1>
+    </div>
+    <br>
+    <br>
+    <br>
+
+
+    {% endblock %}

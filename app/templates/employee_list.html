@@ -1,0 +1,65 @@
+{% extends 'base2.html' %}  <!-- Extend the base template -->
+
+{% block title %}Employee Information{% endblock %}  <!-- Title for the page -->
+
+{% block content %}
+
+<head>
+    <meta charset="UTF-8">
+    <title>Employee List</title>
+</head>
+<body>
+    <h1>Employee</h1>
+
+    
+    <div class="model-actions">
+        <a class="button add-model-btn" href="{% url 'employee_create' %}">Add New Employee</a>
+    </div>
+
+    <div class="service-list">
+        {% for employee in employees %}
+            <div class="service-container">
+                <a href="{% url 'employee_detail' employee.id %}">{{ employee.first_name }} {{ employee.last_name }}</a> - {{ employee.position }}
+                <p><strong>Employee:</strong> {{ employee.callsign }}</p>
+                <p><strong>Number:</strong> {{ employee.employee_number }}</p>
+                <p><strong>Position:</strong> {{ employee.position }}</p>
+                <p><strong>Group:</strong> {{ employee.group }}</p>
+                <p><strong>Department:</strong> {{ employee.department }}</p>
+                <p><strong>Location:</strong> {{ employee.location }}</p>
+                <p><strong>Status:</strong> {{ employee.status }}</p>
+                <p><strong>Level:</strong> {{ employee.level }}</p>
+            </div>
+        {% empty %}
+            <li>No employees available.</li>
+        {% endfor %}
+    </div>
+<br>
+    <!-- Pagination Controls -->
+<div class="pagination">
+    <span>
+        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+    </span>
+
+    <div>
+        {% if page_obj.has_previous %}
+            <a href="?page=1" class="pagination-link">First</a>
+            <a href="?page={{ page_obj.previous_page_number }}" class="pagination-link">Previous</a>
+        {% endif %}
+
+        {% for num in page_obj.paginator.page_range %}
+            {% if num == page_obj.number %}
+                <strong class="pagination-current">{{ num }}</strong>
+            {% else %}
+                <a href="?page={{ num }}" class="pagination-link">{{ num }}</a>
+            {% endif %}
+        {% endfor %}
+
+        {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}" class="pagination-link">Next</a>
+            <a href="?page={{ page_obj.paginator.num_pages }}" class="pagination-link">Last</a>
+        {% endif %}
+    </div>
+</div>
+</body>
+
+{% endblock %}

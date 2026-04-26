@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice {{ invoice.invoice_number }}</title>
+    <style>
+        @page {
+            size: A3 portrait;
+            margin: 2cm;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 12pt;
+            line-height: 1.5;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            width: 100%;
+            margin: 0 auto;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .header h1 {
+            color: #007bff;
+            font-size: 24pt;
+            margin-bottom: 5px;
+        }
+        .header p {
+            font-size: 10pt;
+            margin: 0;
+        }
+        .info-block h2 {
+            font-size: 8pt;
+            border-bottom: 1px solid #007bff;
+            margin-bottom: 10px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            font-size: 10pt;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+        .summary {
+            text-align: right;
+            margin-bottom: 30px;
+        }
+        .summary p {
+            margin: 5px 0;
+        }
+        .footer {
+            text-align: center;
+            font-size: 10pt;
+            color: #666;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header Section -->
+        <div class="header">
+            <h1>Invoice {{ invoice.invoice_number }} {{company.name}}</h1>
+        </div>
+
+         <!-- Invoice Details Section -->
+         <div class="company-quote-info">
+            <p>Invoice Number: {{ invoice.invoice_number }}</p>
+            <p>Date: {{ invoice.issue_date }}</p>
+            <p>Due Date: {{ invoice.due_date }}</p>
+            <p>Terms: {{ invoice.customer.payment_terms }}</p>
+        </div>
+
+        <!-- Company and Customer Information Section -->
+        <table>
+            <tr>
+                <td style="width: 50%; vertical-align: top;">
+                    <h3>Bill To:</h3>
+                    <p>{{ customer.name }}</p>
+                    <p>{{ customer.address }}</p>
+                </td>
+                <td style="width: 50%; vertical-align: top;">
+                    <h3>From:</h3>
+                    <p>{{ company.name }}</p>
+                    <p>{{ company.address }}</p>
+                    <p>{{ company.city }}, {{ company.state }}</p>
+                    <p>{{ company.zip_code }}</p>
+                </td>
+            </tr>
+        </table>
+
+        <table>
+            <tr>
+                <td style="width: 100%; vertical-align: top;">
+                    <h3>Notes:</h3>
+                    {% if invoice.notes %}
+                        <div style="margin-top: 15px;">
+                            <strong>Notes:</strong><br>
+                            <span>{{ invoice.notes|linebreaksbr }}</span>
+                        </div>
+                    {% endif %}
+                </td>
+            </tr>
+        </table>
+
+        <!-- Invoice Items Section -->
+        <div class="info-block">
+            <h2>Invoice Items</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Description</th>
+                        <th>Quantity</th>
+                        <th>Daily Rate</th>
+                        <th>Subtotal</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for line_item in invoice.line_items.all %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ line_item.description }}</td>
+                            <td>{{ line_item.quantity }}</td>
+                            <td>${{ line_item.unit_price }}</td>
+                            <td>${{ line_item.total_price }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="5">No items found.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Summary Section -->
+        <div class="summary">
+            <p><strong>Subtotal:</strong> ${{ invoice.subtotal }}</p>
+            <p><strong>Total:</strong> ${{ invoice.total }}</p>
+        </div>
+
+        <!-- Footer Section -->
+        <div class="footer">
+            <p>Thank you for your business!</p>
+        </div>
+    </div>
+</body>
+</html>

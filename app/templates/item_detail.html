@@ -1,0 +1,24 @@
+{% extends 'base2.html' %}  <!-- Extending the base template -->
+{% load static %}
+
+{% block title %}{{ item.name }}{% endblock %}
+
+{% block content %}
+<h2 style="text-align: center;">{{ item.name }} ({{ item.sku }})</h2>
+
+<div style="width:60%; margin:auto;">
+    <p><strong>Category:</strong> {{ item.category }}</p>
+    <p><strong>Description:</strong> {{ item.description }}</p>
+    <p><strong>Quantity:</strong> {{ item.quantity }}</p>
+    <p><strong>Reorder Level:</strong> {{ item.reorder_level }}</p>
+</div>
+
+<h3 style="text-align:center;">Transactions</h3>
+<ul style="width:60%; margin:auto;">
+    {% for t in transactions %}
+        <li>{{ t.date|date:"Y-m-d H:i" }} - {{ t.get_transaction_type_display }} ({{ t.quantity }})</li>
+    {% empty %}
+        <li>No transactions yet.</li>
+    {% endfor %}
+</ul>
+{% endblock %}

@@ -1,0 +1,27 @@
+# Python
+*.pyc
+__pycache__/
+venv/
+
+# Django
+db.sqlite3
+media/
+
+# Environment variables
+.env
+
+emailtest.py
+emailtest2.py
+
+backup.py
+gen_encrypt_key.py
+gen_fernet.py
+import_data.py
+backup_instructions.txt
+backup.sql
+
+latest.dump
+latest.dump.*
+
+rotate_keys.py
+

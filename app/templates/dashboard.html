@@ -1,0 +1,74 @@
+{% extends 'base2.html' %}
+{% load static %}
+{% block title %}Account Information{% endblock %}
+
+{% block content %}
+<main>
+    <h2>Account Information</h2>
+    <a class="button" href="{% url 'edit_account' %}">Edit Account</a>  <!-- Link to edit account -->
+    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+    <div class="account-info">
+        <ul>
+            <li><strong>Company Name:</strong> {{ user.company.name }}</li>
+            <li><strong>Email:</strong> {{ user.email }}</li>
+            <li><strong>Username:</strong> {{ user.username }}</li>
+            <li><strong>Phone Number:</strong> {{ user.phone_number }}</li>
+            <li><strong>Date Joined:</strong> {{ user.date_joined|date:"F j, Y" }}</li>
+            
+            {% if user.coupon_code %}
+            <p>Your TRADESEC promo code: 
+                <strong>{{ user.coupon_code|upper }}PROMO</strong>
+            </p>
+            {% else %}
+                <p>Click to generate Promo Code</a>
+                </p>
+            {% endif %}
+        </ul>
+    </div>
+
+    <form action="{% url 'generate_promo' %}" method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-primary">Generate Promo Code</button>
+    </form>
+
+
+
+    <div class="account-actions">
+        <a class="button" href="{% url 'location_list' %}">Locations</a>
+        <a class="button" href="{% url 'create_service_request' %}">Create New Service Request</a> <!-- New Button -->
+
+    </div>
+    <h2> Account Summary</h2>
+    <ul>
+        <li>Total Locations: {{ total_locations }}</li>
+        <li>Total Equipment: {{ total_equipment }}</li>
+        <li>Total Employees: {{ total_employees }}</li>
+        <li>Total Service Requests: {{ total_service_requests }}</li>
+    </ul>
+
+    <h2>Equipment by Category</h2>
+    <ul>
+        {% for category in equipment_by_category %}
+            <li>{{ category.category }}: {{ category.total }}</li>
+        {% endfor %}
+    </ul>
+
+    <h2>Active Employees by Location</h2>
+    <ul>
+        {% for location in employees_by_location %}
+            <li>{{ location.location__name }}: {{ location.count }}</li>
+        {% endfor %}
+    </ul>
+
+    <h2>Service Requests</h2>
+    <div class="account-actions">
+        <a class="button" href="{% url 'calendar_view' %}">View Calendar</a> 
+    </div>
+    <ul>
+        <li>Today's Requests: {{ service_requests_today }}</li>
+        <li>This Week's Requests: {{ service_requests_week }}</li>
+    </ul>
+
+
+</main>
+{% endblock %}

@@ -1,0 +1,166 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}PROFOROPS | Security CRM & Software Solutions for Guard Companies{% endblock %}
+
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="description" content="PROFOROPS is the leading Security CRM and Security Software platform for private security firms. Manage clients, guards, incidents, and reports from one secure dashboard.">
+    <meta name="keywords" content="Security CRM, Security Software, Security Solutions, Guard Management Software, Security Company CRM, Security Operations Platform, Security Patrol Tracking, Incident Reporting System, Private Security Management Software">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PROFOROPS | Security CRM & Security Software Solutions</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+
+    <style>
+        /* Slideshow styling */
+        .carousel-inner {
+            max-height: 600px;
+        }
+
+        .carousel-item img {
+            object-fit: contain;
+            height: 500px;
+            background-color: #000;
+        }
+
+        /* Section styling */
+        .section {
+            padding: 60px 20px;
+        }
+
+        .section h2 {
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: #222;
+        }
+
+        .section p {
+            font-size: 1.1rem;
+            color: #444;
+            line-height: 1.6;
+        }
+
+        .centered-div {
+            text-align: center;
+            margin: 40px 0;
+        }
+
+        .signup-button {
+            background-color: #0056b3;
+            color: white;
+            padding: 15px 30px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 1.2rem;
+        }
+
+        .signup-button:hover {
+            background-color: #003f80;
+            color: #fff;
+        }
+
+        footer {
+            background: #111;
+            color: #ccc;
+            text-align: center;
+            padding: 40px 10px;
+            font-size: 0.9rem;
+        }
+
+        footer a {
+            color: #00aaff;
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+<!-- HERO SLIDESHOW -->
+<div class="container mt-4">
+    <div id="slideshow" class="carousel slide" data-bs-ride="carousel" aria-label="PROFOROPS Security CRM Slideshow">
+        <div class="carousel-inner">
+            <div class="carousel-item active">
+                <img src="{% static 'images/slideshow/PROFOROPS_LOGO.jpg' %}" class="d-block w-100 rounded" alt="Security CRM dashboard overview for guard companies">
+            </div>
+            <div class="carousel-item">
+                <img src="{% static 'images/slideshow/web_image2.jpg' %}" class="d-block w-100 rounded" alt="Security software client management dashboard">
+            </div>
+            <div class="carousel-item">
+                <img src="{% static 'images/slideshow/web_image3.jpg' %}" class="d-block w-100 rounded" alt="Incident reporting and analytics software for private security firms">
+            </div>
+            <div class="carousel-item">
+                <img src="{% static 'images/slideshow/web_image4.jpg' %}" class="d-block w-100 rounded" alt="Security operations management and scheduling tools">
+            </div>
+            <div class="carousel-item">
+                <img src="{% static 'images/slideshow/web_image5.jpg' %}" class="d-block w-100 rounded" alt="PROFOROPS Security CRM interface for security companies">
+            </div>
+        </div>
+        <button class="carousel-control-prev" type="button" data-bs-target="#slideshow" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#slideshow" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+        </button>
+    </div>
+</div>
+
+<!-- CALL TO ACTION -->
+<div class="centered-div">
+    <h1><a href="{% url 'signup' %}" class="signup-button">Start Now</a></h1>
+</div>
+
+<!-- ABOUT SECTION -->
+<section class="section text-center">
+    <div class="container">
+        <h2>All-in-One Security CRM for Modern Guard Companies</h2>
+        <p>PROFOROPS is the comprehensive <strong>security CRM and management software</strong> designed for private security firms. Our platform helps you <strong>manage clients, guards, incident reports, patrol routes, and operations</strong> — all from one secure and easy-to-use dashboard. Whether you operate locally or manage multiple sites, PROFOROPS gives your team the tools to stay organized, compliant, and efficient.</p>
+    </div>
+</section>
+
+<!-- FEATURES SECTION -->
+<section class="section bg-light text-center">
+    <div class="container">
+        <h2>Powerful Security Software Features</h2>
+        <p>Streamline every part of your security business with PROFOROPS intelligent software solutions:</p>
+        <ul class="list-unstyled mt-4">
+            <li>✔ Guard Scheduling and Shift Management</li>
+            <li>✔ Incident Reporting and Activity Tracking</li>
+            <li>✔ Client and Contract Management</li>
+            <li>✔ Security Patrol Tracking and GPS Monitoring</li>
+            <li>✔ Employee Communication Tools</li>
+            <li>✔ Analytics and Performance Reports</li>
+        </ul>
+    </div>
+</section>
+
+<!-- SOLUTIONS SECTION -->
+<section class="section text-center">
+    <div class="container">
+        <h2>Security Solutions Tailored for Your Business</h2>
+        <p>Whether you manage <strong>on-site guards, event security, or mobile patrols</strong>, PROFOROPS software scales with your operations. Our <strong>Security CRM and Security Software</strong> give you complete visibility and control, so you can deliver trusted protection and professional service to every client.</p>
+    </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+    <p>© {{ year|default:2025 }} PROFOROPS.com | <a href="/security-crm/">Security CRM</a> | <a href="/security-software/">Security Software</a> | <a href="/security-solutions/">Security Solutions</a></p>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    var myCarousel = new bootstrap.Carousel(document.querySelector('#slideshow'), {
+        interval: 5000,
+        ride: 'carousel'
+    });
+</script>
+
+</body>
+</html>
+{% endblock %}

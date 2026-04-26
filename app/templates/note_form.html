@@ -1,0 +1,22 @@
+
+{% extends 'base2.html' %}  <!-- Extend the base template -->
+
+{% block title %}Service Request Note{% endblock %}  <!-- Title for the page -->
+
+{% block content %}
+<head>
+    <meta charset="UTF-8">
+    <title>Create Note</title>
+</head>
+<body>
+    <h1>Add Note</h1>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Save Posting</button>
+    </form>
+    <a href="{% url 'service_list' %}">Back to Service Request</a>
+</body>
+
+
+{% endblock %}

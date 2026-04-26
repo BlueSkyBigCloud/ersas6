@@ -1,0 +1,39 @@
+{% extends 'base2.html' %}
+{% load static %}
+{% block title %}Account Information{% endblock %}
+
+{% block content %}
+
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>File Transfer</title>
+</head>
+<body>
+    <h1>File Transfer (Unencrypted)</h1>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <label for="file">Choose a file (.csv, .dat):</label>
+        <input type="file" id="file" name="file" required><br>
+        <label for="to_user">Select user:</label>
+        <select id="to_user" name="to_user" required>
+            {% for user in users %}
+                <option value="{{ user.id }}">{{ user.username }}</option>
+            {% endfor %}
+        </select><br>
+        <button type="submit">Upload</button>
+    </form>
+    <h2>Files sent to you</h2>
+    <ul>
+        {% for file_transfer in user.files_received.all %}
+            <li>
+                <a href="download/{{ file_transfer.id }}/">{{ file_transfer.file.name }}</a>
+            </li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
+
+
+{% endblock %}

@@ -1,0 +1,13 @@
+{% extends 'base2.html' %}
+
+{% block content %}
+  <h1>{{ servicetype.name }}</h1>
+  <p><strong>Description:</strong> {{ servicetype.description }}</p>
+  <p><strong>Created by:</strong> {{ servicetype.created_by_user }}</p>
+  <p><strong>Created on:</strong> {{ servicetype.created_at }}</p>
+  <p><strong>Daily Rate:</strong> {{ servicetype.daily_rate }}</p>
+
+  <!-- Add more details as necessary -->
+  <a href="{% url 'servicetype_list' %}">Back to Service Types List</a>
+  <a href="{% url 'servicetype_edit' servicetype.id %}">Edit Servicetype</a>
+{% endblock %}

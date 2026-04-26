@@ -1,0 +1,15 @@
+{% extends "base2.html" %}
+
+{% block content %}
+  <div class="container">
+    <h1>Convert Prospect to Customer</h1>
+    <p>You are about to convert <strong>{{ prospect.name }}</strong> into a customer.</p>
+
+    <form method="post">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <button type="submit" class="btn btn-success">Convert</button>
+      <a href="{% url 'prospect_profile' prospect.pk %}" class="btn btn-secondary">Cancel</a>
+    </form>
+  </div>
+{% endblock %}

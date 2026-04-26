@@ -1,0 +1,16 @@
+{% extends 'base2.html' %}
+{% load static %}
+
+{% block title %}New Transaction{% endblock %}
+
+{% block content %}
+<h2 style="text-align: center;">Add Transaction</h2>
+
+<div style="width:50%; margin:auto;">
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" style="padding:8px 16px;">Save Transaction</button>
+    </form>
+</div>
+{% endblock %}

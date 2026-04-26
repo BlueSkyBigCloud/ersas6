@@ -1,0 +1,70 @@
+{% extends 'base2.html' %}
+
+{% block title %}Inventory Detail{% endblock %}
+
+{% block content %}
+<head>
+    <meta charset="UTF-8">
+    <title>Inventory Detail</title>
+</head>
+<body>
+    <h1>{{ inventory.name }}</h1>
+    <p><strong>Description:</strong> {{ inventory.description }}</p>
+    <p><strong>Category:</strong> {{ inventory.category }}</p>
+    <p><strong>Quantity:</strong> {{ inventory.quantity }}</p>
+
+    <p><strong>Location:</strong> 
+        {% if inventory.location %}
+            {{ inventory.location.name }} 
+            <a href="{% url 'location_detail' inventory.location.id %}">Location Link</a>
+        {% else %}
+            <em>No location assigned</em>
+        {% endif %}
+    </p>
+
+    <p><strong>Date Added:</strong> {{ inventory.created_at|date:"F j, Y" }}</p>
+
+    <h2>Inventory Items</h2>
+    {% if items %}
+        <table border="1">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Serial Number</th>
+                    <th>Quantity</th>
+                    <th>Actions</th> 
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                <tr>
+                    <td>{{ item.name }}</td>
+                    <td>{{ item.serial_number|default:"N/A" }}</td>
+                    <td>{{ item.quantity }}</td>
+                    <td>
+                        <a href="{% url 'inventoryitem_edit' inventory.id item.id %}" style="padding: 5px 10px; background-color: #0c8a0c; color: white; text-decoration: none; border-radius: 4px;">
+                            Edit
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No inventory items available.</p>
+    {% endif %}
+
+    <!-- Add Inventory Item Button -->
+    <div style="margin-top: 10px;">
+        <a href="{% url 'inventoryitem_add' inventory.id %}" style="display: inline-block; padding: 8px 12px; background-color: #007bff; color: white; text-decoration: none; border-radius: 4px;">
+            Add Inventory Item
+        </a>
+    </div>
+
+    <br>
+
+    <a href="{% url 'inventory_list' %}">Back to Inventory List</a>
+    <a href="{% url 'inventory_edit' inventory.id %}">Edit Inventory</a>
+
+</body>
+{% endblock %}

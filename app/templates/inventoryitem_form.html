@@ -1,0 +1,19 @@
+{% extends 'base2.html' %}
+
+{% block title %}Add Inventory Item{% endblock %}
+
+{% block content %}
+<h1>Add Inventory Item to {{ inventory.name }}</h1>
+
+<form method="post">
+    {% csrf_token %}
+    <table>
+        {{ form.as_table }}
+    </table>
+    <button type="submit" style="padding: 8px 12px; background-color: #28a745; color: white; border: none; border-radius: 4px;">Add Item</button>
+</form>
+
+<br>
+
+<a href="{% url 'inventory_detail' inventory.id %}" style="text-decoration: none; color: #007bff;">Back to Inventory</a>
+{% endblock %}

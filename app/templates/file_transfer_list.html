@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <div class="container">
+    <h2 class="my-4">File Transfers</h2>
+    
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>File</th>
+          <th>From User</th>
+          <th>To User</th>
+          <th>Timestamp</th>
+          <th>Opened</th>
+          <th>Expiration Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for transfer in file_transfers %}
+          <tr>
+            <td>
+              <a href="{% url 'download_file' transfer.id %}">{{ transfer.file.name }}</a>
+            </td>
+            <td>{{ transfer.from_user.username }}</td>
+            <td>{{ transfer.to_user.username }}</td>
+            <td>{{ transfer.timestamp }}</td>
+            <td>{% if transfer.opened %}Yes{% else %}No{% endif %}</td>
+            <td>
+              {% if transfer.is_expired %}
+                <span class="badge bg-danger">Expired</span>
+              {% else %}
+                <span class="badge bg-success">Active</span>
+              {% endif %}
+            </td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="6">No file transfers available.</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endblock %}

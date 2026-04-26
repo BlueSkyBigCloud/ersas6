@@ -1,0 +1,22 @@
+
+{% extends 'base2.html' %}  <!-- Extend the base template -->
+
+{% block title %}Message User{% endblock %}  <!-- Title for the page -->
+
+{% block content %}
+<head>
+    <meta charset="UTF-8">
+    <title>Send Message</title>
+</head>
+<body>
+    <h1>Send Message</h1>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Send Message</button>
+    </form>
+    <a href="{% url 'message_list' %}">Back to Messages</a>
+</body>
+
+
+{% endblock %}

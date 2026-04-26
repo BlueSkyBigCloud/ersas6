@@ -1,0 +1,27 @@
+{% extends 'base2.html' %}
+
+{% block title %}Invoice Detail{% endblock %}
+
+{% block content %}
+<main>
+    <h2>Invoice Detail</h2>
+
+    <div class="invoice-container">
+        <h3>Invoice #{{ invoice.invoice_number }}</h3>
+        <p><strong>Customer:</strong> {{ invoice.customer.name }}</p>
+        <p><strong>Issue Date:</strong> {{ invoice.issue_date }}</p>
+        <p><strong>Due Date:</strong> {{ invoice.due_date }}</p>
+        <p><strong>Amount:</strong> ${{ invoice.total }}</p>
+        <p><strong>Status:</strong> {{ invoice.get_payment_status_display }}</p>
+        <p><strong>Created By:</strong> {{ invoice.created_by_user }}</p>
+        <p><strong>Notes:</strong> {{ invoice.notes }}</p>
+    </div>
+
+    <br>
+    <a href="{% url 'edit_invoice' invoice.id %}">Edit Line Items</a>
+    <a href="{% url 'print_invoice_pdf' invoice.id %}" class="btn">Print Invoice</a>
+    <a href="{% url 'invoice_list' %}" class="button">Back to Invoices</a>
+
+    
+</main>
+{% endblock %}
