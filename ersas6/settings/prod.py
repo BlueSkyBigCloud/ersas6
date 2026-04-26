@@ -2,7 +2,7 @@ from .base import *
 
 DEBUG = False
 
-ALLOWED_HOSTS = ['www.tradesec.us', 'tradesec.us', 'proforops.com', 'ersas-32ed9640lkmsjsdkjsd7b2f.herokuapp.com']
+ALLOWED_HOSTS = ['www.tradesec.us', 'tradesec.us', 'proforops.com', 'www.proforops.com', 'ersas-32ed9640lkmsjsdkjsd7b2f.herokuapp.com']
 
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
