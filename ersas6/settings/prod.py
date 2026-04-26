@@ -12,7 +12,8 @@ STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 CORS_ALLOWED_ORIGINS = [
-
+    "https://www.proforops.com",
+    "https://proforops.com",
     "https://www.tradesec.us",
     "https://tradesec.us",
     ]
