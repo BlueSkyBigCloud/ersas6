@@ -101,6 +101,10 @@ CORS_ALLOWED_ORIGINS = [
     "http://www.proforops.com",  # For production
 ]
 
+CSRF_TRUSTED_ORIGINS = [
+    "https://www.proforops.com",
+    "https://proforops.com",
+]
 
 
 
