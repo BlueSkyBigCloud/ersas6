@@ -17,10 +17,10 @@ logger = logging.getLogger(__name__)
 
 
 def send_admin_payment_email(customer_email, amount_total, currency):
-    """Send notification email to contact@tradesec.us when payment succeeds."""
+    """Send notification email to contact@proforops.com when payment succeeds."""
     subject = "✅ New Stripe Payment Successful"
     message = f"""
-A payment has been successfully completed on TradeSec.
+A payment has been successfully completed on PROFOROPS.
 
 Customer Email: {customer_email}
 Amount: {amount_total:.2f} {currency.upper()}
@@ -29,8 +29,8 @@ Please verify this payment in the Stripe dashboard.
 """
 
     msg = MIMEMultipart()
-    msg['From'] = 'TradeSec <contact@tradesec.us>'
-    msg['To'] = 'contact@tradesec.us', 'nrsimports@nrsimports.com'
+    msg['From'] = 'PROFOROPS <contact@proforops.com>'
+    msg['To'] = 'contact@proforops.com', 'nrsimports@nrsimports.com'
     msg['Subject'] = subject
     msg.attach(MIMEText(message, 'plain'))
 
@@ -121,15 +121,15 @@ def stripe_webhook(request):
 def send_email(user_email, city, product_option, quantity, start_date, end_date):
     subject = 'Booking Details'
     message = f"""
-    Congratulations and welcome to Trade Sec!!! Your new  Resource Platform!
+    Congratulations and welcome to PROFOROPS!!! Your new  Resource Platform!
     
-	Please complete your company onboarding and email contact@tradesec.us to request assistance completing your profile. If you have not already, ensure proper payment within 48 hours so that your account is not cancelled.
+	Please complete your company onboarding and email contact@proforops.com to request assistance completing your profile. If you have not already, ensure proper payment within 48 hours so that your account is not cancelled.
 
     Thank you and looking forward to serving you.
     """
 
     msg = MIMEMultipart()
-    msg['From'] = 'TradeSec.us <contact@tradesec.us>'
+    msg['From'] = 'PROFOROPS.com <contact@proforops.com>'
     msg['To'] = user_email
     msg['Subject'] = subject
 
@@ -254,8 +254,8 @@ def create_checkout_session(amount, currency="usd", coupon_code=None):
             mode="payment",
             discounts=discounts,  # only applies if valid coupon code
             allow_promotion_codes=True,
-            success_url="https://tradesec.us/success",
-            cancel_url="https://tradesec.us/cancel",
+            success_url="https://proforops.com/success",
+            cancel_url="https://proforops.com/cancel",
         )
         return session
 
