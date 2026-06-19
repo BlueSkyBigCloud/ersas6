@@ -98,7 +98,7 @@ REST_FRAMEWORK = {
 
 CORS_ALLOWED_ORIGINS = [
 
-    "http://www.tradesec.us",  # For production
+    "http://www.proforops.com",  # For production
 ]
 
 
@@ -204,10 +204,10 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.privateemail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'contact@tradesec.us'
+EMAIL_HOST_USER = 'contact@proforops.com'
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
-DEFAULT_FROM_EMAIL = 'contact@tradesec.us'
-INTERNAL_CONTACT_EMAIL = 'contact@tradesec.us'
+DEFAULT_FROM_EMAIL = 'contact@proforops.com'
+INTERNAL_CONTACT_EMAIL = 'contact@proforops.com'
 PASSWORD_RESET_TIMEOUT = 86400
 ACCOUNT_EMAIL_VERIFICATION= 'mandatory'
 KEY_REFERENCE = '2345GHTY1295768AWE'

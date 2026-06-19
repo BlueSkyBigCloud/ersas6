@@ -250,7 +250,7 @@ def forgot_password(request):
         user = User.objects.get(email=email)
     except User.DoesNotExist:
         return Response({'error': 'No user with this email'}, status=status.HTTP_404_NOT_FOUND)
-    reset_url = "www.tradesec.us/accounts/password/reset"
+    reset_url = "www.proforops.com/accounts/password/reset"
 
     send_mail(
         subject="Password Reset Request",
@@ -307,8 +307,8 @@ def create_payment_session(request):
                 "quantity": 1,
             }],
             mode='subscription',
-            success_url="https://tradesec.us/success",
-            cancel_url="https://tradesec.us/cancel",
+            success_url="https://www.proforops.com/success",
+            cancel_url="https://www.proforops.com/cancel",
         )
         return JsonResponse({'id': session.id, 'checkout_url': session.url})
 
