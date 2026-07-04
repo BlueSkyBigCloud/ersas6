@@ -11,7 +11,7 @@
 {% if display_case == "company_assigned" %}
     <!-- Case 1: User is already assigned to a company -->
     <div class="info-container" style="border: 1px solid #ccc; padding: 15px; margin: 20px auto; text-align: center;">
-        <h3>Company Pending approval. If more than 24 hours have passed, please email payment reference number, REF# to contact@tradesec.us.</h3>
+        <h3>Company Pending approval. If more than 24 hours have passed, please email payment reference number, REF# to contact@proforops.com</h3>
         <p><strong>Company Name:</strong> {{ company.name }}</p>
         <p><strong>Address:</strong> {{ company.address }}</p>
         <p><strong>City:</strong> {{ company.city }}</p>
@@ -39,7 +39,7 @@
                 <div class="product-option-wrapper" style="margin-top: 20px;">
                     <form method="post" action="{% url 'make_payment' %}">
                         {% csrf_token %}
-                        <button type="submit" name="price_id" value="price_1SHVT1GLcTDJWbqVgmemWiuC" class="btn btn-primary">
+                        <button type="submit" name="price_id" value="price_1TpITvBhrAyO26FHaSVzKtkN" class="btn btn-primary">
                             Get Started
                         </button>
                     </form>
