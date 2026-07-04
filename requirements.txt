@@ -31,3 +31,4 @@ mongoengine
 boto3
 django-storages
 django-embed-video
+django-user-agents

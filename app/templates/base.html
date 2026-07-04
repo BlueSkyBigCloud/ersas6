@@ -1,148 +1,284 @@
-{% load static %}  <!-- Load the static template tag library -->
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/png" href="{% static 'images/favicon.png' %}"> <!-- Update the path to your favicon file -->
-    <title>{% block title %}PROFOROPS{% endblock %}</title>  <!-- Default title -->
+    <title>{% block title %}PROFOROPS{% endblock %}</title>
+
+    <link rel="icon" type="image/png" href="{% static 'images/favicon.png' %}">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+
     <style>
-                            
-        .home-button {
-            font-family: Arial, sans-serif;
-            font-size: 1.0em;        /* Slightly larger font for emphasis */
-            color: #ffffff;          /* White text color */
-            background-color: #020000; /* Professional blue background */
-            padding: 10px 20px;      /* Padding for a button-like appearance */
-            border-radius: 5px;      /* Rounded corners */
-            text-decoration: none;   /* Remove underline */
-            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2); /* Soft shadow */
-            transition: background-color 0.3s ease; /* Smooth hover transition */
-            width: 100%;
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
         }
 
-        .home-button:hover {
-            background-color: #0056b3; /* Darker blue on hover */
-        }
-        .dashboard-footer {
-            text-align: center;
-            padding: 09px;
-            background-color: #90bdec;
-            color: #dde8eb;
-            position: fixed;
-            width: 100%;
-            bottom: 0;
+        body{
+            font-family:Arial, Helvetica, sans-serif;
+            background:#fff;
+            color:#222;
+            min-height:100vh;
+            display:flex;
+            flex-direction:column;
         }
 
-        .dashboard-footer p {
-            margin: 0;
-        }
-        .centered-div {
-            display: flex;                     /* Use flexbox for centering */
-            justify-content: center;           /* Center horizontally */
-            align-items: center;               /* Center vertically */
-            height: 4vh;                       /* Full viewport height */          /* Black background color */                    /* Allow the button to take full width of its container */
-            width: auto;                       /* Automatic width */
-            margin: 0 auto;                   /* Center the div horizontally */
-            padding: 1rem;                    /* Padding inside the div */
-            border-radius: 8px;               /* Rounded corners */
+        /* =========================
+           HEADER
+        ========================== */
+
+        header{
+            background:#ffffff;
+            box-shadow:0 2px 8px rgba(0,0,0,.15);
+            position:sticky;
+            top:0;
+            z-index:1000;
         }
 
-        /* Signup Button Styles */
-        .signup-button {
-            color: white;                      /* White text color for contrast */
-            text-decoration: none;             /* Remove underline from link */
-            font-size: 0.5em;                  /* Adjust font size as needed */
-            padding: 10px 15px;               /* Padding for the button */
-            background-color: #022f5e;        /* Button background color */
-            border: none;                     /* Remove border */
-            border-radius: 5px;               /* Rounded corners */
-            cursor: pointer;                   /* Pointer cursor on hover */
-            transition: background-color 0.3s ease; /* Smooth transition for hover effect */
-            width: 100%;
+        .navbar{
+            max-width:1200px;
+            margin:auto;
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            padding:15px 20px;
+            position:relative;
         }
 
-        .signup-button:hover {
-            background-color: #000000;        /* Darker blue on hover */
+        .logo-section{
+            display:flex;
+            align-items:center;
+            gap:15px;
         }
 
-        .navbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        .home-button{
+            display:inline-block;
+            background:#020000;
+            color:#fff;
+            text-decoration:none;
+            padding:12px 20px;
+            border-radius:6px;
+            font-size:1.1rem;
+            font-weight:bold;
+            transition:.3s;
         }
 
-        .nav-links {
-            list-style: none;
-            display: flex;
-            gap: 1rem;
+        .home-button:hover{
+            background:#0056b3;
         }
 
-        .nav-links li a {
-            text-decoration: none;
-            color: #000;
+        .mobile-logo{
+            width:70px;
+            height:auto;
+            border-radius:6px;
         }
 
-        /* Hide toggle on desktop */
-        .menu-toggle {
-            display: none;
-            font-size: 1.5rem;
-            background: none;
-            border: none;
-            cursor: pointer;
+        nav{
+            margin-left:auto;
         }
 
-        /* Mobile styles */
-        @media (max-width: 768px) {
-            .nav-links {
-                display: block;
-                flex-direction: column;
-                background: #fff;
-                position: absolute;
-                top: 70px;  /* adjust depending on header height */
-                left: 0;
-                width: 100%;
-                padding: 1rem 0;
-                box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        .nav-links{
+            list-style:none;
+            display:flex;
+            align-items:center;
+            gap:25px;
+        }
+
+        .nav-links a{
+            text-decoration:none;
+            color:#111;
+            font-weight:bold;
+            transition:.3s;
+        }
+
+        .nav-links a:hover{
+            color:#0056b3;
+        }
+
+        .login-button{
+            background:#022f5e;
+            color:white;
+            padding:10px 18px;
+            border-radius:5px;
+        }
+
+        .login-button:hover{
+            background:black;
+            color:white;
+        }
+
+        .menu-toggle{
+            display:none;
+            background:none;
+            border:none;
+            font-size:30px;
+            cursor:pointer;
+        }
+
+        /* =========================
+           MAIN CONTENT
+        ========================== */
+
+        main{
+            flex:1;
+            max-width:1200px;
+            width:100%;
+            margin:30px auto;
+            padding:20px;
+        }
+
+        /* =========================
+           FOOTER
+        ========================== */
+
+        .dashboard-footer{
+            text-align:center;
+            padding:12px;
+            background:#90bdec;
+            color:white;
+            margin-top:auto;
+        }
+
+        /* =========================
+           MOBILE
+        ========================== */
+
+        @media (max-width:768px){
+
+            .navbar{
+                flex-wrap:wrap;
             }
 
-            .nav-links.active {
-                display: flex;
+            .menu-toggle{
+                display:block;
+                margin-left:auto;
             }
 
-            .menu-toggle {
-                display: block;
+            nav{
+                width:100%;
+            }
+
+            .nav-links{
+                display:none;
+                flex-direction:column;
+                width:100%;
+                background:white;
+                margin-top:15px;
+                border-top:1px solid #ddd;
+                box-shadow:0 4px 10px rgba(0,0,0,.1);
+            }
+
+            .nav-links.active{
+                display:flex;
+            }
+
+            .nav-links li{
+                width:100%;
+                text-align:center;
+                border-bottom:1px solid #eee;
+            }
+
+            .nav-links li:last-child{
+                border-bottom:none;
+            }
+
+            .nav-links a{
+                display:block;
+                padding:15px;
+            }
+
+            .logo-section{
+                flex:1;
+            }
+
+            .mobile-logo{
+                width:55px;
+            }
+
+            .home-button{
+                font-size:0.95rem;
+                padding:10px 15px;
             }
         }
-
     </style>
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">  <!-- Link to CSS -->
 </head>
+
 <body>
-    <header>
-        <style>
-        </style>
-        <h1><a href="{% url 'home' %}" class="home-button">PROFOROPS</a></h1>
-        <img src="{% static 'images/PROFOROPS_LOGO.jpg' %}" alt="PROFOROPS Logo" class="mobile-logo">
-        <nav>
-            <ul>
-                <P></P>
-                <li><a href="{% url 'equipmentstore' %}">Equipment Store</a></li>
-                <li><a href="{% url 'digitalsolutions' %}">Digital Solutions</a></li>
-                <!-- Add more links here as needed -->
-            </ul>
-        </nav>
-        <div class="login-container">
-            <a class="login-button" href="{% url 'login' %}">Login</a>
+
+<header>
+
+    <div class="navbar">
+
+        <div class="logo-section">
+            <a href="{% url 'home' %}" class="home-button">
+                PROFOROPS
+            </a>
+
+            <img
+                src="{% static 'images/PROFOROPS_LOGO.jpg' %}"
+                alt="PROFOROPS Logo"
+                class="mobile-logo">
         </div>
-    </header>
-    <main>
-        {% block content %}
-        <!-- Default content can be placed here -->
-        {% endblock %}
-    </main>
-    <footer class="dashboard-footer">
-        <p>&copy; 2026 PROFOROPS</p>
-    </footer>
+
+        <button class="menu-toggle" onclick="toggleMenu()">
+            ☰
+        </button>
+
+        <nav>
+
+            <ul class="nav-links" id="navLinks">
+
+                <li>
+                    <a href="{% url 'equipmentstore' %}">
+                        Equipment Store
+                    </a>
+                </li>
+
+                <li>
+                    <a href="{% url 'digitalsolutions' %}">
+                        Digital Solutions
+                    </a>
+                </li>
+
+                <li>
+                    <a href="{% url 'login' %}" class="login-button">
+                        Login
+                    </a>
+                </li>
+
+            </ul>
+
+        </nav>
+
+    </div>
+
+</header>
+
+<main>
+
+    {% block content %}
+    {% endblock %}
+
+</main>
+
+<footer class="dashboard-footer">
+    <p>&copy; 2026 PROFOROPS</p>
+</footer>
+
+<script>
+function toggleMenu() {
+    document.getElementById("navLinks").classList.toggle("active");
+}
+
+// Close menu when a link is clicked (mobile)
+document.querySelectorAll("#navLinks a").forEach(link => {
+    link.addEventListener("click", function () {
+        document.getElementById("navLinks").classList.remove("active");
+    });
+});
+</script>
+
 </body>
 </html>
