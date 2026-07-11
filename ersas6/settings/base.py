@@ -15,7 +15,7 @@ DEBUG = False
 
 ALLOWED_HOSTS = []
 
-SUBSCRIPTION = 'price_1TpITvBhrAyO26FHaSVzKtkN'
+SUBSCRIPTION = 'price_1Ts84WBhrAyO26FHz5dHoeY3'
 # Application definition
 
 X_FRAME_OPTIONS = 'SAMEORIGIN'
