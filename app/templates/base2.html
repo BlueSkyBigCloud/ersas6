@@ -58,10 +58,9 @@
                 
                 {% if user.is_account_admin %}
                 <li><a href="{% url 'item_list' %}">Inventory</a></li>
-                {% endif %}
-
                 <li><a href="{% url 'prospect_dashboard' %}">Prospects</a></li>
                 <li><a href="{% url 'business_center' %}">Business Center</a></li>
+                {% endif %}
                 <li><a href="{% url 'message_list' %}">Messages</a></li>
                 
 
