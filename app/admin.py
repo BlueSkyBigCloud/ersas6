@@ -71,10 +71,10 @@ class LocationAdmin(admin.ModelAdmin):
 
 @admin.register(Company)
 class CompanyAdmin(admin.ModelAdmin):
-    list_display = ('name', 'created_by_user', 'primary_user', 'secondary_user', 'created_at')
+    list_display = ('id', 'name', 'created_by_user', 'primary_user', 'secondary_user', 'created_at')
     list_filter = ('created_at',)
     search_fields = ('name', 'address')
-    readonly_fields = ['address', 'name', 'created_by_user', 'primary_user', 'secondary_user']
+    readonly_fields = ['id', 'address', 'name', 'created_by_user', 'primary_user', 'secondary_user', 'created_at']
 
 
 @admin.register(Directmessage)
