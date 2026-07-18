@@ -41,6 +41,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     phone_number = models.CharField(max_length=15, blank=True, null=True)  # Add this line
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
+    is_account_admin = models.BooleanField(default=False)
     date_joined = models.DateTimeField(default=timezone.now)
     is_onboarded = models.BooleanField(default=False)
     company = models.ForeignKey(
