@@ -20,7 +20,7 @@ class UserAdmin(BaseUserAdmin):
             'fields': ('email', 'password1', 'password2', 'phone_number'),  # Add phone_number here
         }),
     )
-    list_display = ('id', 'email', 'first_name', 'last_name', 'phone_number', 'is_staff', 'promotion_code', 'stripe_coupon_id', 'coupon_code')  # Add phone_number here
+    list_display = ('id', 'email', 'first_name', 'last_name', 'phone_number', 'is_active', 'is_staff', 'promotion_code', 'stripe_coupon_id', 'coupon_code')  # Add phone_number here
     search_fields = ('id', 'email', 'first_name', 'last_name', 'phone_number')  # Add phone_number here
     ordering = ('id', 'email',)
     readonly_fields = ['id', 'email', 'first_name', 'last_name', 'phone_number']
