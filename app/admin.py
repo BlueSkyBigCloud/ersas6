@@ -30,7 +30,20 @@ class ServiceRequestAdmin(admin.ModelAdmin):
     search_fields = ('id', 'start_location__name', 'end_location__name')  # Enable searching by location name
     readonly_fields = ['status', 'invoice', 'created_timestamp', 'created_by_user', 'start_date', 'end_date', 'start_location', 'end_location', 'equipment', 'employee', 'service_type']
 
+@admin.register(EmployeeQualification)
+class EmployeeQualificationAdmin(admin.ModelAdmin):
+    list_display = ('employee', 'qualification', 'status', 'date_completed', 'expiration_date')
+    list_filter = ('status', 'date_completed', 'expiration_date')
+    search_fields = ('employee__callsign', 'qualification__name')
+    readonly_fields = ['employee', 'qualification', 'status', 'date_completed', 'expiration_date', 'approved_by', 'notes', 'created_at']
 
+@admin.register(Qualification)
+class QualificationAdmin(admin.ModelAdmin):
+    list_display = ('name', 'type', 'rep_count', 'required_approval')
+    list_filter = ('type', 'required_approval')
+    search_fields = ('name',)
+    readonly_fields = ['name', 'type', 'rep_count', 'required_approval', 'field_1', 'field_2', 'field_3', 'date_created']
+    
 # Admin configuration for Employee
 @admin.register(Employee)
 class EmployeeAdmin(admin.ModelAdmin):
