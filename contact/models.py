@@ -12,5 +12,5 @@ class ContactUsRequest(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.name} ({self.email})"
+        return f"{self.company_name} ({self.email})"
 
