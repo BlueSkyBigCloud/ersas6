@@ -144,6 +144,25 @@ body {
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
+    overflow-y: auto;
+    overflow-x: hidden;
+    
+    /* Prevent padding from increasing the width */
+    box-sizing: border-box;
+}
+
+/* Optional: make the scrollbar less obtrusive */
+.sidebar::-webkit-scrollbar {
+    width: 8px;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+.sidebar::-webkit-scrollbar-thumb:hover {
+    background: #555;
 }
 
 .sidebar-logo {
