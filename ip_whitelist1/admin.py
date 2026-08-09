@@ -22,4 +22,3 @@ from .models import Blocked_IPAddress
 class Blocked_IPAddress(admin.ModelAdmin):
     list_display = ('ip_address', 'created_at', 'reason')
     search_fields = ('ip_address', 'created_at', 'reason')
-    readonly_fields = ['ip_address', 'created_at']
