@@ -40,7 +40,7 @@ class AccessLog(models.Model):
 class Blocked_IPAddress(models.Model):
     ip_address = models.GenericIPAddressField(unique=True)  # Store the IP address
     created_at = models.DateTimeField(auto_now_add=True)  # Timestamp when the block was added
-    reason = models.CharField(max_length=255, blank=True, null=True)  # Optional reason for blocking
+    reason = models.CharField(max_length=512, blank=True, null=True)  # Optional reason for blocking
     timestamp = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
