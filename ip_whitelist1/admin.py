@@ -1,6 +1,7 @@
 from django.contrib import admin
 from .models import *
 
+
 class IPWhitelistAdmin(admin.ModelAdmin):
     list_display = ('user', 'ip_address', 'created_at')
     search_fields = ('user__username', 'ip_address')
@@ -17,8 +18,7 @@ admin.site.register(AccessLog, AccessLogAdmin)
 
 from .models import Blocked_IPAddress
 
-admin.site.register(Blocked_IPAddress)
-
+@admin.register(Blocked_IPAddress)
 class Blocked_IPAddress(admin.ModelAdmin):
     list_display = ('ip_address', 'created_at', 'reason')
     search_fields = ('ip_address', 'created_at', 'reason')
