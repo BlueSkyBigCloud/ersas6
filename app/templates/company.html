@@ -7,7 +7,8 @@
 <br>
 <h2>Company and Users</h2>
 
-<div center class="service-actions-container" style="display: flex; justify-content: center; gap: 10px;">
+{% if company %}
+    <div center class="service-actions-container" style="display: flex; justify-content: center; gap: 10px;">
         <div class="service-actions">
             <a class="button-calendar-btn" href="{% url 'location_list' %}">Locations</a>
         </div>
@@ -23,10 +24,8 @@
         <div class="service-actions">
             <a class="button-calendar-btn" href="{% url 'calendar_view' %}">Calendar</a>
         </div>
-</div>
-
-
-{% if company %}
+    </div>
+    
     <p><strong>Company Name:</strong> {{ company.name }}</p>
 
     <!-- Display a list of users in the company -->

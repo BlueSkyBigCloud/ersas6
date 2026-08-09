@@ -49,6 +49,10 @@
     <a href="{{ next_url }}">Next Day &raquo;</a>
 </h3>
 
+<div class="service-actions">
+        <a class="button add-services-btn" href="{% url 'create_service_request' %}">Add New Service Request</a>
+</div>
+
 <a href="{% url 'calendar_by_month' year month %}">Back to Calendar</a>
 
 {% endblock %}
