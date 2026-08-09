@@ -76,9 +76,9 @@ MIDDLEWARE = [
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django_user_agents.middleware.UserAgentMiddleware',
 
-    #'ip_whitelist1.middleware.AutoBlockIPMiddleware',
+    'ip_whitelist1.middleware.AutoBlockIPMiddleware',
     'ip_whitelist1.middleware.LogAllIPMiddleware',
-    #'ip_whitelist1.middleware.BlockSpecificIPMiddleware',
+    'ip_whitelist1.middleware.BlockSpecificIPMiddleware',
 ]
 
 AUTHENTICATION_BACKENDS = (
