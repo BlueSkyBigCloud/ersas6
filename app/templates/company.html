@@ -4,6 +4,9 @@
 
 {% block content %}
 
+<br>
+<h2>Company and Users</h2>
+
 <div center class="service-actions-container" style="display: flex; justify-content: center; gap: 10px;">
         <div class="service-actions">
             <a class="button-calendar-btn" href="{% url 'location_list' %}">Locations</a>
@@ -22,7 +25,6 @@
         </div>
 </div>
 
-<h2>Company and Users</h2>
 
 {% if company %}
     <p><strong>Company Name:</strong> {{ company.name }}</p>
