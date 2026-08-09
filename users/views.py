@@ -86,12 +86,21 @@ class CustomSocialLoginView(LoginView):
             return redirect('login')
         
 from app.models import *
-        
+
+from ip_whitelist1.utils import get_client_ip
+
 class CustomSignupView(AllAuthSignupView):
     def form_valid(self, form):
+
+        signup_ip = self.get_client_ip(self.request)
+
         # Save the user first to get the user object
         user = form.save(self.request)
-        print(f"User  signed up with email: {user.email}")  # Debugging line
+
+        user.signup_ip_address = signup_ip
+        user.save(update_fields=["signup_ip_address"])
+
+        print(f"User  signed up with email: {user.email} from IP {"signup_ip_address"}")  # Debugging line
         
         # Try to find an invitation by email
         try:

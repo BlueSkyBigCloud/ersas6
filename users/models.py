@@ -73,6 +73,12 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         verbose_name='user permissions'
     )
 
+    signup_ip_address = models.GenericIPAddressField(
+    null=True,
+    blank=True,
+    editable=False
+    )
+
     def save(self, *args, **kwargs):
         """Automatically set `is_onboarded` based on whether `company` is assigned."""
         self.is_onboarded = self.company is not None
