@@ -2,9 +2,9 @@ from django.contrib import admin
 from django.utils.translation import gettext_lazy as _
 from .models import *
 
-admin.site.site_header = _("TRADE-SEC ADMIN")  
-admin.site.site_title = _("TRADESEC 1.0 PROTOTYPE ALPHA PLATFORM ADMIN Portal")
-admin.site.index_title = _("Welcome to TRADESEC ADMIN")
+admin.site.site_header = _("PROFOROPS ADMIN")  
+admin.site.site_title = _("PROFOROPS Admin Portal")
+admin.site.index_title = _("Welcome to PROFOROPS ADMIN")
 
 from .models import Stripe_Transaction, ServiceType, ServiceRequest, Employee, Equipment, Location, Directmessage, Posting
 
