@@ -152,7 +152,7 @@ class AutoBlockIPMiddleware:
             logger.warning(f"Blocked request from IP {ip}")
             return HttpResponseForbidden(
                 "Your IP has been blocked due to suspicious activity. "
-                "Please email contact@tradesec.us to request being removed from our block list."
+                "Please email contact@proforops.com to request being removed from our block list."
             )
 
         # Log the request
