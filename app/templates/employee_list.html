@@ -9,7 +9,26 @@
     <title>Employee List</title>
 </head>
 <body>
-    <h1>Employee</h1>
+
+    <div center class="service-actions-container" style="display: flex; justify-content: center; gap: 10px;">
+        <div class="service-actions">
+            <a class="button-calendar-btn" href="{% url 'location_list' %}">Locations</a>
+        </div>
+        <div class="service-actions">
+            <a class="button-calendar-btn" href="{% url 'equipment_list' %}">Equipment</a>
+        </div>
+        <div class="service-actions">
+            <a class="button-calendar-btn" href="{% url 'employee_list' %}">Employees</a>
+        </div>
+        <div class="service-actions">
+            <a class="button-calendar-btn" href="{% url 'servicetype_list' %}">Service Types</a>
+        </div>
+        <div class="service-actions">
+            <a class="button-calendar-btn" href="{% url 'calendar_view' %}">Calendar</a>
+        </div>
+    </div>
+    
+    <h1>Employees</h1>
 
     
     <div class="model-actions">
