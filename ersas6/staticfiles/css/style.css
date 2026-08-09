@@ -430,3 +430,7 @@ body {
 .btn-submit:hover {
   background: #0056b3;
 }
+
+.password-reset-actions {
+    margin-top: 25px;
+}
