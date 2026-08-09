@@ -20,9 +20,9 @@ class UserAdmin(BaseUserAdmin):
             'fields': ('email', 'password1', 'password2', 'phone_number'),  # Add phone_number here
         }),
     )
-    list_display = ('id', 'email', 'first_name', 'last_name', 'phone_number', 'is_onboarded','is_staff', 'is_account_admin', 'promotion_code', 'stripe_coupon_id', 'coupon_code')  # Add phone_number here
+    list_display = ('id', 'email', 'first_name', 'last_name', 'phone_number', 'signup_ip_address', 'is_onboarded','is_staff', 'is_account_admin', 'promotion_code', 'stripe_coupon_id', 'coupon_code')  # Add phone_number here
     search_fields = ('id', 'email', 'first_name', 'last_name', 'phone_number')  # Add phone_number here
     ordering = ('id', 'email',)
-    readonly_fields = ['id', 'email', 'first_name', 'last_name', 'phone_number']
+    readonly_fields = ['id', 'email', 'first_name', 'last_name', 'phone_number', 'signup_ip_address']
 
 admin.site.register(CustomUser, UserAdmin)
