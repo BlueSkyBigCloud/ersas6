@@ -50,6 +50,7 @@ h2 {
 
 /* Buttons styling */
 button {
+    margin-top: 25px;
     background-color: #4CAF50;   /* Dark green background for buttons */
     color: #fff;                 /* White text */
     border: none;
