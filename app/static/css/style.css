@@ -425,6 +425,7 @@ body {
   border-radius: 6px;
   cursor: pointer;
   font-size: 16px;
+  margin-top: 25px;
 }
 
 .btn-submit:hover {
@@ -434,3 +435,4 @@ body {
 .password-reset-actions {
     margin-top: 25px;
 }
+
