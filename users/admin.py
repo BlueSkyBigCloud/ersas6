@@ -11,7 +11,7 @@ class UserAdmin(BaseUserAdmin):
     fieldsets = (
         (None, {'fields': ('id', 'email', 'password')}),
         ('Personal info', {'fields': ('first_name', 'last_name', 'phone_number')}),  # Add phone_number here
-        ('Permissions', {'fields': ('is_active', 'is_staff', 'is_account_admin', 'is_superuser', 'groups', 'user_permissions', 'is_onboarded', 'company', 'stripe_coupon_id', 'coupon_code', 'promotion_code')}),
+        ('Permissions', {'fields': ('signup_ip_address', 'is_active', 'is_staff', 'is_account_admin', 'is_superuser', 'groups', 'user_permissions', 'is_onboarded', 'company', 'stripe_coupon_id', 'coupon_code', 'promotion_code')}),
         ('Important dates', {'fields': ('last_login', 'date_joined')}),
     )
     add_fieldsets = (
