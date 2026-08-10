@@ -23,6 +23,6 @@ class UserAdmin(BaseUserAdmin):
     list_display = ('date_joined', 'id', 'email', 'first_name', 'last_name', 'phone_number', 'signup_ip_address', 'is_onboarded','is_staff', 'is_account_admin', 'promotion_code', 'stripe_coupon_id', 'coupon_code')  # Add phone_number here
     search_fields = ('id', 'email', 'first_name', 'last_name', 'phone_number')  # Add phone_number here
     ordering = ('id', 'email',)
-    readonly_fields = ['date_joined', 'id', 'email', 'first_name', 'last_name', 'phone_number', 'signup_ip_address']
+    readonly_fields = ['date_joined', 'id', 'first_name', 'last_name', 'phone_number', 'signup_ip_address']
 
 admin.site.register(CustomUser, UserAdmin)
