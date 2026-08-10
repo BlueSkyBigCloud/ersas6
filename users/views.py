@@ -87,7 +87,7 @@ class CustomSocialLoginView(LoginView):
         
 from app.models import *
 
-from utils import get_client_ip
+from .utils import get_client_ip
 
 class CustomSignupView(AllAuthSignupView):
     def form_valid(self, form):
