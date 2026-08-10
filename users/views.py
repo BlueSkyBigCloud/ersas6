@@ -92,7 +92,7 @@ from ip_whitelist1.utils import get_client_ip
 class CustomSignupView(AllAuthSignupView):
     def form_valid(self, form):
 
-        signup_ip = self.get_client_ip(self.request)
+        signup_ip = get_client_ip(self.request)
 
         # Save the user first to get the user object
         user = form.save(self.request)
