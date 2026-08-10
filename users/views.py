@@ -91,8 +91,9 @@ from .utils import get_client_ip
 
 class CustomSignupView(AllAuthSignupView):
     def form_valid(self, form):
-
+        print("***** CUSTOM SIGNUP VIEW CALLED *****")
         signup_ip = get_client_ip(self.request)
+        print(f"***** SIGNUP IP: {signup_ip} *****")
 
         # Save the user first to get the user object
         user = form.save(self.request)
