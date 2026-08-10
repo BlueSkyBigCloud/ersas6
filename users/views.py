@@ -100,7 +100,7 @@ class CustomSignupView(AllAuthSignupView):
         user.signup_ip_address = signup_ip
         user.save(update_fields=["signup_ip_address"])
 
-        print(f"User  signed up with email: {user.email} from IP {"signup_ip_address"}")  # Debugging line
+        print(f"User  signed up with email: {user.email} from IP {user.signup_ip_address}")  # Debugging line
         
         # Try to find an invitation by email
         try:
