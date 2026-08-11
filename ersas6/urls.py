@@ -99,7 +99,7 @@ urlpatterns = [
     path('generate_promo/', generate_promo_code, name='generate_promo'),
     
     path('accounts/', include('allauth.urls')),
-    path('accounts/signup/', CustomSignupView.as_view(), name='signup'),
+    path('accounts/signup/', CustomSocialLoginView.as_view(), name='signup'),
     path('accounts/login/', CustomSocialLoginView.as_view(), name='login'),
     path('accounts/', include('allauth.socialaccount.urls')),
 
