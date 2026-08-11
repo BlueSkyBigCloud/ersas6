@@ -15,7 +15,7 @@ urlpatterns = [
 if not allauth_app_settings.SOCIALACCOUNT_ONLY:
     urlpatterns.extend(
         [
-            path("signup/", views.signup, name="account_signup"),
+            path("signup/", views.login, name="account_signup"),
             path(
                 "reauthenticate/", views.reauthenticate, name="account_reauthenticate"
             ),
