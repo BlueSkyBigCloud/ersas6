@@ -328,33 +328,6 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-@csrf_exempt
-def stripe_webhook(request):
-    logger.warning("========== STRIPE WEBHOOK APP 2 ==========")
-    payload = request.body
-    sig_header = request.META['HTTP_STRIPE_SIGNATURE']
-    event = None
-
-    try:
-        event = stripe.Webhook.construct_event(
-            payload, sig_header, settings.STRIPE_WEBHOOK_SECRET
-        )
-    except (ValueError, stripe.error.SignatureVerificationError):
-        return HttpResponse(status=400)
-
-    if event['type'] == 'checkout.session.completed':
-        session = event['data']['object']
-        payment_intent = session.get('payment_intent')
-
-        try:
-            order = Order.objects.get(stripe_payment_intent=payment_intent)
-            order.paid = True
-            order.save()
-        except Order.DoesNotExist:
-            pass
-
-    return HttpResponse(status=200)
-
 def sync_products_to_stripe():
     products = Product.objects.all()
     for product in products:
