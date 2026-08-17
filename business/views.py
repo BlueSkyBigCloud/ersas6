@@ -327,6 +327,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 @csrf_exempt
 def stripe_webhook(request):
+    print(">>> VIEW TWO IS ACTIVE")
     payload = request.body
     sig_header = request.META['HTTP_STRIPE_SIGNATURE']
     event = None
