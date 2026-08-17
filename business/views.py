@@ -324,9 +324,13 @@ def checkout_view(request, order_id):
 
 
 from django.views.decorators.csrf import csrf_exempt
+import logging
+
+logger = logging.getLogger(__name__)
 
 @csrf_exempt
 def stripe_webhook(request):
+    logger.warning("========== STRIPE WEBHOOK APP 2 ==========")
     payload = request.body
     sig_header = request.META['HTTP_STRIPE_SIGNATURE']
     event = None

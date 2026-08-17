@@ -83,6 +83,7 @@ def payment_cancelled(request):
 
 @csrf_exempt
 def stripe_webhook(request):
+    logger.warning("========== STRIPE WEBHOOK APP 1 ==========")
     payload = request.body
     sig_header = request.META.get('HTTP_STRIPE_SIGNATURE')
     endpoint_secret = settings.STRIPE_WEBHOOK_SECRET
@@ -141,8 +142,6 @@ def send_email(user_email, city, product_option, quantity, start_date, end_date)
             server.login(settings.EMAIL_HOST_USER, settings.EMAIL_HOST_PASSWORD)
             server.sendmail(msg['From'], msg['To'], msg.as_string())
     except Exception as e:
-        import logging
-        logger = logging.getLogger(__name__)
         logger.error(f"Error sending email: {e}")
 
 @login_required
