@@ -45,7 +45,7 @@ urlpatterns = [
     path("make_payment/", make_payment, name="make_payment"),
     path('stripe/webhook/', stripe_webhook, name='stripe-webhook'),
 
-    path("data-integration/", include("dataintegration.urls")),
+    path("dataintegration/", include("dataintegration.urls")),
 
     path("quotes/<int:pk>/convert/", convert_quote_to_invoice, name="convert_quote_to_invoice"),
 
