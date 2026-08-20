@@ -1,0 +1,283 @@
+{% extends "base2.html" %}
+
+{% block content %}
+
+<div class="container-fluid mt-4">
+
+    <!-- ===================================================== -->
+    <!-- Header -->
+    <!-- ===================================================== -->
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+            <h2>Upload Data</h2>
+
+            <p class="text-muted mb-0">
+                Upload a file to begin the data integration process.
+            </p>
+        </div>
+
+        <div>
+            <a
+                href="{% url 'integration_dashboard' %}"
+                class="btn btn-secondary"
+            >
+                Back to Data Integration
+            </a>
+        </div>
+
+    </div>
+
+
+    <!-- ===================================================== -->
+    <!-- Upload Card -->
+    <!-- ===================================================== -->
+
+    <div class="row justify-content-center">
+
+        <div class="col-lg-8 col-xl-7">
+
+            <div class="card">
+
+                <div class="card-header">
+
+                    <h5 class="mb-0">
+                        Upload File
+                    </h5>
+
+                </div>
+
+
+                <div class="card-body">
+
+                    <!-- ========================================= -->
+                    <!-- Instructions -->
+                    <!-- ========================================= -->
+
+                    <div class="alert alert-info">
+
+                        <strong>
+                            Supported file types
+                        </strong>
+
+                        <p class="mb-0 mt-1">
+                            CSV, XLS, XLSX, and DAT files are currently
+                            supported.
+                        </p>
+
+                    </div>
+
+
+                    <!-- ========================================= -->
+                    <!-- Upload Form -->
+                    <!-- ========================================= -->
+
+                    <form
+                        method="post"
+                        enctype="multipart/form-data"
+                        action="{% url 'integration_upload' %}"
+                    >
+
+                        {% csrf_token %}
+
+
+                        <!-- ===================================== -->
+                        <!-- File Input -->
+                        <!-- ===================================== -->
+
+                        <div class="mb-4">
+
+                            <label
+                                for="file"
+                                class="form-label fw-bold"
+                            >
+                                Select File
+                            </label>
+
+                            <input
+                                type="file"
+                                name="file"
+                                id="file"
+                                class="form-control"
+                                accept=".csv,.xls,.xlsx,.dat"
+                                required
+                            >
+
+                            <div class="form-text">
+                                Select the CSV, Excel, or DAT file you
+                                want to import.
+                            </div>
+
+                        </div>
+
+
+                        <!-- ===================================== -->
+                        <!-- File Information -->
+                        <!-- ===================================== -->
+
+                        <div
+                            id="selected-file-info"
+                            class="alert alert-secondary d-none"
+                        >
+
+                            <strong>
+                                Selected File:
+                            </strong>
+
+                            <span id="selected-file-name"></span>
+
+                        </div>
+
+
+                        <!-- ===================================== -->
+                        <!-- Actions -->
+                        <!-- ===================================== -->
+
+                        <div class="d-flex justify-content-between">
+
+                            <a
+                                href="{% url 'integration_dashboard' %}"
+                                class="btn btn-secondary"
+                            >
+                                Cancel
+                            </a>
+
+
+                            <button
+                                type="submit"
+                                class="btn btn-primary"
+                            >
+                                Upload &amp; Analyze
+                            </button>
+
+                        </div>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+
+            <!-- ================================================= -->
+            <!-- Workflow -->
+            <!-- ================================================= -->
+
+            <div class="card mt-4">
+
+                <div class="card-header">
+
+                    <h5 class="mb-0">
+                        What Happens Next?
+                    </h5>
+
+                </div>
+
+
+                <div class="card-body">
+
+                    <div class="row text-center">
+
+                        <div class="col-md-3 mb-3">
+
+                            <div class="fw-bold">
+                                1. Upload
+                            </div>
+
+                            <small class="text-muted">
+                                Select your business data file.
+                            </small>
+
+                        </div>
+
+
+                        <div class="col-md-3 mb-3">
+
+                            <div class="fw-bold">
+                                2. Analyze
+                            </div>
+
+                            <small class="text-muted">
+                                We examine the file structure and records.
+                            </small>
+
+                        </div>
+
+
+                        <div class="col-md-3 mb-3">
+
+                            <div class="fw-bold">
+                                3. Map
+                            </div>
+
+                            <small class="text-muted">
+                                Match your columns to ProForOps fields.
+                            </small>
+
+                        </div>
+
+
+                        <div class="col-md-3 mb-3">
+
+                            <div class="fw-bold">
+                                4. Validate
+                            </div>
+
+                            <small class="text-muted">
+                                Verify the data before importing.
+                            </small>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- ========================================================= -->
+<!-- File Selection Display -->
+<!-- ========================================================= -->
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const fileInput = document.getElementById("file");
+    const fileInfo = document.getElementById("selected-file-info");
+    const fileName = document.getElementById("selected-file-name");
+
+    if (!fileInput) {
+        return;
+    }
+
+    fileInput.addEventListener("change", function () {
+
+        if (fileInput.files.length > 0) {
+
+            fileName.textContent =
+                fileInput.files[0].name;
+
+            fileInfo.classList.remove("d-none");
+
+        } else {
+
+            fileName.textContent = "";
+
+            fileInfo.classList.add("d-none");
+
+        }
+
+    });
+
+});
+</script>
+
+{% endblock %}

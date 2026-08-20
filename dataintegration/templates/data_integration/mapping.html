@@ -1,0 +1,496 @@
+{% extends "base2.html" %}
+
+{% block content %}
+
+<div class="container-fluid mt-4">
+
+    <!-- ===================================================== -->
+    <!-- Header -->
+    <!-- ===================================================== -->
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+            <h2>Column Mapping</h2>
+
+            <p class="text-muted mb-0">
+                Map the columns from your uploaded file to ProForOps fields.
+            </p>
+        </div>
+
+        <div>
+            <a
+                href="{% url 'integration_dashboard' %}"
+                class="btn btn-secondary"
+            >
+                Back to Data Integration
+            </a>
+        </div>
+
+    </div>
+
+
+    <!-- ===================================================== -->
+    <!-- File Information -->
+    <!-- ===================================================== -->
+
+    <div class="card mb-4">
+
+        <div class="card-header">
+            <h5 class="mb-0">
+                Import Information
+            </h5>
+        </div>
+
+        <div class="card-body">
+
+            <div class="row">
+
+                <div class="col-md-4">
+
+                    <div class="text-muted">
+                        File
+                    </div>
+
+                    <div class="fw-bold">
+                        {{ data_import.filename }}
+                    </div>
+
+                </div>
+
+
+                <div class="col-md-4">
+
+                    <div class="text-muted">
+                        Total Rows
+                    </div>
+
+                    <div class="fw-bold">
+                        {{ data_import.total_rows }}
+                    </div>
+
+                </div>
+
+
+                <div class="col-md-4">
+
+                    <div class="text-muted">
+                        Source Type
+                    </div>
+
+                    <div class="fw-bold">
+                        {{ data_import.get_source_type_display }}
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ===================================================== -->
+    <!-- Mapping Instructions -->
+    <!-- ===================================================== -->
+
+    <div class="alert alert-info mb-4">
+
+        <strong>Mapping Instructions</strong>
+
+        <p class="mb-0 mt-1">
+            Select the ProForOps field that corresponds to each column
+            in your uploaded file. Columns that do not contain useful
+            information may be left unmapped.
+        </p>
+
+    </div>
+
+
+    <!-- ===================================================== -->
+    <!-- Mapping Form -->
+    <!-- ===================================================== -->
+
+    <form
+        method="post"
+        action="{% url 'integration_mapping' import_id=data_import.id %}"
+    >
+
+        {% csrf_token %}
+
+
+        <div class="card mb-4">
+
+            <div class="card-header">
+
+                <div class="d-flex justify-content-between align-items-center">
+
+                    <h5 class="mb-0">
+                        Source Columns
+                    </h5>
+
+                    <span class="text-muted">
+                        {{ columns|length }} column{{ columns|length|pluralize }}
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <div class="card-body p-0">
+
+                {% if columns %}
+
+                    <div class="table-responsive">
+
+                        <table class="table table-hover align-middle mb-0">
+
+                            <thead>
+
+                                <tr>
+
+                                    <th style="width: 5%;">
+                                        #
+                                    </th>
+
+                                    <th style="width: 30%;">
+                                        Source Column
+                                    </th>
+
+                                    <th style="width: 40%;">
+                                        ProForOps Field
+                                    </th>
+
+                                    <th style="width: 15%;">
+                                        Required
+                                    </th>
+
+                                    <th style="width: 10%;">
+                                        Status
+                                    </th>
+
+                                </tr>
+
+                            </thead>
+
+
+                            <tbody>
+
+                                {% for column in columns %}
+
+                                    <tr>
+
+                                        <!-- Row Number -->
+
+                                        <td>
+                                            {{ forloop.counter }}
+                                        </td>
+
+
+                                        <!-- Source Column -->
+
+                                        <td>
+
+                                            <input
+                                                type="hidden"
+                                                name="source_column_{{ forloop.counter0 }}"
+                                                value="{{ column.source_column }}"
+                                            >
+
+                                            <strong>
+                                                {{ column.source_column }}
+                                            </strong>
+
+                                        </td>
+
+
+                                        <!-- Target Field -->
+
+                                        <td>
+
+                                            <select
+                                                name="target_field_{{ forloop.counter0 }}"
+                                                class="form-select"
+                                            >
+
+                                                <option value="">
+                                                    -- Do Not Import --
+                                                </option>
+
+                                                {% if column.target_field %}
+
+                                                    <option
+                                                        value="{{ column.target_field }}"
+                                                        selected
+                                                    >
+                                                        {{ column.target_field }}
+                                                    </option>
+
+                                                {% endif %}
+
+                                                <!--
+                                                    Additional target fields
+                                                    can be populated here as
+                                                    the supported import models
+                                                    are added.
+                                                -->
+
+                                                <option value="employee_number">
+                                                    employee_number
+                                                </option>
+
+                                                <option value="first_name">
+                                                    first_name
+                                                </option>
+
+                                                <option value="last_name">
+                                                    last_name
+                                                </option>
+
+                                                <option value="phone_number">
+                                                    phone_number
+                                                </option>
+
+                                                <option value="email">
+                                                    email
+                                                </option>
+
+                                                <option value="callsign">
+                                                    callsign
+                                                </option>
+
+                                                <option value="position">
+                                                    position
+                                                </option>
+
+                                                <option value="department">
+                                                    department
+                                                </option>
+
+                                                <option value="group">
+                                                    group
+                                                </option>
+
+                                                <option value="date_hired">
+                                                    date_hired
+                                                </option>
+
+                                            </select>
+
+                                        </td>
+
+
+                                        <!-- Required -->
+
+                                        <td>
+
+                                            <div class="form-check">
+
+                                                <input
+                                                    type="checkbox"
+                                                    class="form-check-input"
+                                                    id="required_{{ forloop.counter0 }}"
+                                                    name="is_required_{{ forloop.counter0 }}"
+                                                    {% if column.is_required %}
+                                                        checked
+                                                    {% endif %}
+                                                >
+
+                                                <label
+                                                    class="form-check-label"
+                                                    for="required_{{ forloop.counter0 }}"
+                                                >
+                                                    Required
+                                                </label>
+
+                                            </div>
+
+                                        </td>
+
+
+                                        <!-- Status -->
+
+                                        <td>
+
+                                            {% if column.is_mapped %}
+
+                                                <span class="badge bg-success">
+                                                    Mapped
+                                                </span>
+
+                                            {% else %}
+
+                                                <span class="badge bg-secondary">
+                                                    Unmapped
+                                                </span>
+
+                                            {% endif %}
+
+                                        </td>
+
+                                    </tr>
+
+                                {% endfor %}
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                {% else %}
+
+                    <div class="p-5 text-center">
+
+                        <h5>
+                            No columns found
+                        </h5>
+
+                        <p class="text-muted mb-3">
+                            No source columns are currently available
+                            for mapping.
+                        </p>
+
+                        <a
+                            href="{% url 'integration_analyze' import_id=data_import.id %}"
+                            class="btn btn-primary"
+                        >
+                            Analyze File
+                        </a>
+
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+
+        <!-- ================================================= -->
+        <!-- Target Model -->
+        <!-- ================================================= -->
+
+        <div class="card mb-4">
+
+            <div class="card-header">
+
+                <h5 class="mb-0">
+                    Import Target
+                </h5>
+
+            </div>
+
+            <div class="card-body">
+
+                <div class="row">
+
+                    <div class="col-md-6">
+
+                        <label
+                            for="target_model"
+                            class="form-label"
+                        >
+                            Target Model
+                        </label>
+
+                        <select
+                            name="target_model"
+                            id="target_model"
+                            class="form-select"
+                        >
+
+                            <option value="">
+                                -- Select Target Model --
+                            </option>
+
+                            <option
+                                value="Employee"
+                                {% if data_import.target_model == "Employee" %}
+                                    selected
+                                {% endif %}
+                            >
+                                Employee
+                            </option>
+
+                            <option
+                                value="Equipment"
+                                {% if data_import.target_model == "Equipment" %}
+                                    selected
+                                {% endif %}
+                            >
+                                Equipment
+                            </option>
+
+                            <option
+                                value="Location"
+                                {% if data_import.target_model == "Location" %}
+                                    selected
+                                {% endif %}
+                            >
+                                Location
+                            </option>
+
+                            <option
+                                value="Customer"
+                                {% if data_import.target_model == "Customer" %}
+                                    selected
+                                {% endif %}
+                            >
+                                Customer
+                            </option>
+
+                        </select>
+
+                        <div class="form-text">
+                            Select the ProForOps model that will receive
+                            the imported data.
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ================================================= -->
+        <!-- Actions -->
+        <!-- ================================================= -->
+
+        <div class="d-flex justify-content-between align-items-center mb-5">
+
+            <div>
+
+                <a
+                    href="{% url 'integration_analyze' import_id=data_import.id %}"
+                    class="btn btn-secondary"
+                >
+                    Back to Analysis
+                </a>
+
+            </div>
+
+
+            <div>
+
+                <button
+                    type="submit"
+                    class="btn btn-primary"
+                >
+                    Save Mapping &amp; Validate
+                </button>
+
+            </div>
+
+        </div>
+
+    </form>
+
+</div>
+
+{% endblock %}

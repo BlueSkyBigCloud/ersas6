@@ -1,0 +1,791 @@
+{% extends "base2.html" %}
+
+{% block content %}
+
+<div class="container-fluid mt-4">
+
+    <!-- ===================================================== -->
+    <!-- Header -->
+    <!-- ===================================================== -->
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+            <h2>Data Validation</h2>
+
+            <p class="text-muted mb-0">
+                Review the validation results before importing your data.
+            </p>
+        </div>
+
+        <div>
+            <a
+                href="{% url 'integration_dashboard' %}"
+                class="btn btn-secondary"
+            >
+                Back to Data Integration
+            </a>
+        </div>
+
+    </div>
+
+
+    <!-- ===================================================== -->
+    <!-- Import Information -->
+    <!-- ===================================================== -->
+
+    <div class="card mb-4">
+
+        <div class="card-header">
+            <h5 class="mb-0">
+                Import Information
+            </h5>
+        </div>
+
+        <div class="card-body">
+
+            <div class="row">
+
+                <div class="col-md-3 mb-3">
+
+                    <div class="text-muted">
+                        File
+                    </div>
+
+                    <div class="fw-bold">
+                        {{ data_import.filename }}
+                    </div>
+
+                </div>
+
+
+                <div class="col-md-3 mb-3">
+
+                    <div class="text-muted">
+                        Target Model
+                    </div>
+
+                    <div class="fw-bold">
+
+                        {% if data_import.target_model %}
+                            {{ data_import.target_model }}
+                        {% else %}
+                            <span class="text-muted">
+                                Not specified
+                            </span>
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+
+                <div class="col-md-3 mb-3">
+
+                    <div class="text-muted">
+                        Total Rows
+                    </div>
+
+                    <div class="fw-bold">
+                        {{ data_import.total_rows }}
+                    </div>
+
+                </div>
+
+
+                <div class="col-md-3 mb-3">
+
+                    <div class="text-muted">
+                        Status
+                    </div>
+
+                    <div>
+
+                        {% if data_import.status == "READY" %}
+
+                            <span class="badge bg-success">
+                                {{ data_import.get_status_display }}
+                            </span>
+
+                        {% elif data_import.status == "VALIDATING" %}
+
+                            <span class="badge bg-warning text-dark">
+                                {{ data_import.get_status_display }}
+                            </span>
+
+                        {% elif data_import.status == "FAILED" %}
+
+                            <span class="badge bg-danger">
+                                {{ data_import.get_status_display }}
+                            </span>
+
+                        {% else %}
+
+                            <span class="badge bg-secondary">
+                                {{ data_import.get_status_display }}
+                            </span>
+
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ===================================================== -->
+    <!-- Validation Summary -->
+    <!-- ===================================================== -->
+
+    <div class="row mb-4">
+
+        <!-- Total -->
+
+        <div class="col-md-4 mb-3">
+
+            <div class="card h-100">
+
+                <div class="card-body text-center">
+
+                    <div class="text-muted">
+                        Total Rows
+                    </div>
+
+                    <div class="display-5 fw-bold">
+                        {{ data_import.total_rows }}
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Valid -->
+
+        <div class="col-md-4 mb-3">
+
+            <div class="card h-100">
+
+                <div class="card-body text-center">
+
+                    <div class="text-muted">
+                        Valid Rows
+                    </div>
+
+                    <div class="display-5 fw-bold text-success">
+                        {{ data_import.valid_rows }}
+                    </div>
+
+                    <small class="text-muted">
+                        Rows that passed validation
+                    </small>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Errors -->
+
+        <div class="col-md-4 mb-3">
+
+            <div class="card h-100">
+
+                <div class="card-body text-center">
+
+                    <div class="text-muted">
+                        Error Rows
+                    </div>
+
+                    <div class="display-5 fw-bold text-danger">
+                        {{ data_import.error_rows }}
+                    </div>
+
+                    <small class="text-muted">
+                        Rows that failed validation
+                    </small>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ===================================================== -->
+    <!-- Validation Message -->
+    <!-- ===================================================== -->
+
+    {% if data_import.status == "READY" %}
+
+        <div class="alert alert-success mb-4">
+
+            <h5 class="alert-heading">
+                Validation Successful
+            </h5>
+
+            <p class="mb-0">
+                The data is ready to be imported.
+                {{ data_import.valid_rows }}
+                row{{ data_import.valid_rows|pluralize }}
+                passed validation.
+            </p>
+
+        </div>
+
+    {% elif data_import.error_rows > 0 %}
+
+        <div class="alert alert-warning mb-4">
+
+            <h5 class="alert-heading">
+                Validation Issues Found
+            </h5>
+
+            <p class="mb-0">
+                {{ data_import.error_rows }}
+                row{{ data_import.error_rows|pluralize }}
+                failed validation. Review the errors below before
+                continuing.
+            </p>
+
+        </div>
+
+    {% endif %}
+
+
+    <!-- ===================================================== -->
+    <!-- Errors -->
+    <!-- ===================================================== -->
+
+    {% if validation.errors %}
+
+        <div class="card mb-4">
+
+            <div class="card-header">
+
+                <h5 class="mb-0 text-danger">
+                    Validation Errors
+                </h5>
+
+            </div>
+
+            <div class="card-body p-0">
+
+                <div class="table-responsive">
+
+                    <table class="table table-hover mb-0">
+
+                        <thead>
+
+                            <tr>
+
+                                <th>
+                                    Row
+                                </th>
+
+                                <th>
+                                    Field
+                                </th>
+
+                                <th>
+                                    Error
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+                        <tbody>
+
+                            {% for error in validation.errors %}
+
+                                <tr>
+
+                                    <td>
+
+                                        {% if error.row %}
+                                            {{ error.row }}
+                                        {% elif error.row_number %}
+                                            {{ error.row_number }}
+                                        {% else %}
+                                            -
+                                        {% endif %}
+
+                                    </td>
+
+                                    <td>
+
+                                        {% if error.field %}
+                                            {{ error.field }}
+                                        {% else %}
+                                            -
+                                        {% endif %}
+
+                                    </td>
+
+                                    <td class="text-danger">
+
+                                        {% if error.message %}
+                                            {{ error.message }}
+                                        {% elif error.error %}
+                                            {{ error.error }}
+                                        {% else %}
+                                            {{ error }}
+                                        {% endif %}
+
+                                    </td>
+
+                                </tr>
+
+                            {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    {% endif %}
+
+
+    <!-- ===================================================== -->
+    <!-- Warnings -->
+    <!-- ===================================================== -->
+
+    {% if validation.warnings %}
+
+        <div class="card mb-4">
+
+            <div class="card-header">
+
+                <h5 class="mb-0 text-warning">
+                    Validation Warnings
+                </h5>
+
+            </div>
+
+            <div class="card-body p-0">
+
+                <div class="table-responsive">
+
+                    <table class="table table-hover mb-0">
+
+                        <thead>
+
+                            <tr>
+
+                                <th>
+                                    Row
+                                </th>
+
+                                <th>
+                                    Field
+                                </th>
+
+                                <th>
+                                    Warning
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+                        <tbody>
+
+                            {% for warning in validation.warnings %}
+
+                                <tr>
+
+                                    <td>
+
+                                        {% if warning.row %}
+                                            {{ warning.row }}
+                                        {% elif warning.row_number %}
+                                            {{ warning.row_number }}
+                                        {% else %}
+                                            -
+                                        {% endif %}
+
+                                    </td>
+
+                                    <td>
+
+                                        {% if warning.field %}
+                                            {{ warning.field }}
+                                        {% else %}
+                                            -
+                                        {% endif %}
+
+                                    </td>
+
+                                    <td class="text-warning">
+
+                                        {% if warning.message %}
+                                            {{ warning.message }}
+                                        {% elif warning.warning %}
+                                            {{ warning.warning }}
+                                        {% else %}
+                                            {{ warning }}
+                                        {% endif %}
+
+                                    </td>
+
+                                </tr>
+
+                            {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    {% endif %}
+
+
+    <!-- ===================================================== -->
+    <!-- Row Validation Results -->
+    <!-- ===================================================== -->
+
+    {% if validation.rows %}
+
+        <div class="card mb-4">
+
+            <div class="card-header">
+
+                <h5 class="mb-0">
+                    Row Validation Results
+                </h5>
+
+            </div>
+
+            <div class="card-body p-0">
+
+                <div class="table-responsive">
+
+                    <table class="table table-hover mb-0">
+
+                        <thead>
+
+                            <tr>
+
+                                <th>
+                                    Row
+                                </th>
+
+                                <th>
+                                    Status
+                                </th>
+
+                                <th>
+                                    Messages
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+                        <tbody>
+
+                            {% for row in validation.rows %}
+
+                                <tr>
+
+                                    <td>
+
+                                        {% if row.row %}
+                                            {{ row.row }}
+                                        {% elif row.row_number %}
+                                            {{ row.row_number }}
+                                        {% else %}
+                                            {{ forloop.counter }}
+                                        {% endif %}
+
+                                    </td>
+
+
+                                    <td>
+
+                                        {% if row.valid %}
+
+                                            <span class="badge bg-success">
+                                                Valid
+                                            </span>
+
+                                        {% elif row.status == "valid" %}
+
+                                            <span class="badge bg-success">
+                                                Valid
+                                            </span>
+
+                                        {% else %}
+
+                                            <span class="badge bg-danger">
+                                                Invalid
+                                            </span>
+
+                                        {% endif %}
+
+                                    </td>
+
+
+                                    <td>
+
+                                        {% if row.errors %}
+
+                                            {% for error in row.errors %}
+
+                                                <div class="text-danger">
+                                                    {{ error }}
+                                                </div>
+
+                                            {% endfor %}
+
+                                        {% elif row.message %}
+
+                                            {{ row.message }}
+
+                                        {% else %}
+
+                                            <span class="text-muted">
+                                                No issues
+                                            </span>
+
+                                        {% endif %}
+
+                                    </td>
+
+                                </tr>
+
+                            {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    {% endif %}
+
+
+    <!-- ===================================================== -->
+    <!-- Column Mapping -->
+    <!-- ===================================================== -->
+
+    <div class="card mb-4">
+
+        <div class="card-header">
+
+            <h5 class="mb-0">
+                Column Mapping
+            </h5>
+
+        </div>
+
+        <div class="card-body p-0">
+
+            {% if mappings %}
+
+                <div class="table-responsive">
+
+                    <table class="table table-hover mb-0">
+
+                        <thead>
+
+                            <tr>
+
+                                <th>
+                                    Source Column
+                                </th>
+
+                                <th>
+                                    Target Field
+                                </th>
+
+                                <th>
+                                    Required
+                                </th>
+
+                                <th>
+                                    Status
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+                        <tbody>
+
+                            {% for mapping in mappings %}
+
+                                <tr>
+
+                                    <td>
+                                        {{ mapping.source_column }}
+                                    </td>
+
+                                    <td>
+
+                                        {% if mapping.target_field %}
+                                            {{ mapping.target_field }}
+                                        {% else %}
+                                            <span class="text-muted">
+                                                Not mapped
+                                            </span>
+                                        {% endif %}
+
+                                    </td>
+
+                                    <td>
+
+                                        {% if mapping.is_required %}
+
+                                            <span class="badge bg-danger">
+                                                Required
+                                            </span>
+
+                                        {% else %}
+
+                                            <span class="text-muted">
+                                                Optional
+                                            </span>
+
+                                        {% endif %}
+
+                                    </td>
+
+                                    <td>
+
+                                        {% if mapping.is_mapped %}
+
+                                            <span class="badge bg-success">
+                                                Mapped
+                                            </span>
+
+                                        {% else %}
+
+                                            <span class="badge bg-secondary">
+                                                Unmapped
+                                            </span>
+
+                                        {% endif %}
+
+                                    </td>
+
+                                </tr>
+
+                            {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            {% else %}
+
+                <div class="p-4">
+
+                    <p class="text-muted mb-0">
+                        No mappings were found.
+                    </p>
+
+                </div>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+
+    <!-- ===================================================== -->
+    <!-- Actions -->
+    <!-- ===================================================== -->
+
+    <div class="d-flex justify-content-between align-items-center mb-5">
+
+        <div>
+
+            <a
+                href="{% url 'integration_mapping' import_id=data_import.id %}"
+                class="btn btn-secondary"
+            >
+                Back to Mapping
+            </a>
+
+        </div>
+
+
+        <div>
+
+            {% if data_import.status == "READY" %}
+
+                <form
+                    method="post"
+                    action="{% url 'integration_import' import_id=data_import.id %}"
+                    class="d-inline"
+                >
+
+                    {% csrf_token %}
+
+                    <button
+                        type="submit"
+                        class="btn btn-success"
+                    >
+                        Import Valid Records
+                    </button>
+
+                </form>
+
+            {% elif data_import.status == "VALIDATING" %}
+
+                <button
+                    type="button"
+                    class="btn btn-secondary"
+                    disabled
+                >
+                    Validation In Progress
+                </button>
+
+            {% elif data_import.status == "FAILED" %}
+
+                <a
+                    href="{% url 'integration_mapping' import_id=data_import.id %}"
+                    class="btn btn-warning"
+                >
+                    Return to Mapping
+                </a>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

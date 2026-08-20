@@ -21,6 +21,7 @@ SUBSCRIPTION = 'price_1Ts84WBhrAyO26FHz5dHoeY3'
 X_FRAME_OPTIONS = 'SAMEORIGIN'
 
 INSTALLED_APPS = [
+    'dataintegration',
     'django.contrib.sitemaps',
     'priceanalysis',
     'prospects',

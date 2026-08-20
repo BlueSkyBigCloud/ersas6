@@ -83,7 +83,7 @@ def payment_cancelled(request):
 
 @csrf_exempt
 def stripe_webhook(request):
-    logger.warning("========== STRIPE WEBHOOK APP 1 ==========")
+    logger.warning("========== STRIPE WEBHOOK ==========")
     payload = request.body
     sig_header = request.META.get('HTTP_STRIPE_SIGNATURE')
     endpoint_secret = settings.STRIPE_WEBHOOK_SECRET

@@ -1,0 +1,626 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+
+<div class="container-fluid mt-4">
+
+    <!-- ===================================================== -->
+    <!-- Header -->
+    <!-- ===================================================== -->
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+            <h2>Data Integration</h2>
+
+            <p class="text-muted mb-0">
+                Upload, analyze, validate, and import business data.
+            </p>
+        </div>
+
+        <div>
+            <a
+                href="{% url 'integration_upload' %}"
+                class="btn btn-primary"
+            >
+                Upload Data
+            </a>
+        </div>
+
+    </div>
+
+
+    <!-- ===================================================== -->
+    <!-- Summary Cards -->
+    <!-- ===================================================== -->
+
+    <div class="row mb-4">
+
+        <!-- Total Imports -->
+
+        <div class="col-md-3 mb-3">
+
+            <div class="card h-100">
+
+                <div class="card-body">
+
+                    <div class="text-muted">
+                        Total Imports
+                    </div>
+
+                    <div class="display-6 fw-bold">
+                        {{ total_imports }}
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Active Imports -->
+
+        <div class="col-md-3 mb-3">
+
+            <div class="card h-100">
+
+                <div class="card-body">
+
+                    <div class="text-muted">
+                        Active Imports
+                    </div>
+
+                    <div class="display-6 fw-bold">
+                        {{ active_imports }}
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Completed -->
+
+        <div class="col-md-3 mb-3">
+
+            <div class="card h-100">
+
+                <div class="card-body">
+
+                    <div class="text-muted">
+                        Completed
+                    </div>
+
+                    <div class="display-6 fw-bold">
+                        {{ completed_imports }}
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Failed -->
+
+        <div class="col-md-3 mb-3">
+
+            <div class="card h-100">
+
+                <div class="card-body">
+
+                    <div class="text-muted">
+                        Failed
+                    </div>
+
+                    <div class="display-6 fw-bold">
+                        {{ failed_imports }}
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ===================================================== -->
+    <!-- Import History -->
+    <!-- ===================================================== -->
+
+    <div class="card">
+
+        <div class="card-header">
+
+            <div class="d-flex justify-content-between align-items-center">
+
+                <h5 class="mb-0">
+                    Import History
+                </h5>
+
+                <a
+                    href="{% url 'integration_upload' %}"
+                    class="btn btn-sm btn-primary"
+                >
+                    New Import
+                </a>
+
+            </div>
+
+        </div>
+
+
+        <div class="card-body p-0">
+
+            {% if imports %}
+
+                <div class="table-responsive">
+
+                    <table class="table table-hover mb-0">
+
+                        <thead>
+
+                            <tr>
+
+                                <th>
+                                    File
+                                </th>
+
+                                <th>
+                                    Source
+                                </th>
+
+                                <th>
+                                    Target
+                                </th>
+
+                                <th>
+                                    Status
+                                </th>
+
+                                <th>
+                                    Rows
+                                </th>
+
+                                <th>
+                                    Valid
+                                </th>
+
+                                <th>
+                                    Errors
+                                </th>
+
+                                <th>
+                                    Uploaded By
+                                </th>
+
+                                <th>
+                                    Created
+                                </th>
+
+                                <th>
+                                    Action
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody>
+
+                            {% for data_import in imports %}
+
+                                <tr>
+
+                                    <!-- File -->
+
+                                    <td>
+
+                                        <strong>
+                                            {{ data_import.filename }}
+                                        </strong>
+
+                                    </td>
+
+
+                                    <!-- Source -->
+
+                                    <td>
+
+                                        {{ data_import.get_source_type_display }}
+
+                                    </td>
+
+
+                                    <!-- Target -->
+
+                                    <td>
+
+                                        {% if data_import.target_model %}
+
+                                            {{ data_import.target_model }}
+
+                                        {% else %}
+
+                                            <span class="text-muted">
+                                                Not selected
+                                            </span>
+
+                                        {% endif %}
+
+                                    </td>
+
+
+                                    <!-- Status -->
+
+                                    <td>
+
+                                        {% if data_import.status == "UPLOADED" %}
+
+                                            <span class="badge bg-secondary">
+                                                {{ data_import.get_status_display }}
+                                            </span>
+
+                                        {% elif data_import.status == "ANALYZING" %}
+
+                                            <span class="badge bg-info">
+                                                {{ data_import.get_status_display }}
+                                            </span>
+
+                                        {% elif data_import.status == "MAPPING" %}
+
+                                            <span class="badge bg-warning text-dark">
+                                                {{ data_import.get_status_display }}
+                                            </span>
+
+                                        {% elif data_import.status == "VALIDATING" %}
+
+                                            <span class="badge bg-info">
+                                                {{ data_import.get_status_display }}
+                                            </span>
+
+                                        {% elif data_import.status == "READY" %}
+
+                                            <span class="badge bg-primary">
+                                                {{ data_import.get_status_display }}
+                                            </span>
+
+                                        {% elif data_import.status == "IMPORTING" %}
+
+                                            <span class="badge bg-info">
+                                                {{ data_import.get_status_display }}
+                                            </span>
+
+                                        {% elif data_import.status == "COMPLETED" %}
+
+                                            <span class="badge bg-success">
+                                                {{ data_import.get_status_display }}
+                                            </span>
+
+                                        {% elif data_import.status == "FAILED" %}
+
+                                            <span class="badge bg-danger">
+                                                {{ data_import.get_status_display }}
+                                            </span>
+
+                                        {% elif data_import.status == "CANCELLED" %}
+
+                                            <span class="badge bg-dark">
+                                                {{ data_import.get_status_display }}
+                                            </span>
+
+                                        {% else %}
+
+                                            <span class="badge bg-secondary">
+                                                {{ data_import.get_status_display }}
+                                            </span>
+
+                                        {% endif %}
+
+                                    </td>
+
+
+                                    <!-- Total Rows -->
+
+                                    <td>
+                                        {{ data_import.total_rows }}
+                                    </td>
+
+
+                                    <!-- Valid Rows -->
+
+                                    <td>
+                                        {{ data_import.valid_rows }}
+                                    </td>
+
+
+                                    <!-- Error Rows -->
+
+                                    <td>
+
+                                        {% if data_import.error_rows > 0 %}
+
+                                            <span class="text-danger fw-bold">
+                                                {{ data_import.error_rows }}
+                                            </span>
+
+                                        {% else %}
+
+                                            <span class="text-muted">
+                                                0
+                                            </span>
+
+                                        {% endif %}
+
+                                    </td>
+
+
+                                    <!-- Uploaded By -->
+
+                                    <td>
+
+                                        {% if data_import.uploaded_by %}
+
+                                            {{ data_import.uploaded_by }}
+
+                                        {% else %}
+
+                                            <span class="text-muted">
+                                                Unknown
+                                            </span>
+
+                                        {% endif %}
+
+                                    </td>
+
+
+                                    <!-- Created -->
+
+                                    <td>
+
+                                        {{ data_import.created_at|date:"M d, Y H:i" }}
+
+                                    </td>
+
+
+                                    <!-- Action -->
+
+                                    <td>
+
+                                        {% if data_import.status == "UPLOADED" %}
+
+                                            <a
+                                                href="{% url 'integration_analyze' import_id=data_import.id %}"
+                                                class="btn btn-sm btn-outline-primary"
+                                            >
+                                                Analyze
+                                            </a>
+
+                                        {% elif data_import.status == "ANALYZING" %}
+
+                                            <a
+                                                href="{% url 'integration_analyze' import_id=data_import.id %}"
+                                                class="btn btn-sm btn-outline-primary"
+                                            >
+                                                Continue
+                                            </a>
+
+                                        {% elif data_import.status == "MAPPING" %}
+
+                                            <a
+                                                href="{% url 'integration_mapping' import_id=data_import.id %}"
+                                                class="btn btn-sm btn-outline-primary"
+                                            >
+                                                Mapping
+                                            </a>
+
+                                        {% elif data_import.status == "VALIDATING" %}
+
+                                            <a
+                                                href="{% url 'integration_validate' import_id=data_import.id %}"
+                                                class="btn btn-sm btn-outline-primary"
+                                            >
+                                                Validation
+                                            </a>
+
+                                        {% elif data_import.status == "READY" %}
+
+                                            <a
+                                                href="{% url 'integration_validate' import_id=data_import.id %}"
+                                                class="btn btn-sm btn-outline-success"
+                                            >
+                                                Review
+                                            </a>
+
+                                        {% elif data_import.status == "IMPORTING" %}
+
+                                            <a
+                                                href="{% url 'integration_results' import_id=data_import.id %}"
+                                                class="btn btn-sm btn-outline-primary"
+                                            >
+                                                View
+                                            </a>
+
+                                        {% elif data_import.status == "COMPLETED" %}
+
+                                            <a
+                                                href="{% url 'integration_results' import_id=data_import.id %}"
+                                                class="btn btn-sm btn-outline-success"
+                                            >
+                                                Results
+                                            </a>
+
+                                        {% elif data_import.status == "FAILED" %}
+
+                                            <a
+                                                href="{% url 'integration_results' import_id=data_import.id %}"
+                                                class="btn btn-sm btn-outline-danger"
+                                            >
+                                                View
+                                            </a>
+
+                                        {% elif data_import.status == "CANCELLED" %}
+
+                                            <span class="text-muted">
+                                                Cancelled
+                                            </span>
+
+                                        {% endif %}
+
+                                    </td>
+
+                                </tr>
+
+                            {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            {% else %}
+
+                <!-- ================================================= -->
+                <!-- Empty State -->
+                <!-- ================================================= -->
+
+                <div class="text-center p-5">
+
+                    <h5>
+                        No imports yet
+                    </h5>
+
+                    <p class="text-muted">
+                        Upload your first CSV, Excel, or DAT file
+                        to begin integrating your data.
+                    </p>
+
+                    <a
+                        href="{% url 'integration_upload' %}"
+                        class="btn btn-primary"
+                    >
+                        Upload Data
+                    </a>
+
+                </div>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+
+    <!-- ===================================================== -->
+    <!-- Workflow Information -->
+    <!-- ===================================================== -->
+
+    <div class="card mt-4">
+
+        <div class="card-header">
+
+            <h5 class="mb-0">
+                Data Integration Workflow
+            </h5>
+
+        </div>
+
+        <div class="card-body">
+
+            <div class="row text-center">
+
+                <div class="col-md-2 mb-3">
+
+                    <div class="fw-bold">
+                        1. Upload
+                    </div>
+
+                    <small class="text-muted">
+                        Upload CSV, Excel, or DAT data.
+                    </small>
+
+                </div>
+
+
+                <div class="col-md-2 mb-3">
+
+                    <div class="fw-bold">
+                        2. Analyze
+                    </div>
+
+                    <small class="text-muted">
+                        Examine columns and records.
+                    </small>
+
+                </div>
+
+
+                <div class="col-md-2 mb-3">
+
+                    <div class="fw-bold">
+                        3. Map
+                    </div>
+
+                    <small class="text-muted">
+                        Match source fields to ProForOps fields.
+                    </small>
+
+                </div>
+
+
+                <div class="col-md-2 mb-3">
+
+                    <div class="fw-bold">
+                        4. Validate
+                    </div>
+
+                    <small class="text-muted">
+                        Check records before importing.
+                    </small>
+
+                </div>
+
+
+                <div class="col-md-2 mb-3">
+
+                    <div class="fw-bold">
+                        5. Import
+                    </div>
+
+                    <small class="text-muted">
+                        Import valid records.
+                    </small>
+
+                </div>
+
+
+                <div class="col-md-2 mb-3">
+
+                    <div class="fw-bold">
+                        6. Results
+                    </div>
+
+                    <small class="text-muted">
+                        Review the completed operation.
+                    </small>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

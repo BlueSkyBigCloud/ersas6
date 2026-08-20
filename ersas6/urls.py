@@ -17,6 +17,7 @@ from api.views import *
 from dj_rest_auth.views import LoginView
 from file_store.views import *
 from video.views import *
+from dataintegration.views import *
 
 from django.contrib.sitemaps.views import sitemap
 from app.sitemaps import StaticViewSitemap
@@ -43,6 +44,8 @@ urlpatterns = [
     path('8175639&@anjsnom!iplookup/', iplookup_view, name="iplookup"),
     path("make_payment/", make_payment, name="make_payment"),
     path('stripe/webhook/', stripe_webhook, name='stripe-webhook'),
+
+    path("data-integration/", include("dataintegration.urls")),
 
     path("quotes/<int:pk>/convert/", convert_quote_to_invoice, name="convert_quote_to_invoice"),
 
