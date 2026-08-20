@@ -30,6 +30,11 @@ class DataImportAdmin(admin.ModelAdmin):
     readonly_fields = (
         "id",
         "created_at",
+        "total_rows",
+        "valid_rows",
+        "error_rows",
+        "uploaded_by",
+        "filename",
     )
 
     ordering = (
