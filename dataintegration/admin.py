@@ -12,10 +12,8 @@ class DataImportAdmin(admin.ModelAdmin):
     list_display = (
         "id",
         "company",
-        "original_filename",
         "status",
         "created_at",
-        "updated_at",
     )
 
     list_filter = (
@@ -26,14 +24,12 @@ class DataImportAdmin(admin.ModelAdmin):
 
     search_fields = (
         "id",
-        "original_filename",
         "company__name",
     )
 
     readonly_fields = (
         "id",
         "created_at",
-        "updated_at",
     )
 
     ordering = (
@@ -64,7 +60,6 @@ class DataImportColumnAdmin(admin.ModelAdmin):
     search_fields = (
         "source_column",
         "target_field",
-        "data_import__original_filename",
     )
 
     ordering = (
