@@ -8,6 +8,7 @@ from .views import (
     integration_validate,
     integration_import,
     integration_results,
+    integration_cancel,
 )
 
 
@@ -24,6 +25,12 @@ urlpatterns = [
         "",
         integration_dashboard,
         name="integration_dashboard",
+    ),
+
+    path(
+    "<uuid:import_id>/cancel/",
+    integration_cancel,
+    name="integration_cancel",
     ),
 
     # ---------------------------------------------------------

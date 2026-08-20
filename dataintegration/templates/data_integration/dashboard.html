@@ -21,7 +21,7 @@
 
         <div>
             <a
-                href="{% url 'integration_upload' %}"
+                href="{% url 'dataintegration:integration_upload' %}"
                 class="btn btn-primary"
             >
                 Upload Data
@@ -146,7 +146,7 @@
                 </h5>
 
                 <a
-                    href="{% url 'integration_upload' %}"
+                    href="{% url 'dataintegration:integration_upload' %}"
                     class="btn btn-sm btn-primary"
                 >
                     New Import
@@ -398,7 +398,7 @@
                                         {% if data_import.status == "UPLOADED" %}
 
                                             <a
-                                                href="{% url 'integration_analyze' import_id=data_import.id %}"
+                                                href="{% url 'dataintegration:integration_analyze' import_id=data_import.id %}"
                                                 class="btn btn-sm btn-outline-primary"
                                             >
                                                 Analyze
@@ -407,7 +407,7 @@
                                         {% elif data_import.status == "ANALYZING" %}
 
                                             <a
-                                                href="{% url 'integration_analyze' import_id=data_import.id %}"
+                                                href="{% url 'dataintegration:integration_analyze' import_id=data_import.id %}"
                                                 class="btn btn-sm btn-outline-primary"
                                             >
                                                 Continue
@@ -416,7 +416,7 @@
                                         {% elif data_import.status == "MAPPING" %}
 
                                             <a
-                                                href="{% url 'integration_mapping' import_id=data_import.id %}"
+                                                href="{% url 'dataintegration:integration_mapping' import_id=data_import.id %}"
                                                 class="btn btn-sm btn-outline-primary"
                                             >
                                                 Mapping
@@ -425,7 +425,7 @@
                                         {% elif data_import.status == "VALIDATING" %}
 
                                             <a
-                                                href="{% url 'integration_validate' import_id=data_import.id %}"
+                                                href="{% url 'dataintegration:integration_validate' import_id=data_import.id %}"
                                                 class="btn btn-sm btn-outline-primary"
                                             >
                                                 Validation
@@ -434,7 +434,7 @@
                                         {% elif data_import.status == "READY" %}
 
                                             <a
-                                                href="{% url 'integration_validate' import_id=data_import.id %}"
+                                                href="{% url 'dataintegration:integration_validate' import_id=data_import.id %}"
                                                 class="btn btn-sm btn-outline-success"
                                             >
                                                 Review
@@ -443,7 +443,7 @@
                                         {% elif data_import.status == "IMPORTING" %}
 
                                             <a
-                                                href="{% url 'integration_results' import_id=data_import.id %}"
+                                                href="{% url 'dataintegration:integration_results' import_id=data_import.id %}"
                                                 class="btn btn-sm btn-outline-primary"
                                             >
                                                 View
@@ -452,7 +452,7 @@
                                         {% elif data_import.status == "COMPLETED" %}
 
                                             <a
-                                                href="{% url 'integration_results' import_id=data_import.id %}"
+                                                href="{% url 'dataintegration:integration_results' import_id=data_import.id %}"
                                                 class="btn btn-sm btn-outline-success"
                                             >
                                                 Results
@@ -461,7 +461,7 @@
                                         {% elif data_import.status == "FAILED" %}
 
                                             <a
-                                                href="{% url 'integration_results' import_id=data_import.id %}"
+                                                href="{% url 'dataintegration:integration_results' import_id=data_import.id %}"
                                                 class="btn btn-sm btn-outline-danger"
                                             >
                                                 View
@@ -505,7 +505,7 @@
                     </p>
 
                     <a
-                        href="{% url 'integration_upload' %}"
+                        href="{% url 'dataintegration:integration_upload' %}"
                         class="btn btn-primary"
                     >
                         Upload Data

@@ -20,7 +20,7 @@
 
         <div>
             <a
-                href="{% url 'integration_dashboard' %}"
+                href="{% url 'dataintegration:integration_dashboard' %}"
                 class="btn btn-secondary"
             >
                 Back to Data Integration
@@ -114,7 +114,7 @@
 
     <form
         method="post"
-        action="{% url 'integration_mapping' import_id=data_import.id %}"
+        action="{% url 'dataintegration:integration_mapping' import_id=data_import.id %}"
     >
 
         {% csrf_token %}
@@ -354,7 +354,7 @@
                         </p>
 
                         <a
-                            href="{% url 'integration_analyze' import_id=data_import.id %}"
+                            href="{% url 'dataintegration:integration_analyze' import_id=data_import.id %}"
                             class="btn btn-primary"
                         >
                             Analyze File
@@ -467,7 +467,7 @@
             <div>
 
                 <a
-                    href="{% url 'integration_analyze' import_id=data_import.id %}"
+                    href="{% url 'dataintegration:integration_analyze' import_id=data_import.id %}"
                     class="btn btn-secondary"
                 >
                     Back to Analysis

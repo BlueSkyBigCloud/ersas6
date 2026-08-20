@@ -181,7 +181,7 @@ def integration_upload(request):
         )
 
     return redirect(
-        "integration_analyze",
+        "dataintegration:integration_analyze",
         import_id=data_import.id,
     )
 
@@ -221,7 +221,7 @@ def integration_analyze(request, import_id):
         )
 
         return redirect(
-            "integration_dashboard"
+            "dataintegration:integration_dashboard"
         )
 
     # --------------------------------------------------------
@@ -344,7 +344,7 @@ def integration_analyze(request, import_id):
         )
 
         return redirect(
-            "integration_dashboard"
+            "dataintegration:integration_dashboard"
         )
 
     # --------------------------------------------------------
@@ -390,7 +390,7 @@ def integration_mapping(request, import_id):
         )
 
         return redirect(
-            "integration_dashboard"
+            "dataintegration:integration_dashboard"
         )
 
     # --------------------------------------------------------
@@ -475,12 +475,12 @@ def integration_mapping(request, import_id):
         )
 
         return redirect(
-            "integration_mapping",
+            "dataintegration:integration_mapping",
             import_id=data_import.id,
         )
 
     return redirect(
-        "integration_validate",
+        "dataintegration:integration_validate",
         import_id=data_import.id,
     )
 
@@ -520,7 +520,7 @@ def integration_validate(request, import_id):
         )
 
         return redirect(
-            "integration_mapping",
+            "dataintegration:integration_mapping",
             import_id=data_import.id,
         )
 
@@ -575,7 +575,7 @@ def integration_validate(request, import_id):
         )
 
         return redirect(
-            "integration_dashboard"
+            "dataintegration:integration_dashboard"
         )
 
     # --------------------------------------------------------
@@ -629,7 +629,7 @@ def integration_mapping(request, import_id):
         )
 
         return redirect(
-            "integration_dashboard"
+            "dataintegration:integration_dashboard"
         )
 
     # --------------------------------------------------------
@@ -686,7 +686,7 @@ def integration_mapping(request, import_id):
                 )
 
                 return redirect(
-                    "integration_mapping",
+                    "dataintegration:integration_mapping",
                     import_id=data_import.id,
                 )
 
@@ -799,7 +799,7 @@ def integration_mapping(request, import_id):
         )
 
         return redirect(
-            "integration_mapping",
+            "dataintegration:integration_mapping",
             import_id=data_import.id,
         )
 
@@ -808,7 +808,7 @@ def integration_mapping(request, import_id):
     # --------------------------------------------------------
 
     return redirect(
-        "integration_validate",
+        "dataintegration:integration_validate",
         import_id=data_import.id,
     )
 
@@ -873,7 +873,7 @@ def integration_cancel(request, import_id):
         )
 
         return redirect(
-            "integration_dashboard"
+            "dataintegration:integration_dashboard"
         )
 
     data_import.status = DataImport.Status.CANCELLED
@@ -888,7 +888,7 @@ def integration_cancel(request, import_id):
     )
 
     return redirect(
-        "integration_dashboard"
+        "dataintegration:integration_dashboard"
     )
 
 from .services import run_import 
@@ -917,7 +917,7 @@ def integration_import(request, import_id):
         )
 
         return redirect(
-            "integration_validate",
+            "dataintegration:integration_validate",
             import_id=data_import.id,
         )
 
@@ -1010,7 +1010,7 @@ def integration_import(request, import_id):
         )
 
         return redirect(
-            "integration_validate",
+            "dataintegration:integration_validate",
             import_id=data_import.id,
         )
 
@@ -1027,6 +1027,6 @@ def integration_import(request, import_id):
     )
 
     return redirect(
-        "integration_results",
+        "dataintegration:integration_results",
         import_id=data_import.id,
     )

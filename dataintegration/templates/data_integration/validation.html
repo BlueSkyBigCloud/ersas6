@@ -20,7 +20,7 @@
 
         <div>
             <a
-                href="{% url 'integration_dashboard' %}"
+                href="{% url 'dataintegration:integration_dashboard' %}"
                 class="btn btn-secondary"
             >
                 Back to Data Integration
@@ -731,7 +731,7 @@
         <div>
 
             <a
-                href="{% url 'integration_mapping' import_id=data_import.id %}"
+                href="{% url 'dataintegration:integration_mapping' import_id=data_import.id %}"
                 class="btn btn-secondary"
             >
                 Back to Mapping
@@ -746,7 +746,7 @@
 
                 <form
                     method="post"
-                    action="{% url 'integration_import' import_id=data_import.id %}"
+                    action="{% url 'dataintegration:integration_import' import_id=data_import.id %}"
                     class="d-inline"
                 >
 
@@ -774,7 +774,7 @@
             {% elif data_import.status == "FAILED" %}
 
                 <a
-                    href="{% url 'integration_mapping' import_id=data_import.id %}"
+                    href="{% url 'dataintegration:integration_mapping' import_id=data_import.id %}"
                     class="btn btn-warning"
                 >
                     Return to Mapping

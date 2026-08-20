@@ -21,7 +21,7 @@
         <div>
 
             <a
-                href="{% url 'integration_dashboard' %}"
+                href="{% url 'dataintegration:integration_dashboard' %}"
                 class="btn btn-secondary"
             >
                 Back to Data Integration
@@ -527,7 +527,7 @@
     <div class="d-flex justify-content-between align-items-center">
 
         <a
-            href="{% url 'integration_dashboard' %}"
+            href="{% url 'dataintegration:integration_dashboard' %}"
             class="btn btn-secondary"
         >
             Back to Dashboard
@@ -537,7 +537,7 @@
         {% if data_import.status == "COMPLETED" %}
 
             <a
-                href="{% url 'integration_upload' %}"
+                href="{% url 'dataintegration:integration_upload' %}"
                 class="btn btn-primary"
             >
                 Start New Import
@@ -548,7 +548,7 @@
 
             <form
                 method="post"
-                action="{% url 'integration_import' import_id=data_import.id %}"
+                action="{% url 'dataintegration:integration_import' import_id=data_import.id %}"
             >
 
                 {% csrf_token %}
@@ -566,7 +566,7 @@
         {% elif data_import.status == "MAPPING" %}
 
             <a
-                href="{% url 'integration_mapping' import_id=data_import.id %}"
+                href="{% url 'dataintegration:integration_mapping' import_id=data_import.id %}"
                 class="btn btn-primary"
             >
                 Return to Mapping
@@ -576,7 +576,7 @@
         {% elif data_import.status == "VALIDATING" %}
 
             <a
-                href="{% url 'integration_validate' import_id=data_import.id %}"
+                href="{% url 'dataintegration:integration_validate' import_id=data_import.id %}"
                 class="btn btn-primary"
             >
                 Return to Validation
@@ -586,7 +586,7 @@
         {% elif data_import.status == "FAILED" %}
 
             <a
-                href="{% url 'integration_dashboard' %}"
+                href="{% url 'dataintegration:integration_dashboard' %}"
                 class="btn btn-primary"
             >
                 Return to Dashboard

@@ -20,7 +20,7 @@
 
         <div>
             <a
-                href="{% url 'integration_dashboard' %}"
+                href="{% url 'dataintegration:integration_dashboard' %}"
                 class="btn btn-secondary"
             >
                 Back to Data Integration
@@ -76,7 +76,7 @@
                     <form
                         method="post"
                         enctype="multipart/form-data"
-                        action="{% url 'integration_upload' %}"
+                        action="{% url 'dataintegration:integration_upload' %}"
                     >
 
                         {% csrf_token %}
