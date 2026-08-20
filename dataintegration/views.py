@@ -890,3 +890,141 @@ def integration_cancel(request, import_id):
     return redirect(
         "integration_dashboard"
     )
+
+@login_required
+@require_POST
+def integration_import(request, import_id):
+    """
+    Execute an import that has successfully passed validation.
+    """
+
+    data_import = get_company_import(
+        request,
+        import_id,
+    )
+
+    # --------------------------------------------------------
+    # Verify import is ready
+    # --------------------------------------------------------
+
+    if data_import.status != DataImport.Status.READY:
+
+        messages.error(
+            request,
+            "This import is not ready to be imported.",
+        )
+
+        return redirect(
+            "integration_validate",
+            import_id=data_import.id,
+        )
+
+    # --------------------------------------------------------
+    # Execute import
+    # --------------------------------------------------------
+
+    try:
+
+        with transaction.atomic():
+
+            # -----------------------------------------------
+            # Mark import as currently importing
+            # -----------------------------------------------
+
+            data_import.status = (
+                DataImport.Status.IMPORTING
+            )
+
+            data_import.save(
+                update_fields=[
+                    "status",
+                ]
+            )
+
+            # -----------------------------------------------
+            # Run the actual importer
+            # -----------------------------------------------
+
+            result = run_import(
+                data_import=data_import,
+            )
+
+            # -----------------------------------------------
+            # Update import statistics
+            # -----------------------------------------------
+
+            created_count = result.get(
+                "created_count",
+                0,
+            )
+
+            updated_count = result.get(
+                "updated_count",
+                0,
+            )
+
+            skipped_count = result.get(
+                "skipped_count",
+                0,
+            )
+
+            error_count = result.get(
+                "error_count",
+                0,
+            )
+
+            # -----------------------------------------------
+            # Complete import
+            # -----------------------------------------------
+
+            data_import.status = (
+                DataImport.Status.COMPLETED
+            )
+
+            data_import.completed_at = timezone.now()
+
+            data_import.save(
+                update_fields=[
+                    "status",
+                    "completed_at",
+                ]
+            )
+
+    except Exception as exc:
+
+        data_import.status = (
+            DataImport.Status.FAILED
+        )
+
+        data_import.save(
+            update_fields=[
+                "status",
+            ]
+        )
+
+        messages.error(
+            request,
+            f"Import failed: {exc}",
+        )
+
+        return redirect(
+            "integration_validate",
+            import_id=data_import.id,
+        )
+
+    # --------------------------------------------------------
+    # Display import results
+    # --------------------------------------------------------
+
+    messages.success(
+        request,
+        (
+            f"Import completed successfully. "
+            f"{created_count} record(s) created."
+        ),
+    )
+
+    return redirect(
+        "integration_results",
+        import_id=data_import.id,
+    )
