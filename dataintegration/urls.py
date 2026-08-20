@@ -23,7 +23,7 @@ urlpatterns = [
     path(
         "",
         integration_dashboard,
-        name="dashboard",
+        name="integration_dashboard",
     ),
 
     # ---------------------------------------------------------
@@ -33,7 +33,7 @@ urlpatterns = [
     path(
         "upload/",
         integration_upload,
-        name="upload",
+        name="integration_upload",
     ),
 
     # ---------------------------------------------------------
@@ -43,7 +43,7 @@ urlpatterns = [
     path(
         "<uuid:import_id>/analyze/",
         integration_analyze,
-        name="analyze",
+        name="integration_analyze",
     ),
 
     # ---------------------------------------------------------
@@ -53,7 +53,7 @@ urlpatterns = [
     path(
         "<uuid:import_id>/mapping/",
         integration_mapping,
-        name="mapping",
+        name="integration_mapping",
     ),
 
     # ---------------------------------------------------------
@@ -63,7 +63,7 @@ urlpatterns = [
     path(
         "<uuid:import_id>/validate/",
         integration_validate,
-        name="validate",
+        name="integration_validate",
     ),
 
     # ---------------------------------------------------------
@@ -73,7 +73,7 @@ urlpatterns = [
     path(
         "<uuid:import_id>/import/",
         integration_import,
-        name="import",
+        name="integration_import",
     ),
 
     # ---------------------------------------------------------
@@ -83,6 +83,6 @@ urlpatterns = [
     path(
         "<uuid:import_id>/results/",
         integration_results,
-        name="results",
+        name="integration_results",
     ),
 ]
