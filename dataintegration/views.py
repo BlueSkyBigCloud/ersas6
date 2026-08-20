@@ -891,6 +891,8 @@ def integration_cancel(request, import_id):
         "integration_dashboard"
     )
 
+from .services import run_import 
+
 @login_required
 @require_POST
 def integration_import(request, import_id):
