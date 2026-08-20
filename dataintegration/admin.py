@@ -12,7 +12,6 @@ class DataImportAdmin(admin.ModelAdmin):
     list_display = (
         "id",
         "company",
-        "created_by",
         "original_filename",
         "status",
         "created_at",
@@ -28,7 +27,6 @@ class DataImportAdmin(admin.ModelAdmin):
     search_fields = (
         "id",
         "original_filename",
-        "created_by__email",
         "company__name",
     )
 
