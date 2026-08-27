@@ -8,7 +8,9 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views.decorators.http import require_http_methods, require_POST
 from .models import DataImport, DataImportColumn
+import logging
 
+logger = logging.getLogger(__name__)
 
 # ============================================================
 # Helpers
@@ -373,6 +375,13 @@ def integration_mapping(request, import_id):
     """
     Display and save the column mapping.
     """
+    logger.info(
+        "MAPPING CHECK - FIRST integration_mapping VIEW "
+        "user=%s import_id=%s method=%s",
+        request.user.email,
+        import_id,
+        request.method,
+    )
 
     data_import = get_company_import(
         request,
