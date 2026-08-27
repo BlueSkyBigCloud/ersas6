@@ -618,6 +618,14 @@ def integration_mapping(request, import_id):
     Display and save the column mapping and target model.
     """
 
+    logger.info(
+            "MAPPING CHECK - SECOND 222 integration_mapping VIEW "
+            "user=%s import_id=%s method=%s",
+            request.user.email,
+            import_id,
+            request.method,
+        )
+
     data_import = get_company_import(
         request,
         import_id,
