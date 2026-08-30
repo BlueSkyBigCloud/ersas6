@@ -753,7 +753,7 @@ def integration_mapping(request, import_id):
     # --------------------------------------------------------
 
     return redirect(
-        "dataintegration:integration_validate",
+        "dataintegration:integration_import",
         import_id=data_import.id,
     )
 
