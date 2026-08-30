@@ -426,15 +426,6 @@ def run_import(
             "No column mappings have been configured."
         )
 
-    # --------------------------------------------------------
-    # Set import status.
-    # --------------------------------------------------------
-
-    data_import.status = DataImport.Status.IMPORTING
-
-    data_import.save(
-        update_fields=["status"]
-    )
 
     validated_count = 0
     skipped_count = 0
