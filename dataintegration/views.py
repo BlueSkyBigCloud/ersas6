@@ -854,7 +854,7 @@ def integration_import(request, import_id):
     # Verify import is ready
     # --------------------------------------------------------
 
-    if data_import.status != DataImport.Status.FAILED:
+    if data_import.status != DataImport.Status.READY:
 
         messages.error(
             request,

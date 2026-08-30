@@ -11,7 +11,6 @@ class DataImport(models.Model):
         MAPPING = "MAPPING", "Mapping"
         VALIDATING = "VALIDATING", "Validating"
         READY = "READY", "Ready"
-        IMPORTING = "IMPORTING", "Importing"
         COMPLETED = "COMPLETED", "Completed"
         FAILED = "FAILED", "Failed"
         CANCELLED = "CANCELLED", "Cancelled"
