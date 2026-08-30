@@ -286,6 +286,42 @@ def integration_analyze(request, import_id):
                 "File analyzer returned invalid column headers."
             )
 
+        # ----------------------------------------------------
+        # Create DataImportColumn records
+        # ----------------------------------------------------
+
+        DataImportColumn.objects.filter(
+            data_import=data_import
+        ).delete()
+
+        column_objects = []
+
+        for column_order, header in enumerate(headers):
+
+            if header is None:
+                continue
+
+            header = str(header).strip()
+
+            if not header:
+                continue
+
+            column_objects.append(
+                DataImportColumn(
+                    data_import=data_import,
+                    source_column=header,
+                    target_field="",
+                    column_order=column_order,
+                    is_required=False,
+                    is_mapped=False,
+                )
+            )
+
+
+        DataImportColumn.objects.bulk_create(
+            column_objects
+        )
+
         try:
             total_rows = int(
                 total_rows

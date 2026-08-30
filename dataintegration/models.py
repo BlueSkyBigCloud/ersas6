@@ -121,7 +121,9 @@ class DataImportColumn(models.Model):
     )
 
     target_field = models.CharField(
-        max_length=255,
+    max_length=255,
+    blank=True,
+    default="",
     )
 
     column_order = models.PositiveIntegerField(
@@ -133,7 +135,7 @@ class DataImportColumn(models.Model):
     )
 
     is_mapped = models.BooleanField(
-        default=True,
+        default=False,
     )
 
     created_at = models.DateTimeField(
