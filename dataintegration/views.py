@@ -9,6 +9,7 @@ from django.utils import timezone
 from django.views.decorators.http import require_http_methods, require_POST
 from .models import DataImport, DataImportColumn
 import logging
+from .services import run_import_from_file
 
 logger = logging.getLogger(__name__)
 
@@ -891,7 +892,7 @@ def integration_import(request, import_id):
             # Run the actual importer
             # -----------------------------------------------
 
-            result = run_import(
+            result = run_import_from_file(
                 data_import=data_import,
             )
 
