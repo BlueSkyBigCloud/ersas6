@@ -912,7 +912,7 @@ def integration_import(request, import_id):
                 data_import.id,
             )
 
-            result = run_import_from_file(
+            result = run_import(
                 data_import=data_import,
             )
 
