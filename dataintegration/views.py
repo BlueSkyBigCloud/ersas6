@@ -875,20 +875,6 @@ def integration_import(request, import_id):
         with transaction.atomic():
 
             # -----------------------------------------------
-            # Mark import as currently importing
-            # -----------------------------------------------
-
-            data_import.status = (
-                DataImport.Status.IMPORTING
-            )
-
-            data_import.save(
-                update_fields=[
-                    "status",
-                ]
-            )
-
-            # -----------------------------------------------
             # Run the actual importer
             # -----------------------------------------------
 
