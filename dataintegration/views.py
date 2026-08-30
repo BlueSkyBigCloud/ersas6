@@ -845,9 +845,21 @@ def integration_import(request, import_id):
     Execute an import that has successfully passed validation.
     """
 
+    logger.info(
+        "IMPORT START requested: import_id=%s user_id=%s",
+        import_id,
+        request.user.id,
+    )
+
     data_import = get_company_import(
         request,
         import_id,
+    )
+
+    logger.info(
+        "IMPORT START loaded: import_id=%s status=%s",
+        data_import.id,
+        data_import.status,
     )
 
     # --------------------------------------------------------
@@ -855,6 +867,13 @@ def integration_import(request, import_id):
     # --------------------------------------------------------
 
     if data_import.status != DataImport.Status.READY:
+
+        logger.warning(
+            "IMPORT START rejected: import_id=%s status=%s expected=%s",
+            data_import.id,
+            data_import.status,
+            DataImport.Status.READY,
+        )
 
         messages.error(
             request,
@@ -870,16 +889,37 @@ def integration_import(request, import_id):
     # Execute import
     # --------------------------------------------------------
 
+    logger.info(
+        "IMPORT EXECUTION beginning: import_id=%s",
+        data_import.id,
+    )
+
     try:
 
         with transaction.atomic():
+
+            logger.info(
+                "IMPORT TRANSACTION opened: import_id=%s",
+                data_import.id,
+            )
 
             # -----------------------------------------------
             # Run the actual importer
             # -----------------------------------------------
 
+            logger.info(
+                "IMPORT RUNNER starting: import_id=%s",
+                data_import.id,
+            )
+
             result = run_import_from_file(
                 data_import=data_import,
+            )
+
+            logger.info(
+                "IMPORT RUNNER completed: import_id=%s result=%s",
+                data_import.id,
+                result,
             )
 
             # -----------------------------------------------
@@ -906,6 +946,18 @@ def integration_import(request, import_id):
                 0,
             )
 
+            logger.info(
+                (
+                    "IMPORT STATISTICS: import_id=%s "
+                    "validated=%s updated=%s skipped=%s errors=%s"
+                ),
+                data_import.id,
+                validated_count,
+                updated_count,
+                skipped_count,
+                error_count,
+            )
+
             # -----------------------------------------------
             # Complete import
             # -----------------------------------------------
@@ -923,7 +975,20 @@ def integration_import(request, import_id):
                 ]
             )
 
+            logger.info(
+                "IMPORT COMPLETED: import_id=%s status=%s completed_at=%s",
+                data_import.id,
+                data_import.status,
+                data_import.completed_at,
+            )
+
     except Exception as exc:
+
+        logger.exception(
+            "IMPORT FAILED: import_id=%s error=%s",
+            data_import.id,
+            exc,
+        )
 
         data_import.status = (
             DataImport.Status.FAILED
@@ -933,6 +998,11 @@ def integration_import(request, import_id):
             update_fields=[
                 "status",
             ]
+        )
+
+        logger.info(
+            "IMPORT STATUS updated to FAILED: import_id=%s",
+            data_import.id,
         )
 
         messages.error(
@@ -949,6 +1019,18 @@ def integration_import(request, import_id):
     # Display import results
     # --------------------------------------------------------
 
+    logger.info(
+        (
+            "IMPORT RESULTS redirect: import_id=%s "
+            "validated=%s updated=%s skipped=%s errors=%s"
+        ),
+        data_import.id,
+        validated_count,
+        updated_count,
+        skipped_count,
+        error_count,
+    )
+
     messages.success(
         request,
         (
@@ -961,3 +1043,4 @@ def integration_import(request, import_id):
         "dataintegration:integration_results",
         import_id=data_import.id,
     )
+
