@@ -854,7 +854,7 @@ def integration_import(request, import_id):
     # Verify import is ready
     # --------------------------------------------------------
 
-    if data_import.status != DataImport.Status.READY:
+    if data_import.status != DataImport.Status.FAILED:
 
         messages.error(
             request,
@@ -900,8 +900,8 @@ def integration_import(request, import_id):
             # Update import statistics
             # -----------------------------------------------
 
-            created_count = result.get(
-                "created_count",
+            validated_count = result.get(
+                "validated_count",
                 0,
             )
 
@@ -967,7 +967,7 @@ def integration_import(request, import_id):
         request,
         (
             f"Import completed successfully. "
-            f"{created_count} record(s) created."
+            f"{validated_count} record(s) validated."
         ),
     )
 
