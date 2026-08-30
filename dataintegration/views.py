@@ -248,6 +248,12 @@ def integration_analyze(request, import_id):
             data_import
         )
 
+        logger.info(
+            "ANALYZE RESULT - import_id=%s analysis_data=%r",
+            data_import.id,
+            analysis_data,
+        )
+
         # ----------------------------------------------------
         # Validate importer response
         # ----------------------------------------------------
@@ -263,6 +269,13 @@ def integration_analyze(request, import_id):
         headers = analysis_data.get(
             "headers",
             [],
+        )
+
+        logger.info(
+            "ANALYZE HEADERS - import_id=%s headers=%r count=%s",
+            data_import.id,
+            headers,
+            len(headers),
         )
 
         total_rows = analysis_data.get(
@@ -320,6 +333,12 @@ def integration_analyze(request, import_id):
 
         DataImportColumn.objects.bulk_create(
             column_objects
+        )
+
+        logger.info(
+            "ANALYZE COLUMNS CREATED - import_id=%s count=%s",
+            data_import.id,
+            len(column_objects),
         )
 
         try:

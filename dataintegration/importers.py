@@ -6,6 +6,10 @@ from openpyxl import load_workbook
 
 from .models import DataImport
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 # ============================================================
 # File type helpers
@@ -549,6 +553,12 @@ def analyze_import_file(data_import):
 
     rows = read_import_rows(
         data_import
+    )
+
+    logger.info(
+        "IMPORT ANALYSIS - import_id=%s rows=%s",
+        data_import.id,
+        len(rows) if rows else 0,
     )
 
     if not rows:
