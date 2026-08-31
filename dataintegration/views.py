@@ -1048,8 +1048,18 @@ def integration_import(request, import_id):
     )
 
 
+
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.db import IntegrityError, transaction
+from django.shortcuts import redirect
+from django.utils import timezone
+from django.views.decorators.http import require_POST
+
 from .importers import read_import_rows
 from app.models import *
+
+
 @login_required
 @require_POST
 def integration_create_import_models(request, import_id):
@@ -1057,6 +1067,14 @@ def integration_create_import_models(request, import_id):
     Create target-model records from a READY DataImport.
 
     Only rows that individually passed validation are imported.
+
+    Import behavior:
+        - Valid rows are created.
+        - Invalid validation rows are skipped.
+        - Database failures on individual rows are recorded and skipped.
+        - Remaining rows continue to import.
+        - DataImport is marked COMPLETED when processing finishes,
+          even if some rows failed.
     """
 
     logger.info(
@@ -1110,7 +1128,9 @@ def integration_create_import_models(request, import_id):
         "ServiceRequest": ServiceRequest,
     }
 
-    target_model = target_models.get(target_model_name)
+    target_model = target_models.get(
+        target_model_name
+    )
 
     if target_model is None:
 
@@ -1210,15 +1230,20 @@ def integration_create_import_models(request, import_id):
         )
 
         logger.info(
-        "CREATE MODELS VALIDATION RESULT: import_id=%s keys=%s",
-        data_import.id,
-        validation_result.keys(),
+            "CREATE MODELS VALIDATION RESULT: import_id=%s keys=%s",
+            data_import.id,
+            validation_result.keys(),
         )
 
         logger.info(
             "CREATE MODELS VALIDATION ROW COUNT: import_id=%s count=%s",
             data_import.id,
-            len(validation_result.get("rows", [])),
+            len(
+                validation_result.get(
+                    "rows",
+                    [],
+                )
+            ),
         )
 
     except Exception as exc:
@@ -1240,170 +1265,260 @@ def integration_create_import_models(request, import_id):
 
     # --------------------------------------------------------
     # Create target records
+    #
+    # IMPORTANT:
+    # There is intentionally NO transaction.atomic() around
+    # the entire loop.
+    #
+    # Each row is processed independently so that a failure
+    # on one row does not stop the remaining rows.
     # --------------------------------------------------------
 
     created_count = 0
     skipped_count = 0
+    failed_count = 0
 
-    try:
+    failed_rows = []
 
-        with transaction.atomic():
+    for row_result in validation_result["rows"]:
 
-            for row_result in validation_result["rows"]:
+        row_number = row_result["row_number"]
 
-                # ------------------------------------------------
-                # Import ONLY individually valid rows
-                # ------------------------------------------------
+        # ----------------------------------------------------
+        # Import ONLY individually valid rows
+        # ----------------------------------------------------
 
-                if not row_result["valid"]:
+        if not row_result["valid"]:
 
-                    skipped_count += 1
+            skipped_count += 1
 
-                    logger.info(
-                        (
-                            "CREATE MODELS SKIPPED: "
-                            "import_id=%s row=%s errors=%s"
-                        ),
-                        data_import.id,
-                        row_result["row_number"],
-                        row_result["errors"],
-                    )
+            logger.info(
+                (
+                    "CREATE MODELS SKIPPED: "
+                    "import_id=%s row=%s errors=%s"
+                ),
+                data_import.id,
+                row_number,
+                row_result["errors"],
+            )
 
-                    continue
+            failed_rows.append(
+                {
+                    "row_number": row_number,
+                    "type": "validation",
+                    "errors": row_result["errors"],
+                }
+            )
 
-                row = row_result["data"]
+            continue
 
-                # ------------------------------------------------
-                # Build target model data
-                # ------------------------------------------------
+        row = row_result["data"]
 
-                model_data = {}
+        # ----------------------------------------------------
+        # Build target model data
+        # ----------------------------------------------------
 
-                for mapping in mappings:
+        model_data = {}
 
-                    target_field = (
-                        mapping.target_field or ""
-                    ).strip()
+        for mapping in mappings:
 
-                    if not target_field:
-                        continue
+            target_field = (
+                mapping.target_field or ""
+            ).strip()
 
-                    source_column = (
-                        mapping.source_column
-                    )
+            if not target_field:
+                continue
 
-                    value = row.get(
-                        source_column
-                    )
+            source_column = (
+                mapping.source_column
+            )
 
-                    value = normalize_value(
-                        value
-                    )
+            value = row.get(
+                source_column
+            )
 
-                    if is_empty(value):
-                        continue
+            value = normalize_value(
+                value
+            )
 
-                    model_data[target_field] = value
+            if is_empty(value):
+                continue
 
-                # ------------------------------------------------
-                # Automatically assign company if target model
-                # has a company field.
-                # ------------------------------------------------
+            model_data[target_field] = value
 
-                try:
+        # ----------------------------------------------------
+        # Automatically assign company if target model
+        # has a company field.
+        # ----------------------------------------------------
 
-                    target_model._meta.get_field(
-                        "company"
-                    )
+        try:
 
-                    model_data["company"] = (
-                        data_import.company
-                    )
+            target_model._meta.get_field(
+                "company"
+            )
 
-                except Exception:
+            model_data["company"] = (
+                data_import.company
+            )
 
-                    pass
+        except Exception:
 
-                # ------------------------------------------------
-                # Create target record
-                # ------------------------------------------------
+            pass
 
-                logger.info(
-                    "CREATE MODELS ATTEMPT: import_id=%s row=%s model=%s data=%s",
-                    data_import.id,
-                    row_result["row_number"],
-                    target_model.__name__,
-                    model_data,
-                )
+        # ----------------------------------------------------
+        # Create target record
+        #
+        # Each individual row gets its own transaction.
+        # If the create fails, only that row is rolled back.
+        # ----------------------------------------------------
+
+        logger.info(
+            (
+                "CREATE MODELS ATTEMPT: "
+                "import_id=%s row=%s model=%s data=%s"
+            ),
+            data_import.id,
+            row_number,
+            target_model.__name__,
+            model_data,
+        )
+
+        try:
+
+            with transaction.atomic():
 
                 target_model.objects.create(
                     **model_data
                 )
 
-                created_count += 1
+        except IntegrityError as exc:
 
-                logger.info(
-                    "CREATE MODELS SUCCESS: import_id=%s row=%s model=%s",
-                    data_import.id,
-                    row_result["row_number"],
-                    target_model.__name__,
-                )
+            failed_count += 1
 
-                logger.info(
-                    (
-                        "CREATE MODELS CREATED: "
-                        "import_id=%s row=%s model=%s"
-                    ),
-                    data_import.id,
-                    row_result["row_number"],
-                    target_model.__name__,
-                )
-
-            # ----------------------------------------------------
-            # Mark DataImport completed
-            # ----------------------------------------------------
-
-            data_import.status = (
-                DataImport.Status.COMPLETED
+            logger.exception(
+                (
+                    "CREATE MODELS FAILED: "
+                    "import_id=%s row=%s model=%s "
+                    "error=%s"
+                ),
+                data_import.id,
+                row_number,
+                target_model.__name__,
+                exc,
             )
 
-            data_import.completed_at = (
-                timezone.now()
+            failed_rows.append(
+                {
+                    "row_number": row_number,
+                    "type": "database",
+                    "errors": [
+                        str(exc)
+                    ],
+                    "data": model_data,
+                }
             )
 
-            data_import.save(
-                update_fields=[
-                    "status",
-                    "completed_at",
-                ]
+            # ----------------------------------------------
+            # IMPORTANT:
+            # Continue importing the remaining rows.
+            # ----------------------------------------------
+
+            continue
+
+        except Exception as exc:
+
+            failed_count += 1
+
+            logger.exception(
+                (
+                    "CREATE MODELS FAILED: "
+                    "import_id=%s row=%s model=%s "
+                    "error=%s"
+                ),
+                data_import.id,
+                row_number,
+                target_model.__name__,
+                exc,
             )
+
+            failed_rows.append(
+                {
+                    "row_number": row_number,
+                    "type": "error",
+                    "errors": [
+                        str(exc)
+                    ],
+                    "data": model_data,
+                }
+            )
+
+            # ----------------------------------------------
+            # Continue importing remaining rows.
+            # ----------------------------------------------
+
+            continue
+
+        # ----------------------------------------------------
+        # Successful creation
+        # ----------------------------------------------------
+
+        created_count += 1
+
+        logger.info(
+            "CREATE MODELS SUCCESS: import_id=%s row=%s model=%s",
+            data_import.id,
+            row_number,
+            target_model.__name__,
+        )
+
+        logger.info(
+            (
+                "CREATE MODELS CREATED: "
+                "import_id=%s row=%s model=%s"
+            ),
+            data_import.id,
+            row_number,
+            target_model.__name__,
+        )
+
+    # --------------------------------------------------------
+    # Mark DataImport completed
+    #
+    # The import itself completed even if individual rows
+    # failed.
+    # --------------------------------------------------------
+
+    try:
+
+        data_import.status = (
+            DataImport.Status.COMPLETED
+        )
+
+        data_import.completed_at = (
+            timezone.now()
+        )
+
+        data_import.save(
+            update_fields=[
+                "status",
+                "completed_at",
+            ]
+        )
 
     except Exception as exc:
 
         logger.exception(
-            "CREATE MODELS FAILED: import_id=%s error=%s",
+            (
+                "CREATE MODELS STATUS UPDATE FAILED: "
+                "import_id=%s error=%s"
+            ),
             data_import.id,
             exc,
         )
 
         messages.error(
             request,
-            f"Import failed: {type(exc).__name__}: {exc}",
-        )
-
-        data_import.status = (
-            DataImport.Status.FAILED
-        )
-
-        data_import.save(
-            update_fields=[
-                "status",
-            ]
-        )
-
-        messages.error(
-            request,
-            f"Import failed: {exc}",
+            f"Unable to finalize the import: {exc}",
         )
 
         return redirect(
@@ -1412,38 +1527,77 @@ def integration_create_import_models(request, import_id):
         )
 
     # --------------------------------------------------------
-    # Success
+    # Store failed rows for results page
+    #
+    # This assumes your DataImport model has a field available
+    # for storing this information. If it does not, we can
+    # instead pass/display the failures another way.
     # --------------------------------------------------------
 
     logger.info(
         (
             "CREATE MODELS COMPLETED: "
-            "import_id=%s created=%s skipped=%s"
+            "import_id=%s created=%s skipped=%s failed=%s"
         ),
         data_import.id,
         created_count,
         skipped_count,
+        failed_count,
     )
 
-    messages.success(
-        request,
-        (
-            f"Import completed successfully. "
-            f"{created_count} "
-            f"{data_import.target_model} "
-            f"record(s) created."
-        ),
-    )
+    # --------------------------------------------------------
+    # User messages
+    # --------------------------------------------------------
+
+    if failed_count or skipped_count:
+
+        messages.warning(
+            request,
+            (
+                f"Import completed with issues. "
+                f"{created_count} "
+                f"{data_import.target_model} "
+                f"record(s) created, "
+                f"{failed_count + skipped_count} "
+                f"row(s) were not imported."
+            ),
+        )
+
+    else:
+
+        messages.success(
+            request,
+            (
+                f"Import completed successfully. "
+                f"{created_count} "
+                f"{data_import.target_model} "
+                f"record(s) created."
+            ),
+        )
 
     if skipped_count:
 
         messages.info(
             request,
             (
-                f"{skipped_count} invalid "
-                f"record(s) were skipped."
+                f"{skipped_count} row(s) failed "
+                f"validation and were skipped."
             ),
         )
+
+    if failed_count:
+
+        messages.warning(
+            request,
+            (
+                f"{failed_count} row(s) could not be "
+                f"created because of database errors."
+            ),
+        )
+
+    # --------------------------------------------------------
+    # Redirect to results
+    # --------------------------------------------------------
 
     return redirect(
         "dataintegration:integration_results",
