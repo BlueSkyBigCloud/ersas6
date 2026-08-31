@@ -1209,6 +1209,18 @@ def integration_create_import_models(request, import_id):
             rows=rows,
         )
 
+        logger.info(
+        "CREATE MODELS VALIDATION RESULT: import_id=%s keys=%s",
+        data_import.id,
+        validation_result.keys(),
+        )
+
+        logger.info(
+            "CREATE MODELS VALIDATION ROW COUNT: import_id=%s count=%s",
+            data_import.id,
+            len(validation_result.get("rows", [])),
+        )
+
     except Exception as exc:
 
         logger.exception(
@@ -1316,11 +1328,26 @@ def integration_create_import_models(request, import_id):
                 # Create target record
                 # ------------------------------------------------
 
+                logger.info(
+                    "CREATE MODELS ATTEMPT: import_id=%s row=%s model=%s data=%s",
+                    data_import.id,
+                    row_result["row_number"],
+                    target_model.__name__,
+                    model_data,
+                )
+
                 target_model.objects.create(
                     **model_data
                 )
 
                 created_count += 1
+
+                logger.info(
+                    "CREATE MODELS SUCCESS: import_id=%s row=%s model=%s",
+                    data_import.id,
+                    row_result["row_number"],
+                    target_model.__name__,
+                )
 
                 logger.info(
                     (
@@ -1357,6 +1384,11 @@ def integration_create_import_models(request, import_id):
             "CREATE MODELS FAILED: import_id=%s error=%s",
             data_import.id,
             exc,
+        )
+
+        messages.error(
+            request,
+            f"Import failed: {type(exc).__name__}: {exc}",
         )
 
         data_import.status = (
