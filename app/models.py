@@ -215,7 +215,7 @@ class Employee(models.Model):
         super().save(*args, **kwargs)
 
     def decrypt_fields(self, user=None):
-        if user and self.created_by_user and self.created_by_user.company == user.company:
+        if self.company == user.company:
             try:
                 self.position = decrypt(self.position)
                 self.department = decrypt(self.department)
