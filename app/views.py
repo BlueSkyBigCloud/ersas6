@@ -381,7 +381,7 @@ def dashboard_view(request):
 
     total_locations = Location.objects.filter(created_by_user__company=user_company).count()
     total_equipment = Equipment.objects.filter(created_by_user__company=user_company).aggregate(total=Sum('quantity'))['total'] or 0
-    total_employees = Employee.objects.filter(self__company=user_company).count()
+    total_employees = Employee.objects.filter(company=user_company).count()
     total_service_requests = ServiceRequest.objects.filter(created_by_user__company=user_company).count()
 
 
