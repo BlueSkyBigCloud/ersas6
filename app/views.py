@@ -639,7 +639,7 @@ def employee_list(request):
 
     # Retrieve and order the QuerySet, filtered by company
     employees = Employee.objects.filter(
-        created_by_user__company=user_company
+        company=user_company
     ).order_by('id')  # Explicit ordering to avoid UnorderedObjectListWarning
     # Paginate the QuerySet
     paginator = Paginator(employees, 100)  # Show 10 employees per page
@@ -648,8 +648,7 @@ def employee_list(request):
 
     # Decrypt fields for each employee on the current page
     for employee in page_obj.object_list:
-        created_by_company = getattr(employee.created_by_user, 'company', None)
-        if created_by_company == user_company:
+        if employee.company == user_company:
             employee.decrypt_fields(user=request.user)
 
     # Check if no employees exist
