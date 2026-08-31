@@ -1099,9 +1099,7 @@ def integration_create_import_models(request, import_id):
     # Resolve target model
     # --------------------------------------------------------
 
-    target_model = get_target_model(
-        data_import.target_model
-    )
+    target_model = data_import.target_model
 
     if target_model is None:
 
