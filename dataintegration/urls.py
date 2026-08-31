@@ -11,6 +11,7 @@ from .views import (
     integration_import,
     integration_results,
     integration_cancel,
+    integration_create_import_models
 )
 
 
@@ -97,7 +98,7 @@ urlpatterns = [
 
     path(
         "create-import-models/<uuid:import_id>/",
-        views.integration_create_import_models,
+        integration_create_import_models,
         name="integration_create_import_models",
     ),
 ]
