@@ -1047,7 +1047,7 @@ def integration_import(request, import_id):
 
 
 from .importers import read_import_rows
-
+from app.models import *
 
 @login_required
 @require_POST
