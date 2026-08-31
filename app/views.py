@@ -379,10 +379,10 @@ def accountedit_view(request):
 def dashboard_view(request):
     user_company = getattr(request.user, 'company', None) 
 
-    total_locations = Location.objects.filter(created_by_user__company=user_company).count()
-    total_equipment = Equipment.objects.filter(created_by_user__company=user_company).aggregate(total=Sum('quantity'))['total'] or 0
+    total_locations = Location.objects.filter(company=user_company).count()
+    total_equipment = Equipment.objects.filter(company=user_company).aggregate(total=Sum('quantity'))['total'] or 0
     total_employees = Employee.objects.filter(company=user_company).count()
-    total_service_requests = ServiceRequest.objects.filter(created_by_user__company=user_company).count()
+    total_service_requests = ServiceRequest.objects.filter(company=user_company).count()
 
 
     # Active employees grouped by location
