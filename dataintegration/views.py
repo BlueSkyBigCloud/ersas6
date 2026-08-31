@@ -428,6 +428,8 @@ def integration_analyze(request, import_id):
 # ============================================================
 from .importers import read_import_rows
 from .validators import (
+    is_empty,
+    normalize_value,
     validate_import,
     update_import_validation_status,
 )
@@ -1099,7 +1101,16 @@ def integration_create_import_models(request, import_id):
     # Resolve target model
     # --------------------------------------------------------
 
-    target_model = data_import.target_model
+    target_model_name = data_import.target_model or ""
+
+    target_models = {
+        "Employee": Employee,
+        "Equipment": Equipment,
+        "Location": Location,
+        "ServiceRequest": ServiceRequest,
+    }
+
+    target_model = target_models.get(target_model_name)
 
     if target_model is None:
 
