@@ -648,7 +648,6 @@ def employee_list(request):
 
     # Decrypt fields for each employee on the current page
     for employee in page_obj.object_list:
-        if employee.company == user_company:
             employee.decrypt_fields(user=request.user)
 
     # Check if no employees exist
