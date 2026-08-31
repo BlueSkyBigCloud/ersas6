@@ -1,5 +1,7 @@
 from django.urls import path
 
+from app import views
+
 from .views import (
     integration_dashboard,
     integration_upload,
@@ -91,5 +93,11 @@ urlpatterns = [
         "<uuid:import_id>/results/",
         integration_results,
         name="integration_results",
+    ),
+
+    path(
+        "create-import-models/<uuid:import_id>/",
+        views.integration_create_import_models,
+        name="integration_create_import_models",
     ),
 ]

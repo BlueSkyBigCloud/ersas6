@@ -7,9 +7,10 @@ from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views.decorators.http import require_http_methods, require_POST
-from .models import DataImport, DataImportColumn
+from .models import *
 import logging
 from .services import run_import_from_file
+
 
 logger = logging.getLogger(__name__)
 
@@ -1044,3 +1045,287 @@ def integration_import(request, import_id):
         import_id=data_import.id,
     )
 
+
+from .importers import read_import_rows
+
+
+@login_required
+@require_POST
+def integration_create_import_models(request, import_id):
+    """
+    Create Django model records from a validated DataImport.
+
+    This view only allows imports with status READY.
+
+    The DataImport.target_model determines which Django model
+    receives the imported records.
+
+    DataImportColumn records determine how source columns map
+    to target model fields.
+    """
+
+    # --------------------------------------------------------
+    # Get DataImport belonging to the user's company
+    # --------------------------------------------------------
+
+    data_import = get_company_import(
+        request,
+        import_id,
+    )
+
+    # --------------------------------------------------------
+    # Verify import is READY
+    # --------------------------------------------------------
+
+    if data_import.status != DataImport.Status.READY:
+
+        messages.error(
+            request,
+            "This import is not ready to be imported.",
+        )
+
+        return redirect(
+            "dataintegration:integration_validate",
+            import_id=data_import.id,
+        )
+
+    # --------------------------------------------------------
+    # Verify target model exists
+    # --------------------------------------------------------
+
+    target_model = (
+        data_import.target_model or ""
+    ).strip()
+
+    if not target_model:
+
+        messages.error(
+            request,
+            "No target model has been selected for this import.",
+        )
+
+        return redirect(
+            "dataintegration:integration_validate",
+            import_id=data_import.id,
+        )
+
+    # --------------------------------------------------------
+    # Supported target models
+    # --------------------------------------------------------
+
+    target_models = {
+        "Employee": Employee,
+        "Equipment": Equipment,
+    }
+
+    model_class = target_models.get(
+        target_model
+    )
+
+    if model_class is None:
+
+        messages.error(
+            request,
+            f"Unsupported target model: {target_model}",
+        )
+
+        return redirect(
+            "dataintegration:integration_validate",
+            import_id=data_import.id,
+        )
+
+    # --------------------------------------------------------
+    # Get mappings
+    # --------------------------------------------------------
+
+    mappings = list(
+        DataImportColumn.objects
+        .filter(
+            data_import=data_import,
+            is_mapped=True,
+        )
+        .order_by("column_order")
+    )
+
+    if not mappings:
+
+        messages.error(
+            request,
+            "No mapped columns were found for this import.",
+        )
+
+        return redirect(
+            "dataintegration:integration_validate",
+            import_id=data_import.id,
+        )
+
+    # --------------------------------------------------------
+    # Read imported rows
+    # --------------------------------------------------------
+
+    try:
+
+        rows = read_import_rows(
+            data_import
+        )
+
+    except Exception as exc:
+
+        messages.error(
+            request,
+            f"Unable to read the import file: {exc}",
+        )
+
+        return redirect(
+            "dataintegration:integration_validate",
+            import_id=data_import.id,
+        )
+
+    if not rows:
+
+        messages.error(
+            request,
+            "The import file does not contain any records.",
+        )
+
+        return redirect(
+            "dataintegration:integration_validate",
+            import_id=data_import.id,
+        )
+
+    # --------------------------------------------------------
+    # Create target model records
+    # --------------------------------------------------------
+
+    created_count = 0
+    skipped_count = 0
+
+    try:
+
+        with transaction.atomic():
+
+            for row in rows:
+
+                # ------------------------------------------------
+                # Build model fields from the mapping
+                # ------------------------------------------------
+
+                model_data = {}
+
+                for mapping in mappings:
+
+                    source_column = (
+                        mapping.source_column
+                    )
+
+                    target_field = (
+                        mapping.target_field
+                    )
+
+                    if not target_field:
+                        continue
+
+                    value = row.get(
+                        source_column
+                    )
+
+                    model_data[target_field] = value
+
+                # ------------------------------------------------
+                # Skip completely empty records
+                # ------------------------------------------------
+
+                if not any(
+                    value not in [None, ""]
+                    for value in model_data.values()
+                ):
+                    skipped_count += 1
+                    continue
+
+                # ------------------------------------------------
+                # Add company automatically when supported
+                # ------------------------------------------------
+
+                field_names = {
+                    field.name
+                    for field in model_class._meta.get_fields()
+                    if hasattr(field, "name")
+                }
+
+                if "company" in field_names:
+                    model_data["company"] = (
+                        data_import.company
+                    )
+
+                # ------------------------------------------------
+                # Create target model
+                # ------------------------------------------------
+
+                model_class.objects.create(
+                    **model_data
+                )
+
+                created_count += 1
+
+            # ----------------------------------------------------
+            # Mark DataImport completed
+            # ----------------------------------------------------
+
+            data_import.status = (
+                DataImport.Status.COMPLETED
+            )
+
+            data_import.completed_at = timezone.now()
+
+            data_import.save(
+                update_fields=[
+                    "status",
+                    "completed_at",
+                ]
+            )
+
+    except Exception as exc:
+
+        data_import.status = (
+            DataImport.Status.FAILED
+        )
+
+        data_import.save(
+            update_fields=[
+                "status",
+            ]
+        )
+
+        messages.error(
+            request,
+            f"Import failed: {exc}",
+        )
+
+        return redirect(
+            "dataintegration:integration_validate",
+            import_id=data_import.id,
+        )
+
+    # --------------------------------------------------------
+    # Success
+    # --------------------------------------------------------
+
+    messages.success(
+        request,
+        (
+            f"Import completed successfully. "
+            f"{created_count} {target_model} record(s) created."
+        ),
+    )
+
+    if skipped_count:
+
+        messages.info(
+            request,
+            f"{skipped_count} empty record(s) skipped.",
+        )
+
+    return redirect(
+        "dataintegration:integration_results",
+        import_id=data_import.id,
+    )
