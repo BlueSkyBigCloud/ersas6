@@ -642,7 +642,7 @@ def employee_list(request):
         company=user_company
     ).order_by('id')  # Explicit ordering to avoid UnorderedObjectListWarning
     # Paginate the QuerySet
-    paginator = Paginator(employees, 100)  # Show 10 employees per page
+    paginator = Paginator(employees, 25)  # Show 10 employees per page
     page_number = request.GET.get('page')  # Get the current page number from the query string
     page_obj = paginator.get_page(page_number)  # Get the employees for the current page
 
