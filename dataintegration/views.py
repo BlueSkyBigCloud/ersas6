@@ -1048,24 +1048,23 @@ def integration_import(request, import_id):
 
 from .importers import read_import_rows
 from app.models import *
-
 @login_required
 @require_POST
 def integration_create_import_models(request, import_id):
     """
-    Create Django model records from a validated DataImport.
+    Create target-model records from a READY DataImport.
 
-    This view only allows imports with status READY.
-
-    The DataImport.target_model determines which Django model
-    receives the imported records.
-
-    DataImportColumn records determine how source columns map
-    to target model fields.
+    Only rows that individually passed validation are imported.
     """
 
+    logger.info(
+        "CREATE MODELS START: import_id=%s user_id=%s",
+        import_id,
+        request.user.id,
+    )
+
     # --------------------------------------------------------
-    # Get DataImport belonging to the user's company
+    # Get DataImport belonging to user's company
     # --------------------------------------------------------
 
     data_import = get_company_import(
@@ -1073,8 +1072,15 @@ def integration_create_import_models(request, import_id):
         import_id,
     )
 
+    logger.info(
+        "CREATE MODELS LOADED: import_id=%s status=%s target_model=%s",
+        data_import.id,
+        data_import.status,
+        data_import.target_model,
+    )
+
     # --------------------------------------------------------
-    # Verify import is READY
+    # Must be READY
     # --------------------------------------------------------
 
     if data_import.status != DataImport.Status.READY:
@@ -1090,43 +1096,18 @@ def integration_create_import_models(request, import_id):
         )
 
     # --------------------------------------------------------
-    # Verify target model exists
+    # Resolve target model
     # --------------------------------------------------------
 
-    target_model = (
-        data_import.target_model or ""
-    ).strip()
-
-    if not target_model:
-
-        messages.error(
-            request,
-            "No target model has been selected for this import.",
-        )
-
-        return redirect(
-            "dataintegration:integration_validate",
-            import_id=data_import.id,
-        )
-
-    # --------------------------------------------------------
-    # Supported target models
-    # --------------------------------------------------------
-
-    target_models = {
-        "Employee": Employee,
-        "Equipment": Equipment,
-    }
-
-    model_class = target_models.get(
-        target_model
+    target_model = get_target_model(
+        data_import.target_model
     )
 
-    if model_class is None:
+    if target_model is None:
 
         messages.error(
             request,
-            f"Unsupported target model: {target_model}",
+            f"Unsupported target model: {data_import.target_model}",
         )
 
         return redirect(
@@ -1134,8 +1115,14 @@ def integration_create_import_models(request, import_id):
             import_id=data_import.id,
         )
 
+    logger.info(
+        "CREATE MODELS TARGET: import_id=%s model=%s",
+        data_import.id,
+        target_model.__name__,
+    )
+
     # --------------------------------------------------------
-    # Get mappings
+    # Get mapped columns
     # --------------------------------------------------------
 
     mappings = list(
@@ -1160,7 +1147,7 @@ def integration_create_import_models(request, import_id):
         )
 
     # --------------------------------------------------------
-    # Read imported rows
+    # Read uploaded file
     # --------------------------------------------------------
 
     try:
@@ -1170,6 +1157,11 @@ def integration_create_import_models(request, import_id):
         )
 
     except Exception as exc:
+
+        logger.exception(
+            "CREATE MODELS READ FAILED: import_id=%s",
+            data_import.id,
+        )
 
         messages.error(
             request,
@@ -1194,7 +1186,39 @@ def integration_create_import_models(request, import_id):
         )
 
     # --------------------------------------------------------
-    # Create target model records
+    # Validate again
+    #
+    # We intentionally revalidate here because the current
+    # validation results are stored as statistics, not as
+    # persistent row records.
+    # --------------------------------------------------------
+
+    try:
+
+        validation_result = validate_import(
+            data_import=data_import,
+            rows=rows,
+        )
+
+    except Exception as exc:
+
+        logger.exception(
+            "CREATE MODELS VALIDATION FAILED: import_id=%s",
+            data_import.id,
+        )
+
+        messages.error(
+            request,
+            f"Unable to validate the import: {exc}",
+        )
+
+        return redirect(
+            "dataintegration:integration_validate",
+            import_id=data_import.id,
+        )
+
+    # --------------------------------------------------------
+    # Create target records
     # --------------------------------------------------------
 
     created_count = 0
@@ -1204,68 +1228,100 @@ def integration_create_import_models(request, import_id):
 
         with transaction.atomic():
 
-            for row in rows:
+            for row_result in validation_result["rows"]:
 
                 # ------------------------------------------------
-                # Build model fields from the mapping
+                # Import ONLY individually valid rows
+                # ------------------------------------------------
+
+                if not row_result["valid"]:
+
+                    skipped_count += 1
+
+                    logger.info(
+                        (
+                            "CREATE MODELS SKIPPED: "
+                            "import_id=%s row=%s errors=%s"
+                        ),
+                        data_import.id,
+                        row_result["row_number"],
+                        row_result["errors"],
+                    )
+
+                    continue
+
+                row = row_result["data"]
+
+                # ------------------------------------------------
+                # Build target model data
                 # ------------------------------------------------
 
                 model_data = {}
 
                 for mapping in mappings:
 
-                    source_column = (
-                        mapping.source_column
-                    )
-
                     target_field = (
-                        mapping.target_field
-                    )
+                        mapping.target_field or ""
+                    ).strip()
 
                     if not target_field:
                         continue
+
+                    source_column = (
+                        mapping.source_column
+                    )
 
                     value = row.get(
                         source_column
                     )
 
+                    value = normalize_value(
+                        value
+                    )
+
+                    if is_empty(value):
+                        continue
+
                     model_data[target_field] = value
 
                 # ------------------------------------------------
-                # Skip completely empty records
+                # Automatically assign company if target model
+                # has a company field.
                 # ------------------------------------------------
 
-                if not any(
-                    value not in [None, ""]
-                    for value in model_data.values()
-                ):
-                    skipped_count += 1
-                    continue
+                try:
 
-                # ------------------------------------------------
-                # Add company automatically when supported
-                # ------------------------------------------------
+                    target_model._meta.get_field(
+                        "company"
+                    )
 
-                field_names = {
-                    field.name
-                    for field in model_class._meta.get_fields()
-                    if hasattr(field, "name")
-                }
-
-                if "company" in field_names:
                     model_data["company"] = (
                         data_import.company
                     )
 
+                except Exception:
+
+                    pass
+
                 # ------------------------------------------------
-                # Create target model
+                # Create target record
                 # ------------------------------------------------
 
-                model_class.objects.create(
+                target_model.objects.create(
                     **model_data
                 )
 
                 created_count += 1
+
+                logger.info(
+                    (
+                        "CREATE MODELS CREATED: "
+                        "import_id=%s row=%s model=%s"
+                    ),
+                    data_import.id,
+                    row_result["row_number"],
+                    target_model.__name__,
+                )
 
             # ----------------------------------------------------
             # Mark DataImport completed
@@ -1275,7 +1331,9 @@ def integration_create_import_models(request, import_id):
                 DataImport.Status.COMPLETED
             )
 
-            data_import.completed_at = timezone.now()
+            data_import.completed_at = (
+                timezone.now()
+            )
 
             data_import.save(
                 update_fields=[
@@ -1285,6 +1343,12 @@ def integration_create_import_models(request, import_id):
             )
 
     except Exception as exc:
+
+        logger.exception(
+            "CREATE MODELS FAILED: import_id=%s error=%s",
+            data_import.id,
+            exc,
+        )
 
         data_import.status = (
             DataImport.Status.FAILED
@@ -1310,11 +1374,23 @@ def integration_create_import_models(request, import_id):
     # Success
     # --------------------------------------------------------
 
+    logger.info(
+        (
+            "CREATE MODELS COMPLETED: "
+            "import_id=%s created=%s skipped=%s"
+        ),
+        data_import.id,
+        created_count,
+        skipped_count,
+    )
+
     messages.success(
         request,
         (
             f"Import completed successfully. "
-            f"{created_count} {target_model} record(s) created."
+            f"{created_count} "
+            f"{data_import.target_model} "
+            f"record(s) created."
         ),
     )
 
@@ -1322,7 +1398,10 @@ def integration_create_import_models(request, import_id):
 
         messages.info(
             request,
-            f"{skipped_count} empty record(s) skipped.",
+            (
+                f"{skipped_count} invalid "
+                f"record(s) were skipped."
+            ),
         )
 
     return redirect(
