@@ -14,6 +14,8 @@ from django.core.mail import send_mail
 import stripe
 from .decorators import onboarded
 from business.forms import *
+from django.db.models import Count, Sum, Q
+from django.core.paginator import Paginator
 
 def staff_required(view_func):
     def _wrapped_view(request, *args, **kwargs):
@@ -624,41 +626,97 @@ def equipment_delete(request, equipment_id):  # Accepts pk as an argument
 
     return redirect('equipment_list')
 
+
 @onboarded()
 @login_required
 def employee_list(request):
 
-    
     # Ensure the user's company attribute exists
     user_company = getattr(request.user, 'company', None)
+
     if not user_company:
         return render(request, 'employee_list.html', {
             'employees': [],
             'message': "No company associated with the current user.",
         })
 
-    # Retrieve and order the QuerySet, filtered by company
+    # ------------------------------------------------------------
+    # Base QuerySet - only employees belonging to user's company
+    # ------------------------------------------------------------
+
     employees = Employee.objects.filter(
         company=user_company
-    ).order_by('id')  # Explicit ordering to avoid UnorderedObjectListWarning
-    # Paginate the QuerySet
-    paginator = Paginator(employees, 25)  # Show 10 employees per page
-    page_number = request.GET.get('page')  # Get the current page number from the query string
-    page_obj = paginator.get_page(page_number)  # Get the employees for the current page
+    )
 
-    # Decrypt fields for each employee on the current page
+    # ------------------------------------------------------------
+    # Search / Filter
+    # ------------------------------------------------------------
+
+    search = request.GET.get('search', '').strip()
+
+    if search:
+        employees = employees.filter(
+            Q(employee_number__icontains=search) |
+            Q(first_name__icontains=search) |
+            Q(last_name__icontains=search) |
+            Q(callsign__icontains=search)
+        )
+
+    # ------------------------------------------------------------
+    # Sorting
+    # ------------------------------------------------------------
+
+    sort = request.GET.get('sort', 'id')
+
+    allowed_sorts = {
+        'id': 'id',
+        'employee_number': 'employee_number',
+        'first_name': 'first_name',
+        'last_name': 'last_name',
+        'callsign': 'callsign',
+    }
+
+    # Use the requested sort only if it is allowed
+    sort_field = allowed_sorts.get(sort, 'id')
+
+    employees = employees.order_by(sort_field)
+
+    # ------------------------------------------------------------
+    # Pagination
+    # ------------------------------------------------------------
+
+    paginator = Paginator(employees, 25)
+
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    # ------------------------------------------------------------
+    # Decrypt fields for employees on current page
+    # ------------------------------------------------------------
+
     for employee in page_obj.object_list:
-            employee.decrypt_fields(user=request.user)
+        employee.decrypt_fields(user=request.user)
 
-    # Check if no employees exist
+    # ------------------------------------------------------------
+    # Check if employees exist
+    # ------------------------------------------------------------
+
     message = "No employees found." if not employees.exists() else None
 
-    # Render the template with the context
+    # ------------------------------------------------------------
+    # Render
+    # ------------------------------------------------------------
+
     return render(request, 'employee_list.html', {
-        'employees': page_obj.object_list,  # Only pass the current page's employees
+        'employees': page_obj.object_list,
         'message': message,
         'page_obj': page_obj,
+
+        # Return these so the template can preserve selections
+        'search': search,
+        'sort': sort,
     })
+
 
 @onboarded()
 @login_required
