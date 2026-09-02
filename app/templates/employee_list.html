@@ -1,251 +1,179 @@
+{% extends 'base2.html' %}
 
-{% extends "base2.html" %}
+{% block title %}Employee List{% endblock %}
 
 {% block content %}
 
-<div class="container-fluid">
+<br>
+<br>
 
-    <!-- ============================================================
-         Service Navigation
-         ============================================================ -->
+<head>
+    <meta charset="UTF-8">
+    <title>Employee List</title>
+</head>
 
-    <div
-        class="service-actions-container"
-        style="
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            flex-wrap: wrap;
-            margin-bottom: 25px;
-        "
-    >
 
-        <div class="service-actions">
-            <a
-                class="button-calendar-btn"
-                href="{% url 'location_list' %}"
-            >
-                Locations
-            </a>
-        </div>
+<!-- ============================================================
+     Service Navigation
+     ============================================================ -->
 
-        <div class="service-actions">
-            <a
-                class="button-calendar-btn"
-                href="{% url 'equipment_list' %}"
-            >
-                Equipment
-            </a>
-        </div>
+<div center class="service-actions-container"
+     style="display: flex; justify-content: center; gap: 10px;">
 
-        <div class="service-actions">
-            <a
-                class="button-calendar-btn"
-                href="{% url 'employee_list' %}"
-            >
-                Employees
-            </a>
-        </div>
-
-        <div class="service-actions">
-            <a
-                class="button-calendar-btn"
-                href="{% url 'servicetype_list' %}"
-            >
-                Service Types
-            </a>
-        </div>
-
-        <div class="service-actions">
-            <a
-                class="button-calendar-btn"
-                href="{% url 'calendar_view' %}"
-            >
-                Calendar
-            </a>
-        </div>
-
+    <div class="service-actions">
+        <a class="button-calendar-btn"
+           href="{% url 'location_list' %}">
+            Locations
+        </a>
     </div>
 
+    <div class="service-actions">
+        <a class="button-calendar-btn"
+           href="{% url 'equipment_list' %}">
+            Equipment
+        </a>
+    </div>
 
-    <!-- ============================================================
+    <div class="service-actions">
+        <a class="button-calendar-btn"
+           href="{% url 'employee_list' %}">
+            Employees
+        </a>
+    </div>
+
+    <div class="service-actions">
+        <a class="button-calendar-btn"
+           href="{% url 'servicetype_list' %}">
+            Service Types
+        </a>
+    </div>
+
+    <div class="service-actions">
+        <a class="button-calendar-btn"
+           href="{% url 'calendar_view' %}">
+            Calendar
+        </a>
+    </div>
+
+</div>
+
+
+<body>
+
+    <!-- ========================================================
          Page Header
-         ============================================================ -->
+         ======================================================== -->
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Employees</h1>
 
-        <div>
 
-            <h2>Employees</h2>
+    <!-- ========================================================
+         Add Employee
+         ======================================================== -->
 
-            <p class="text-muted mb-0">
-                Manage employees for your company.
-            </p>
+    <div class="model-actions">
 
-        </div>
+        <a class="button add-model-btn"
+           href="{% url 'employee_create' %}">
+            Add New Employee
+        </a>
 
     </div>
 
 
-    <!-- ============================================================
-         Search and Sort
-         ============================================================ -->
+    <!-- ========================================================
+         Search / Sort
+         ======================================================== -->
 
-    <form
-        id="employeeSearchForm"
-        method="get"
-        class="mb-4"
-        onsubmit="return false;"
-    >
+    <div class="model-actions">
 
-        <div class="row g-3 align-items-end">
+        <input
+            type="text"
+            id="employeeSearch"
+            name="search"
+            placeholder="Search employee number, first name, last name, or callsign"
+            value="{{ search }}"
+        >
 
-            <!-- Search -->
+        <select id="employeeSort" name="sort">
 
-            <div class="col-md-6">
+            <option value="-id"
+                {% if sort == "-id" %}selected{% endif %}>
+                Employee ID — Newest
+            </option>
 
-                <label
-                    for="search"
-                    class="form-label"
-                >
-                    Search Employees
-                </label>
+            <option value="id"
+                {% if sort == "id" %}selected{% endif %}>
+                Employee ID — Oldest
+            </option>
 
-                <input
-                    type="text"
-                    id="search"
-                    name="search"
-                    class="form-control"
-                    placeholder="Employee number, first name, last name, or callsign"
-                    value="{{ search }}"
-                    autocomplete="off"
-                >
+            <option value="employee_number"
+                {% if sort == "employee_number" %}selected{% endif %}>
+                Employee Number — A-Z
+            </option>
 
-            </div>
+            <option value="-employee_number"
+                {% if sort == "-employee_number" %}selected{% endif %}>
+                Employee Number — Z-A
+            </option>
 
+            <option value="first_name"
+                {% if sort == "first_name" %}selected{% endif %}>
+                First Name — A-Z
+            </option>
 
-            <!-- Sort -->
+            <option value="-first_name"
+                {% if sort == "-first_name" %}selected{% endif %}>
+                First Name — Z-A
+            </option>
 
-            <div class="col-md-4">
+            <option value="last_name"
+                {% if sort == "last_name" %}selected{% endif %}>
+                Last Name — A-Z
+            </option>
 
-                <label
-                    for="sort"
-                    class="form-label"
-                >
-                    Sort By
-                </label>
+            <option value="-last_name"
+                {% if sort == "-last_name" %}selected{% endif %}>
+                Last Name — Z-A
+            </option>
 
-                <select
-                    id="sort"
-                    name="sort"
-                    class="form-select"
-                >
+            <option value="callsign"
+                {% if sort == "callsign" %}selected{% endif %}>
+                Callsign — A-Z
+            </option>
 
-                    <option
-                        value="-id"
-                        {% if sort == "-id" %}selected{% endif %}
-                    >
-                        Employee ID — Newest
-                    </option>
+            <option value="-callsign"
+                {% if sort == "-callsign" %}selected{% endif %}>
+                Callsign — Z-A
+            </option>
 
-                    <option
-                        value="id"
-                        {% if sort == "id" %}selected{% endif %}
-                    >
-                        Employee ID — Oldest
-                    </option>
+        </select>
 
-                    <option
-                        value="employee_number"
-                        {% if sort == "employee_number" %}selected{% endif %}
-                    >
-                        Employee Number — A-Z
-                    </option>
+        <button
+            type="button"
+            id="employeeSearchButton"
+            class="button"
+        >
+            Search / Sort
+        </button>
 
-                    <option
-                        value="-employee_number"
-                        {% if sort == "-employee_number" %}selected{% endif %}
-                    >
-                        Employee Number — Z-A
-                    </option>
+        <button
+            type="button"
+            id="employeeClearButton"
+            class="button"
+        >
+            Clear
+        </button>
 
-                    <option
-                        value="first_name"
-                        {% if sort == "first_name" %}selected{% endif %}
-                    >
-                        First Name — A-Z
-                    </option>
-
-                    <option
-                        value="-first_name"
-                        {% if sort == "-first_name" %}selected{% endif %}
-                    >
-                        First Name — Z-A
-                    </option>
-
-                    <option
-                        value="last_name"
-                        {% if sort == "last_name" %}selected{% endif %}
-                    >
-                        Last Name — A-Z
-                    </option>
-
-                    <option
-                        value="-last_name"
-                        {% if sort == "-last_name" %}selected{% endif %}
-                    >
-                        Last Name — Z-A
-                    </option>
-
-                    <option
-                        value="callsign"
-                        {% if sort == "callsign" %}selected{% endif %}
-                    >
-                        Callsign — A-Z
-                    </option>
-
-                    <option
-                        value="-callsign"
-                        {% if sort == "-callsign" %}selected{% endif %}
-                    >
-                        Callsign — Z-A
-                    </option>
-
-                </select>
-
-            </div>
+    </div>
 
 
-            <!-- Buttons -->
-
-            <div class="col-md-2">
-
-                <button
-                    type="button"
-                    id="employeeSearchButton"
-                    class="btn btn-primary w-100 mb-2"
-                >
-                    Search / Sort
-                </button>
-
-                <button
-                    type="button"
-                    id="employeeClearButton"
-                    class="btn btn-secondary w-100"
-                >
-                    Clear
-                </button>
-
-            </div>
-
-        </div>
-
-    </form>
+    <br>
 
 
-    <!-- ============================================================
-         AJAX Employee Results
-         ============================================================ -->
+    <!-- ========================================================
+         Employee Results
+         ======================================================== -->
 
     <div id="employeeResults">
 
@@ -253,11 +181,12 @@
 
     </div>
 
-</div>
+
+</body>
 
 
 <!-- ================================================================
-     AJAX Employee Search / Sort / Pagination
+     AJAX Search / Sort / Pagination
      ================================================================ -->
 
 <script>
@@ -265,10 +194,10 @@
 document.addEventListener("DOMContentLoaded", function () {
 
     const searchInput =
-        document.getElementById("search");
+        document.getElementById("employeeSearch");
 
     const sortSelect =
-        document.getElementById("sort");
+        document.getElementById("employeeSort");
 
     const searchButton =
         document.getElementById("employeeSearchButton");
@@ -295,6 +224,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const sort =
             sortSelect.value;
 
+
         const params =
             new URLSearchParams();
 
@@ -319,9 +249,11 @@ document.addEventListener("DOMContentLoaded", function () {
         .then(response => {
 
             if (!response.ok) {
+
                 throw new Error(
                     `HTTP error: ${response.status}`
                 );
+
             }
 
             return response.json();
@@ -335,16 +267,13 @@ document.addEventListener("DOMContentLoaded", function () {
             resultsContainer.style.opacity = "1";
 
 
-            // Update browser URL without
-            // causing a page reload.
-
-            const newUrl =
-                `${window.location.pathname}?${params.toString()}`;
+            // Keep search/sort/page in browser URL
+            // without reloading the page.
 
             window.history.replaceState(
                 {},
                 "",
-                newUrl
+                `${window.location.pathname}?${params.toString()}`
             );
 
         })
@@ -377,14 +306,15 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
     // ============================================================
-    // Sort Change
+    // Sort
     // ============================================================
 
     sortSelect.addEventListener(
         "change",
         function () {
 
-            // Sorting starts at page 1.
+            // Always return to page 1
+            // when sorting changes.
 
             updateEmployees(1);
 
@@ -393,10 +323,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
     // ============================================================
-    // Search Input
+    // Live Search
     //
-    // Automatically search after the user stops typing.
-    // 300ms debounce prevents a request for every keystroke.
+    // Wait 300ms after the user stops typing.
     // ============================================================
 
     searchInput.addEventListener(
@@ -437,14 +366,13 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
     // ============================================================
-    // Pagination
+    // AJAX Pagination
     //
-    // employee_table.html creates links with the class:
+    // Pagination links are generated inside
+    // employee_table.html.
     //
-    //     employee-page-link
-    //
-    // Event delegation allows the links to continue working
-    // after the results HTML is replaced by AJAX.
+    // Event delegation is required because the
+    // table/pagination HTML is replaced by AJAX.
     // ============================================================
 
     resultsContainer.addEventListener(
@@ -456,8 +384,11 @@ document.addEventListener("DOMContentLoaded", function () {
                     ".employee-page-link"
                 );
 
+
             if (!link) {
+
                 return;
+
             }
 
 
@@ -469,7 +400,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
             if (!page) {
+
                 return;
+
             }
 
 
