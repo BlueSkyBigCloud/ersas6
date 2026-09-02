@@ -1,0 +1,207 @@
+
+{# ============================================================
+   Employee Results Table
+   This partial is replaced by AJAX requests.
+   ============================================================ #}
+
+{% if employees %}
+
+    <div class="table-responsive">
+
+        <table class="table table-striped table-hover align-middle">
+
+            <thead>
+                <tr>
+                    <th>Employee #</th>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>Callsign</th>
+                    <th>Phone</th>
+                    <th>Email</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                {% for employee in employees %}
+
+                    <tr>
+
+                        <td>
+                            <a href="{% url 'employee_detail' employee_id=employee.pk %}">
+                                {{ employee.employee_number }}
+                            </a>
+                        </td>
+
+                        <td>
+                            {{ employee.first_name }}
+                        </td>
+
+                        <td>
+                            {{ employee.last_name }}
+                        </td>
+
+                        <td>
+                            {{ employee.callsign }}
+                        </td>
+
+                        <td>
+                            {{ employee.phone_number }}
+                        </td>
+
+                        <td>
+                            {{ employee.email }}
+                        </td>
+
+                        <td>
+                            <a
+                                href="{% url 'employee_detail' employee_id=employee.pk %}"
+                                class="btn btn-sm btn-primary"
+                            >
+                                View
+                            </a>
+                        </td>
+
+                    </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+
+    {# ========================================================
+       Pagination
+       ======================================================== #}
+
+    {% if page_obj.paginator.num_pages > 1 %}
+
+        <nav aria-label="Employee pagination">
+
+            <ul class="pagination justify-content-center">
+
+                {# Previous #}
+
+                {% if page_obj.has_previous %}
+
+                    <li class="page-item">
+
+                        <a
+                            class="page-link employee-page-link"
+                            href="?search={{ search|urlencode }}&sort={{ sort|urlencode }}&page={{ page_obj.previous_page_number }}"
+                            data-page="{{ page_obj.previous_page_number }}"
+                        >
+                            Previous
+                        </a>
+
+                    </li>
+
+                {% else %}
+
+                    <li class="page-item disabled">
+
+                        <span class="page-link">
+                            Previous
+                        </span>
+
+                    </li>
+
+                {% endif %}
+
+
+                {# Page Numbers #}
+
+                {% for num in page_obj.paginator.page_range %}
+
+                    {% if num == page_obj.number %}
+
+                        <li class="page-item active">
+
+                            <span class="page-link">
+                                {{ num }}
+                            </span>
+
+                        </li>
+
+                    {% else %}
+
+                        <li class="page-item">
+
+                            <a
+                                class="page-link employee-page-link"
+                                href="?search={{ search|urlencode }}&sort={{ sort|urlencode }}&page={{ num }}"
+                                data-page="{{ num }}"
+                            >
+                                {{ num }}
+                            </a>
+
+                        </li>
+
+                    {% endif %}
+
+                {% endfor %}
+
+
+                {# Next #}
+
+                {% if page_obj.has_next %}
+
+                    <li class="page-item">
+
+                        <a
+                            class="page-link employee-page-link"
+                            href="?search={{ search|urlencode }}&sort={{ sort|urlencode }}&page={{ page_obj.next_page_number }}"
+                            data-page="{{ page_obj.next_page_number }}"
+                        >
+                            Next
+                        </a>
+
+                    </li>
+
+                {% else %}
+
+                    <li class="page-item disabled">
+
+                        <span class="page-link">
+                            Next
+                        </span>
+
+                    </li>
+
+                {% endif %}
+
+            </ul>
+
+        </nav>
+
+    {% endif %}
+
+
+    {# ========================================================
+       Results Information
+       ======================================================== #}
+
+    <div class="text-muted text-center mt-3">
+
+        Showing
+        {{ page_obj.start_index }}
+        -
+        {{ page_obj.end_index }}
+        of
+        {{ page_obj.paginator.count }}
+        employees
+
+    </div>
+
+
+{% else %}
+
+    <div class="alert alert-info">
+        No employees found.
+    </div>
+
+{% endif %}

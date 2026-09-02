@@ -1,3 +1,4 @@
+
 {% extends "base2.html" %}
 
 {% block content %}
@@ -8,35 +9,58 @@
          Service Navigation
          ============================================================ -->
 
-    <div class="service-actions-container"
-         style="display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin-bottom: 25px;">
+    <div
+        class="service-actions-container"
+        style="
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 25px;
+        "
+    >
 
         <div class="service-actions">
-            <a class="button-calendar-btn" href="{% url 'location_list' %}">
+            <a
+                class="button-calendar-btn"
+                href="{% url 'location_list' %}"
+            >
                 Locations
             </a>
         </div>
 
         <div class="service-actions">
-            <a class="button-calendar-btn" href="{% url 'equipment_list' %}">
+            <a
+                class="button-calendar-btn"
+                href="{% url 'equipment_list' %}"
+            >
                 Equipment
             </a>
         </div>
 
         <div class="service-actions">
-            <a class="button-calendar-btn" href="{% url 'employee_list' %}">
+            <a
+                class="button-calendar-btn"
+                href="{% url 'employee_list' %}"
+            >
                 Employees
             </a>
         </div>
 
         <div class="service-actions">
-            <a class="button-calendar-btn" href="{% url 'servicetype_list' %}">
+            <a
+                class="button-calendar-btn"
+                href="{% url 'servicetype_list' %}"
+            >
                 Service Types
             </a>
         </div>
 
         <div class="service-actions">
-            <a class="button-calendar-btn" href="{% url 'calendar_view' %}">
+            <a
+                class="button-calendar-btn"
+                href="{% url 'calendar_view' %}"
+            >
                 Calendar
             </a>
         </div>
@@ -51,11 +75,13 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
 
         <div>
+
             <h2>Employees</h2>
 
             <p class="text-muted mb-0">
                 Manage employees for your company.
             </p>
+
         </div>
 
     </div>
@@ -65,7 +91,12 @@
          Search and Sort
          ============================================================ -->
 
-    <form method="get" class="mb-4">
+    <form
+        id="employeeSearchForm"
+        method="get"
+        class="mb-4"
+        onsubmit="return false;"
+    >
 
         <div class="row g-3 align-items-end">
 
@@ -73,7 +104,10 @@
 
             <div class="col-md-6">
 
-                <label for="search" class="form-label">
+                <label
+                    for="search"
+                    class="form-label"
+                >
                     Search Employees
                 </label>
 
@@ -84,6 +118,7 @@
                     class="form-control"
                     placeholder="Employee number, first name, last name, or callsign"
                     value="{{ search }}"
+                    autocomplete="off"
                 >
 
             </div>
@@ -93,7 +128,10 @@
 
             <div class="col-md-4">
 
-                <label for="sort" class="form-label">
+                <label
+                    for="sort"
+                    class="form-label"
+                >
                     Sort By
                 </label>
 
@@ -103,29 +141,74 @@
                     class="form-select"
                 >
 
-                    <option value="id"
-                        {% if sort == "id" %}selected{% endif %}>
-                        Employee ID
+                    <option
+                        value="-id"
+                        {% if sort == "-id" %}selected{% endif %}
+                    >
+                        Employee ID — Newest
                     </option>
 
-                    <option value="employee_number"
-                        {% if sort == "employee_number" %}selected{% endif %}>
-                        Employee Number
+                    <option
+                        value="id"
+                        {% if sort == "id" %}selected{% endif %}
+                    >
+                        Employee ID — Oldest
                     </option>
 
-                    <option value="first_name"
-                        {% if sort == "first_name" %}selected{% endif %}>
-                        First Name
+                    <option
+                        value="employee_number"
+                        {% if sort == "employee_number" %}selected{% endif %}
+                    >
+                        Employee Number — A-Z
                     </option>
 
-                    <option value="last_name"
-                        {% if sort == "last_name" %}selected{% endif %}>
-                        Last Name
+                    <option
+                        value="-employee_number"
+                        {% if sort == "-employee_number" %}selected{% endif %}
+                    >
+                        Employee Number — Z-A
                     </option>
 
-                    <option value="callsign"
-                        {% if sort == "callsign" %}selected{% endif %}>
-                        Callsign
+                    <option
+                        value="first_name"
+                        {% if sort == "first_name" %}selected{% endif %}
+                    >
+                        First Name — A-Z
+                    </option>
+
+                    <option
+                        value="-first_name"
+                        {% if sort == "-first_name" %}selected{% endif %}
+                    >
+                        First Name — Z-A
+                    </option>
+
+                    <option
+                        value="last_name"
+                        {% if sort == "last_name" %}selected{% endif %}
+                    >
+                        Last Name — A-Z
+                    </option>
+
+                    <option
+                        value="-last_name"
+                        {% if sort == "-last_name" %}selected{% endif %}
+                    >
+                        Last Name — Z-A
+                    </option>
+
+                    <option
+                        value="callsign"
+                        {% if sort == "callsign" %}selected{% endif %}
+                    >
+                        Callsign — A-Z
+                    </option>
+
+                    <option
+                        value="-callsign"
+                        {% if sort == "-callsign" %}selected{% endif %}
+                    >
+                        Callsign — Z-A
                     </option>
 
                 </select>
@@ -133,23 +216,25 @@
             </div>
 
 
-            <!-- Search / Clear Buttons -->
+            <!-- Buttons -->
 
             <div class="col-md-2">
 
                 <button
-                    type="submit"
+                    type="button"
+                    id="employeeSearchButton"
                     class="btn btn-primary w-100 mb-2"
                 >
                     Search / Sort
                 </button>
 
-                <a
-                    href="{% url 'employee_list' %}"
+                <button
+                    type="button"
+                    id="employeeClearButton"
                     class="btn btn-secondary w-100"
                 >
                     Clear
-                </a>
+                </button>
 
             </div>
 
@@ -159,205 +244,242 @@
 
 
     <!-- ============================================================
-         Messages
+         AJAX Employee Results
          ============================================================ -->
 
-    {% if message %}
+    <div id="employeeResults">
 
-        <div class="alert alert-info">
-            {{ message }}
-        </div>
+        {% include 'partials/employee_table.html' %}
 
-    {% endif %}
-
-
-    <!-- ============================================================
-         Employee Table
-         ============================================================ -->
-
-    {% if employees %}
-
-        <div class="table-responsive">
-
-            <table class="table table-striped table-hover align-middle">
-
-                <thead>
-
-                    <tr>
-                        <th>Employee #</th>
-                        <th>First Name</th>
-                        <th>Last Name</th>
-                        <th>Callsign</th>
-                        <th>Phone</th>
-                        <th>Email</th>
-                    </tr>
-
-                </thead>
-
-                <tbody>
-
-                    {% for employee in employees %}
-
-                        <tr>
-
-                            <td>
-                                {{ employee.employee_number }}
-                            </td>
-
-                            <td>
-                                {{ employee.first_name }}
-                            </td>
-
-                            <td>
-                                {{ employee.last_name }}
-                            </td>
-
-                            <td>
-                                {{ employee.callsign }}
-                            </td>
-
-                            <td>
-                                {{ employee.phone_number }}
-                            </td>
-
-                            <td>
-                                {{ employee.email }}
-                            </td>
-
-                        </tr>
-
-                    {% endfor %}
-
-                </tbody>
-
-            </table>
-
-        </div>
-
-
-        <!-- ========================================================
-             Pagination
-             ======================================================== -->
-
-        {% if page_obj.paginator.num_pages > 1 %}
-
-            <nav aria-label="Employee pagination">
-
-                <ul class="pagination justify-content-center">
-
-                    <!-- Previous -->
-
-                    {% if page_obj.has_previous %}
-
-                        <li class="page-item">
-
-                            <a
-                                class="page-link"
-                                href="?search={{ search|urlencode }}&sort={{ sort }}&page={{ page_obj.previous_page_number }}"
-                            >
-                                Previous
-                            </a>
-
-                        </li>
-
-                    {% else %}
-
-                        <li class="page-item disabled">
-
-                            <span class="page-link">
-                                Previous
-                            </span>
-
-                        </li>
-
-                    {% endif %}
-
-
-                    <!-- Page Numbers -->
-
-                    {% for num in page_obj.paginator.page_range %}
-
-                        {% if num == page_obj.number %}
-
-                            <li class="page-item active">
-
-                                <span class="page-link">
-                                    {{ num }}
-                                </span>
-
-                            </li>
-
-                        {% else %}
-
-                            <li class="page-item">
-
-                                <a
-                                    class="page-link"
-                                    href="?search={{ search|urlencode }}&sort={{ sort }}&page={{ num }}"
-                                >
-                                    {{ num }}
-                                </a>
-
-                            </li>
-
-                        {% endif %}
-
-                    {% endfor %}
-
-
-                    <!-- Next -->
-
-                    {% if page_obj.has_next %}
-
-                        <li class="page-item">
-
-                            <a
-                                class="page-link"
-                                href="?search={{ search|urlencode }}&sort={{ sort }}&page={{ page_obj.next_page_number }}"
-                            >
-                                Next
-                            </a>
-
-                        </li>
-
-                    {% else %}
-
-                        <li class="page-item disabled">
-
-                            <span class="page-link">
-                                Next
-                            </span>
-
-                        </li>
-
-                    {% endif %}
-
-                </ul>
-
-            </nav>
-
-        {% endif %}
-
-
-        <!-- ========================================================
-             Results Information
-             ======================================================== -->
-
-        <div class="text-muted text-center mt-3">
-
-            Showing
-            {{ page_obj.start_index }}
-            -
-            {{ page_obj.end_index }}
-            of
-            {{ page_obj.paginator.count }}
-            employees
-
-        </div>
-
-    {% endif %}
+    </div>
 
 </div>
 
+
+<!-- ================================================================
+     AJAX Employee Search / Sort / Pagination
+     ================================================================ -->
+
+<script>
+
+document.addEventListener("DOMContentLoaded", function () {
+
+    const searchInput =
+        document.getElementById("search");
+
+    const sortSelect =
+        document.getElementById("sort");
+
+    const searchButton =
+        document.getElementById("employeeSearchButton");
+
+    const clearButton =
+        document.getElementById("employeeClearButton");
+
+    const resultsContainer =
+        document.getElementById("employeeResults");
+
+
+    let searchTimeout = null;
+
+
+    // ============================================================
+    // Update Employee Results
+    // ============================================================
+
+    function updateEmployees(page = 1) {
+
+        const search =
+            searchInput.value.trim();
+
+        const sort =
+            sortSelect.value;
+
+        const params =
+            new URLSearchParams();
+
+        params.set("search", search);
+        params.set("sort", sort);
+        params.set("page", page);
+
+
+        resultsContainer.style.opacity = "0.5";
+
+
+        fetch(
+            `${window.location.pathname}?${params.toString()}`,
+            {
+                method: "GET",
+
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest"
+                }
+            }
+        )
+        .then(response => {
+
+            if (!response.ok) {
+                throw new Error(
+                    `HTTP error: ${response.status}`
+                );
+            }
+
+            return response.json();
+
+        })
+        .then(data => {
+
+            resultsContainer.innerHTML =
+                data.html;
+
+            resultsContainer.style.opacity = "1";
+
+
+            // Update browser URL without
+            // causing a page reload.
+
+            const newUrl =
+                `${window.location.pathname}?${params.toString()}`;
+
+            window.history.replaceState(
+                {},
+                "",
+                newUrl
+            );
+
+        })
+        .catch(error => {
+
+            console.error(
+                "Employee AJAX error:",
+                error
+            );
+
+            resultsContainer.style.opacity = "1";
+
+        });
+
+    }
+
+
+    // ============================================================
+    // Search Button
+    // ============================================================
+
+    searchButton.addEventListener(
+        "click",
+        function () {
+
+            updateEmployees(1);
+
+        }
+    );
+
+
+    // ============================================================
+    // Sort Change
+    // ============================================================
+
+    sortSelect.addEventListener(
+        "change",
+        function () {
+
+            // Sorting starts at page 1.
+
+            updateEmployees(1);
+
+        }
+    );
+
+
+    // ============================================================
+    // Search Input
+    //
+    // Automatically search after the user stops typing.
+    // 300ms debounce prevents a request for every keystroke.
+    // ============================================================
+
+    searchInput.addEventListener(
+        "input",
+        function () {
+
+            clearTimeout(searchTimeout);
+
+            searchTimeout = setTimeout(
+                function () {
+
+                    updateEmployees(1);
+
+                },
+                300
+            );
+
+        }
+    );
+
+
+    // ============================================================
+    // Clear
+    // ============================================================
+
+    clearButton.addEventListener(
+        "click",
+        function () {
+
+            searchInput.value = "";
+
+            sortSelect.value = "-id";
+
+            updateEmployees(1);
+
+        }
+    );
+
+
+    // ============================================================
+    // Pagination
+    //
+    // employee_table.html creates links with the class:
+    //
+    //     employee-page-link
+    //
+    // Event delegation allows the links to continue working
+    // after the results HTML is replaced by AJAX.
+    // ============================================================
+
+    resultsContainer.addEventListener(
+        "click",
+        function (event) {
+
+            const link =
+                event.target.closest(
+                    ".employee-page-link"
+                );
+
+            if (!link) {
+                return;
+            }
+
+
+            event.preventDefault();
+
+
+            const page =
+                link.dataset.page;
+
+
+            if (!page) {
+                return;
+            }
+
+
+            updateEmployees(page);
+
+        }
+    );
+
+});
+
+</script>
+
 {% endblock %}
-```

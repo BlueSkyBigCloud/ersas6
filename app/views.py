@@ -631,17 +631,31 @@ def equipment_delete(request, equipment_id):  # Accepts pk as an argument
 @login_required
 def employee_list(request):
 
+    # ------------------------------------------------------------
     # Ensure the user's company attribute exists
+    # ------------------------------------------------------------
+
     user_company = getattr(request.user, 'company', None)
 
     if not user_company:
         return render(request, 'employee_list.html', {
             'employees': [],
             'message': "No company associated with the current user.",
+            'search': '',
+            'sort': '-id',
         })
 
     # ------------------------------------------------------------
-    # Base QuerySet - only employees belonging to user's company
+    # Search / Sort / Page parameters
+    # ------------------------------------------------------------
+
+    search = request.GET.get('search', '').strip()
+    sort = request.GET.get('sort', '-id')
+    page_number = request.GET.get('page', 1)
+
+    # ------------------------------------------------------------
+    # Base QuerySet
+    # Only employees belonging to the user's company
     # ------------------------------------------------------------
 
     employees = Employee.objects.filter(
@@ -652,8 +666,6 @@ def employee_list(request):
     # Search / Filter
     # ------------------------------------------------------------
 
-    search = request.GET.get('search', '').strip()
-
     if search:
         employees = employees.filter(
             Q(employee_number__icontains=search) |
@@ -663,59 +675,101 @@ def employee_list(request):
         )
 
     # ------------------------------------------------------------
-    # Sorting
+    # Allowed Sorting
+    # Supports ascending and descending sorting
     # ------------------------------------------------------------
-
-    sort = request.GET.get('sort', 'id')
 
     allowed_sorts = {
         'id': 'id',
+        '-id': '-id',
+
         'employee_number': 'employee_number',
+        '-employee_number': '-employee_number',
+
         'first_name': 'first_name',
+        '-first_name': '-first_name',
+
         'last_name': 'last_name',
+        '-last_name': '-last_name',
+
         'callsign': 'callsign',
+        '-callsign': '-callsign',
     }
 
-    # Use the requested sort only if it is allowed
-    sort_field = allowed_sorts.get(sort, 'id')
+    # Fall back to newest/highest ID if invalid sort is supplied
+    sort_field = allowed_sorts.get(sort, '-id')
 
     employees = employees.order_by(sort_field)
 
     # ------------------------------------------------------------
     # Pagination
+    # 25 employees per page
     # ------------------------------------------------------------
 
     paginator = Paginator(employees, 25)
 
-    page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
     # ------------------------------------------------------------
-    # Decrypt fields for employees on current page
+    # Decrypt fields
+    #
+    # Only decrypt employees on the current page.
+    # This avoids decrypting the entire company employee list.
     # ------------------------------------------------------------
 
     for employee in page_obj.object_list:
         employee.decrypt_fields(user=request.user)
 
     # ------------------------------------------------------------
-    # Check if employees exist
+    # Message
     # ------------------------------------------------------------
 
-    message = "No employees found." if not employees.exists() else None
+    message = None
+
+    if paginator.count == 0:
+        message = "No employees found."
 
     # ------------------------------------------------------------
-    # Render
+    # Context
     # ------------------------------------------------------------
 
-    return render(request, 'employee_list.html', {
+    context = {
         'employees': page_obj.object_list,
-        'message': message,
         'page_obj': page_obj,
-
-        # Return these so the template can preserve selections
+        'message': message,
         'search': search,
         'sort': sort,
-    })
+    }
+
+    # ------------------------------------------------------------
+    # AJAX Request
+    #
+    # Search, sorting, and pagination all return the same
+    # employee results partial.
+    # ------------------------------------------------------------
+
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+
+        html = render_to_string(
+            'partials/employee_table.html',
+            context,
+            request=request,
+        )
+
+        return JsonResponse({
+            'html': html,
+        })
+
+    # ------------------------------------------------------------
+    # Normal Page Request
+    # ------------------------------------------------------------
+
+    return render(
+        request,
+        'employee_list.html',
+        context,
+    )
+
 
 
 @onboarded()
