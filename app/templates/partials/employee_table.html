@@ -1,75 +1,193 @@
-<div class="pagination">
+{% if employees %}
 
-    <span>
-        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
-    </span>
-
-    <div>
-
-        {% if page_obj.has_previous %}
-
-            <a
-                href="?search={{ search|urlencode }}&sort={{ sort|urlencode }}&page=1"
-                class="pagination-link employee-page-link"
-                data-page="1"
-            >
-                First
-            </a>
-
-            <a
-                href="?search={{ search|urlencode }}&sort={{ sort|urlencode }}&page={{ page_obj.previous_page_number }}"
-                class="pagination-link employee-page-link"
-                data-page="{{ page_obj.previous_page_number }}"
-            >
-                Previous
-            </a>
-
-        {% endif %}
+    <div class="employee-result-count">
+        {{ page_obj.paginator.count }}
+        employee{{ page_obj.paginator.count|pluralize }}
+        found.
+    </div>
 
 
-        {% for num in page_obj.paginator.page_range %}
+    <div class="employee-table-container">
 
-            {% if num == page_obj.number %}
+        <table class="employee-table">
 
-                <strong class="pagination-current">
-                    {{ num }}
-                </strong>
+            <thead>
 
-            {% else %}
+                <tr>
 
-                <a
-                    href="?search={{ search|urlencode }}&sort={{ sort|urlencode }}&page={{ num }}"
-                    class="pagination-link employee-page-link"
-                    data-page="{{ num }}"
-                >
-                    {{ num }}
-                </a>
+                    <th>Employee #</th>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>Callsign</th>
+                    <th>Phone</th>
+                    <th>Email</th>
+                    <th>Actions</th>
 
-            {% endif %}
+                </tr>
 
-        {% endfor %}
+            </thead>
 
 
-        {% if page_obj.has_next %}
+            <tbody>
 
-            <a
-                href="?search={{ search|urlencode }}&sort={{ sort|urlencode }}&page={{ page_obj.next_page_number }}"
-                class="pagination-link employee-page-link"
-                data-page="{{ page_obj.next_page_number }}"
-            >
-                Next
-            </a>
+                {% for employee in employees %}
 
-            <a
-                href="?search={{ search|urlencode }}&sort={{ sort|urlencode }}&page={{ page_obj.paginator.num_pages }}"
-                class="pagination-link employee-page-link"
-                data-page="{{ page_obj.paginator.num_pages }}"
-            >
-                Last
-            </a>
+                    <tr>
 
+                        <td>
+
+                            <a
+                                href="{% url 'employee_detail' employee_id=employee.pk %}"
+                                class="employee-detail-link"
+                            >
+                                {{ employee.employee_number }}
+                            </a>
+
+                        </td>
+
+
+                        <td>
+                            {{ employee.first_name }}
+                        </td>
+
+
+                        <td>
+                            {{ employee.last_name }}
+                        </td>
+
+
+                        <td>
+                            {{ employee.callsign }}
+                        </td>
+
+
+                        <td>
+                            {{ employee.phone_number }}
+                        </td>
+
+
+                        <td>
+                            {{ employee.email }}
+                        </td>
+
+
+                        <td>
+
+                            <a
+                                href="{% url 'employee_detail' employee_id=employee.pk %}"
+                                class="employee-view-btn"
+                            >
+                                View
+                            </a>
+
+                        </td>
+
+                    </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+
+    {% if page_obj.paginator.num_pages > 1 %}
+
+        <div class="pagination">
+
+            <span>
+                Page {{ page_obj.number }}
+                of {{ page_obj.paginator.num_pages }}
+            </span>
+
+
+            <div>
+
+                {% if page_obj.has_previous %}
+
+                    <a
+                        href="?search={{ search|urlencode }}&sort={{ sort|urlencode }}&page=1"
+                        class="pagination-link employee-page-link"
+                        data-page="1"
+                    >
+                        First
+                    </a>
+
+
+                    <a
+                        href="?search={{ search|urlencode }}&sort={{ sort|urlencode }}&page={{ page_obj.previous_page_number }}"
+                        class="pagination-link employee-page-link"
+                        data-page="{{ page_obj.previous_page_number }}"
+                    >
+                        Previous
+                    </a>
+
+                {% endif %}
+
+
+                {% for num in page_obj.paginator.page_range %}
+
+                    {% if num == page_obj.number %}
+
+                        <strong class="pagination-current">
+                            {{ num }}
+                        </strong>
+
+                    {% else %}
+
+                        <a
+                            href="?search={{ search|urlencode }}&sort={{ sort|urlencode }}&page={{ num }}"
+                            class="pagination-link employee-page-link"
+                            data-page="{{ num }}"
+                        >
+                            {{ num }}
+                        </a>
+
+                    {% endif %}
+
+                {% endfor %}
+
+
+                {% if page_obj.has_next %}
+
+                    <a
+                        href="?search={{ search|urlencode }}&sort={{ sort|urlencode }}&page={{ page_obj.next_page_number }}"
+                        class="pagination-link employee-page-link"
+                        data-page="{{ page_obj.next_page_number }}"
+                    >
+                        Next
+                    </a>
+
+
+                    <a
+                        href="?search={{ search|urlencode }}&sort={{ sort|urlencode }}&page={{ page_obj.paginator.num_pages }}"
+                        class="pagination-link employee-page-link"
+                        data-page="{{ page_obj.paginator.num_pages }}"
+                    >
+                        Last
+                    </a>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+    {% endif %}
+
+
+{% else %}
+
+    <div class="employee-empty-message">
+
+        {% if message %}
+            {{ message }}
+        {% else %}
+            No employees found.
         {% endif %}
 
     </div>
 
-</div>
+{% endif %}
