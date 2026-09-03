@@ -631,10 +631,6 @@ def equipment_delete(request, equipment_id):  # Accepts pk as an argument
 @login_required
 def employee_list(request):
 
-    # ------------------------------------------------------------
-    # Ensure the user's company attribute exists
-    # ------------------------------------------------------------
-
     user_company = getattr(request.user, 'company', None)
 
     if not user_company:
@@ -645,80 +641,89 @@ def employee_list(request):
             'sort': '-id',
         })
 
-    # ------------------------------------------------------------
-    # Search / Sort / Page parameters
-    # ------------------------------------------------------------
-
-    search = request.GET.get('search', '').strip()
+    search = request.GET.get('search', '').strip().lower()
     sort = request.GET.get('sort', '-id')
     page_number = request.GET.get('page', 1)
 
     # ------------------------------------------------------------
-    # Base QuerySet
-    # Only employees belonging to the user's company
+    # Get employees for the current company
     # ------------------------------------------------------------
 
-    employees = Employee.objects.filter(
-        company=user_company
+    employees = list(
+        Employee.objects.filter(
+            company=user_company
+        )
     )
 
     # ------------------------------------------------------------
-    # Search / Filter
+    # Decrypt employee fields before searching
+    # ------------------------------------------------------------
+
+    for employee in employees:
+        employee.decrypt_fields(user=request.user)
+
+    # ------------------------------------------------------------
+    # Search decrypted employee fields
     # ------------------------------------------------------------
 
     if search:
-        employees = employees.filter(
-            Q(employee_number__icontains=search) |
-            Q(first_name__icontains=search) |
-            Q(last_name__icontains=search) |
-            Q(callsign__icontains=search)
-        )
+
+        filtered_employees = []
+
+        for employee in employees:
+
+            searchable_values = [
+                str(getattr(employee, 'employee_number', '') or ''),
+                str(getattr(employee, 'first_name', '') or ''),
+                str(getattr(employee, 'last_name', '') or ''),
+                str(getattr(employee, 'callsign', '') or ''),
+            ]
+
+            if any(
+                search in value.lower()
+                for value in searchable_values
+            ):
+                filtered_employees.append(employee)
+
+        employees = filtered_employees
 
     # ------------------------------------------------------------
-    # Allowed Sorting
-    # Supports ascending and descending sorting
+    # Sorting
     # ------------------------------------------------------------
 
     allowed_sorts = {
         'id': 'id',
-        '-id': '-id',
-
+        '-id': 'id',
         'employee_number': 'employee_number',
-        '-employee_number': '-employee_number',
-
+        '-employee_number': 'employee_number',
         'first_name': 'first_name',
-        '-first_name': '-first_name',
-
+        '-first_name': 'first_name',
         'last_name': 'last_name',
-        '-last_name': '-last_name',
-
+        '-last_name': 'last_name',
         'callsign': 'callsign',
-        '-callsign': '-callsign',
+        '-callsign': 'callsign',
     }
 
-    # Fall back to newest/highest ID if invalid sort is supplied
-    sort_field = allowed_sorts.get(sort, '-id')
+    sort_field = allowed_sorts.get(sort, 'id')
 
-    employees = employees.order_by(sort_field)
+    reverse = sort.startswith('-')
+
+    employees.sort(
+        key=lambda employee: (
+            str(
+                getattr(employee, sort_field, '') or ''
+            ).lower()
+        ),
+        reverse=reverse,
+    )
 
     # ------------------------------------------------------------
     # Pagination
-    # 25 employees per page
     # ------------------------------------------------------------
 
     paginator = Paginator(employees, 25)
 
     page_obj = paginator.get_page(page_number)
-
-    # ------------------------------------------------------------
-    # Decrypt fields
-    #
-    # Only decrypt employees on the current page.
-    # This avoids decrypting the entire company employee list.
-    # ------------------------------------------------------------
-
-    for employee in page_obj.object_list:
-        employee.decrypt_fields(user=request.user)
 
     # ------------------------------------------------------------
     # Message
@@ -742,10 +747,7 @@ def employee_list(request):
     }
 
     # ------------------------------------------------------------
-    # AJAX Request
-    #
-    # Search, sorting, and pagination all return the same
-    # employee results partial.
+    # AJAX response
     # ------------------------------------------------------------
 
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
@@ -757,19 +759,14 @@ def employee_list(request):
         )
 
         return JsonResponse({
-            'html': html,
+            'html': html
         })
-
-    # ------------------------------------------------------------
-    # Normal Page Request
-    # ------------------------------------------------------------
 
     return render(
         request,
         'employee_list.html',
-        context,
+        context
     )
-
 
 
 @onboarded()
