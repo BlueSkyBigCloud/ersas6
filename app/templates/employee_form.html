@@ -1,14 +1,10 @@
-{% extends 'base2.html' %}  <!-- Extend the base template -->
+{% extends 'base2.html' %}
 
-{% block title %}Employee Form{% endblock %}  <!-- Title for the page -->
+{% block title %}Employee Form{% endblock %}
 
 {% block content %}
 
-<head>
-    <meta charset="UTF-8">
-    <title>{% if employee %}Edit Employee{% else %}Add Employee{% endif %}</title>
-</head>
-<body>
+<main>
     <h1>
         {% if employee %}
             Edit Employee: {{ employee.first_name }} {{ employee.last_name }}
@@ -21,52 +17,65 @@
 <form method="post" novalidate>
     {% csrf_token %}
 
+    {{ form.non_field_errors }}
+
     {% for field in form %}
-        {% if field.name == 'location' %}
+        <div class="form-group">
 
-            <p>
-                {{ field.label_tag }}
+            {{ field.label_tag }}
 
-                <span style="display: inline-flex; align-items: center; gap: 10px;">
-                    {{ field }}
+            {% if field.errors %}
+                <div class="field-errors">
+                    {{ field.errors }}
+                </div>
+            {% endif %}
 
+            <div style="display: flex; align-items: center; width: 100%;">
+
+                {{ field }}
+
+                {% if field.name == "location" %}
                     <a href="{% url 'location_create' %}"
-                       class="button-calendar-btn"
-                       style="white-space: nowrap;">
-                        + Create New Location
+                       class="button small"
+                       style="margin-left: 10px; white-space: nowrap;">
+                        Create New Location
                     </a>
-                </span>
-
-                {% if field.help_text %}
-                    <small>{{ field.help_text }}</small>
                 {% endif %}
 
-                {{ field.errors }}
-            </p>
+            </div>
 
-        {% else %}
+            {% if field.help_text %}
+                <small class="help-text">
+                    {{ field.help_text }}
+                </small>
+            {% endif %}
 
-            {{ field.as_p }}
-
-        {% endif %}
+        </div>
     {% endfor %}
 
-    <button type="submit">Save</button>
-    <a href="{% url 'employee_list' %}">Cancel</a>
+    <button type="submit" class="button">
+        Save
+    </button>
+
+    <a href="{% url 'employee_list' %}" class="button">
+        Cancel
+    </a>
 </form>
 
 {% if employee %}
-<form method="post"
-      action="{% url 'employee_delete' employee.id %}"
-      style="margin-top: 10px;">
-    {% csrf_token %}
-    <button type="submit"
-            style="background-color: rgb(69, 5, 5); color: white;">
-        Delete
-    </button>
-</form>
+    <form method="post"
+          action="{% url 'employee_delete' employee.id %}"
+          style="margin-top: 10px;">
+
+        {% csrf_token %}
+
+        <button type="submit"
+                style="background-color: rgb(69, 5, 5); color: white;">
+            Delete
+        </button>
+    </form>
 {% endif %}
 
 
-</body>
+</main>
 {% endblock %}
