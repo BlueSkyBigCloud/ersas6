@@ -3,7 +3,6 @@
 {% block title %}Equipment Form{% endblock %}  <!-- Title for the page -->
 
 {% block content %}
-
 <head>
     <meta charset="UTF-8">
     <title>{% if equipment %}Edit Equipment{% else %}Add Equipment{% endif %}</title>
@@ -11,51 +10,19 @@
 <body>
     <h1>{% if equipment %}Edit Equipment: {{ equipment.name }}{% else %}Add New Equipment{% endif %}</h1>
 
-<form method="post" novalidate>
-    {% csrf_token %}
+    <form method="post" novalidate>
+        {% csrf_token %}
+        {{ form.as_p }}  <!-- Render form fields as paragraphs -->
 
-    {% for field in form %}
-        {% if field.name == "location" %}
+        <button type="submit">Save Equipment</button>
+        <a href="{% url 'equipment_list' %}">Cancel</a>  <!-- Link to cancel and go back to the list -->
+    </form>
 
-            <div class="form-group">
-                {{ field.label_tag }}
-
-                <div style="display: flex; align-items: center; gap: 10px;">
-
-                    {{ field }}
-
-                    <a href="{% url 'location_create' %}"
-                       class="button-calendar-btn"
-                       style="white-space: nowrap;">
-                        + Create New Location
-                    </a>
-
-                </div>
-
-                {% if field.errors %}
-                    <div class="error">
-                        {{ field.errors }}
-                    </div>
-                {% endif %}
-            </div>
-
-        {% else %}
-
-            {{ field.as_p }}
-
-        {% endif %}
-    {% endfor %}
-
-    <button type="submit">Save Equipment</button>
-    <a href="{% url 'equipment_list' %}">Cancel</a>  <!-- Link to cancel and go back to the list -->
-</form>
-
-{% if equipment %}
-<form method="post" action="{% url 'equipment_delete' equipment.id %}" style="margin-top: 10px;">
-    {% csrf_token %}
-    <button type="submit" style="background-color: rgb(69, 5, 5); color: white;">Delete</button>
-</form>
-{% endif %}
-
+    {% if equipment %}
+    <form method="post" action="{% url 'equipment_delete' equipment.id %}" style="margin-top: 10px;">
+        {% csrf_token %}
+        <button type="submit" style="background-color: rgb(69, 5, 5); color: white;">Delete</button>
+    </form>
+    {% endif %}
 </body>
 {% endblock %}
