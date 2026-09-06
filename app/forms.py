@@ -102,7 +102,7 @@ class LocationForm(forms.ModelForm):
             location.save()
         return location
 
-class EquipmentForm(forms.ModelForm):
+class EquipmentForm(CreateRelatedModelMixin, forms.ModelForm):
     location = forms.ModelChoiceField(
         queryset=Location.objects.all(),
         label="Location",
