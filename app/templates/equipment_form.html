@@ -11,7 +11,6 @@
 <body>
     <h1>{% if equipment %}Edit Equipment: {{ equipment.name }}{% else %}Add New Equipment{% endif %}</h1>
 
-```
 <form method="post" novalidate>
     {% csrf_token %}
 
@@ -57,7 +56,6 @@
     <button type="submit" style="background-color: rgb(69, 5, 5); color: white;">Delete</button>
 </form>
 {% endif %}
-```
 
 </body>
 {% endblock %}
