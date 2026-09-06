@@ -1,28 +1,84 @@
-{% extends 'base2.html' %}  <!-- Extend the base template -->
+{% extends 'base2.html' %}
 
-{% block title %}Equipment Form{% endblock %}  <!-- Title for the page -->
+{% block title %}Equipment Form{% endblock %}
 
 {% block content %}
-<head>
-    <meta charset="UTF-8">
-    <title>{% if equipment %}Edit Equipment{% else %}Add Equipment{% endif %}</title>
-</head>
-<body>
-    <h1>{% if equipment %}Edit Equipment: {{ equipment.name }}{% else %}Add New Equipment{% endif %}</h1>
+<main>
+    <h1>
+        {% if equipment %}
+            Edit Equipment: {{ equipment.name }}
+        {% else %}
+            Add New Equipment
+        {% endif %}
+    </h1>
 
     <form method="post" novalidate>
         {% csrf_token %}
-        {{ form.as_p }}  <!-- Render form fields as paragraphs -->
 
-        <button type="submit">Save Equipment</button>
-        <a href="{% url 'equipment_list' %}">Cancel</a>  <!-- Link to cancel and go back to the list -->
+        {{ form.non_field_errors }}
+
+        {% for field in form %}
+            <div class="form-group">
+
+                {{ field.label_tag }}
+
+                {% if field.errors %}
+                    <div class="field-errors">
+                        {{ field.errors }}
+                    </div>
+                {% endif %}
+
+                <div style="display: flex; align-items: center; width: 100%;">
+
+                    {{ field }}
+
+                    {% if field.name == "location" %}
+                        <a href="{% url 'location_create' %}"
+                           class="button small"
+                           style="margin-left: 10px; white-space: nowrap;">
+                            Create New Location
+                        </a>
+                    {% endif %}
+
+                </div>
+
+                {% if field.help_text %}
+                    <small class="help-text">
+                        {{ field.help_text }}
+                    </small>
+                {% endif %}
+
+            </div>
+        {% endfor %}
+
+        <button type="submit" class="button">
+            Save Equipment
+        </button>
+
+        <a href="{% url 'equipment_list' %}" class="button">
+            Cancel
+        </a>
     </form>
 
     {% if equipment %}
-    <form method="post" action="{% url 'equipment_delete' equipment.id %}" style="margin-top: 10px;">
-        {% csrf_token %}
-        <button type="submit" style="background-color: rgb(69, 5, 5); color: white;">Delete</button>
-    </form>
+        <form method="post"
+              action="{% url 'equipment_delete' equipment.id %}"
+              style="margin-top: 10px;">
+
+            {% csrf_token %}
+
+            <button type="submit"
+                    style="background-color: rgb(69, 5, 5); color: white;">
+                Delete
+            </button>
+        </form>
     {% endif %}
-</body>
+</main>
 {% endblock %}
+
+
+
+
+
+
+
