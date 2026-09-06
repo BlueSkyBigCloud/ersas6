@@ -3,22 +3,72 @@
 {% block title %}Service Type Form{% endblock %}
 
 {% block content %}
+
 <main>
-    <h2>{% if servicetype %}Edit Service Type: {{ servicetype.name }}{% else %}Create New Service Type{% endif %}</h2>
+    <h2>
+        {% if servicetype %}
+            Edit Service Type: {{ servicetype.name }}
+        {% else %}
+            Create New Service Type
+        {% endif %}
+    </h2>
 
-    <form method="post" novalidate>
+
+<form method="post" novalidate>
+    {% csrf_token %}
+
+    {{ form.non_field_errors }}
+
+    {% for field in form %}
+        <div class="form-group">
+
+            {{ field.label_tag }}
+
+            {% if field.errors %}
+                <div class="field-errors">
+                    {{ field.errors }}
+                </div>
+            {% endif %}
+
+            <div style="display: flex; align-items: center; width: 100%;">
+
+                {{ field }}
+
+            </div>
+
+            {% if field.help_text %}
+                <small class="help-text">
+                    {{ field.help_text }}
+                </small>
+            {% endif %}
+
+        </div>
+    {% endfor %}
+
+    <button type="submit" class="button">
+        Submit
+    </button>
+
+    <a href="{% url 'servicetype_list' %}" class="button">
+        Cancel
+    </a>
+</form>
+
+{% if servicetype %}
+    <form method="post"
+          action="{% url 'servicetype_delete' servicetype.id %}"
+          style="margin-top: 10px;">
+
         {% csrf_token %}
-        {{ form.as_p }}  <!-- Render form fields as paragraphs -->
 
-        <button type="submit" class="button">Submit</button>
-        <a href="{% url 'servicetype_list' %}" class="button">Cancel</a>  <!-- Link to cancel and go back to the list -->
+        <button type="submit"
+                class="button"
+                style="background-color: rgb(69, 5, 5); color: white;">
+            Delete
+        </button>
     </form>
+{% endif %}
 
-    {% if servicetype %}
-    <form method="post" action="{% url 'servicetype_delete' servicetype.id %}" style="margin-top: 10px;">
-        {% csrf_token %}
-        <button type="submit" class="button" style="background-color: rgb(69, 5, 5); color: white;">Delete</button>
-    </form>
-    {% endif %}
+
 </main>
 {% endblock %}
