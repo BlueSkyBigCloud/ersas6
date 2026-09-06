@@ -1,42 +1,89 @@
 {% load static %}
+
 <!DOCTYPE html>
 <html lang="en">
-<style>
-    body {
-        background-color: #f4f4f4; /* Ensure a consistent background color */
-        font-family: Arial, sans-serif;
-        margin: 0;
-        padding: 0;
-    }
-    .container {
-        max-width: 600px;
-        margin: 50px auto;
-        background: white;
-        border-radius: 10px;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    }
-    form {
-        width: 100%;
-    }
-</style>
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/png" href="{% static 'images/favicon.png' %}"> <!-- Update the path to your favicon file -->
+
+    <link rel="icon" type="image/png" href="{% static 'images/favicon.png' %}">
+
     <title>{% block title %}Dashboard{% endblock %}</title>
+
     <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
-    <script src="{% static 'js/sidebar.js' %}"></script> <!-- Include JS for sidebar toggle -->
-    <!-- Include FullCalendar CSS and JS -->
-    <link href='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/5.10.1/main.min.css' rel='stylesheet' />
-    <script src='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/5.10.1/main.min.js'></script>
 
+    <script src="{% static 'js/sidebar.js' %}"></script>
 
+    <!-- FullCalendar CSS and JS -->
+    <link
+        href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/5.10.1/main.min.css"
+        rel="stylesheet"
+    />
+
+    <script
+        src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/5.10.1/main.min.js">
+    </script>
+
+    <style>
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            min-width: 0;
+            overflow-x: auto;
+        }
+
+        body {
+            background-color: #f4f4f4;
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 50px auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        form {
+            width: 100%;
+        }
+
+        /*
+         * Allow wide content such as tables, forms,
+         * calendars, and reports to scroll horizontally.
+         */
+        .content {
+            overflow-x: auto;
+        }
+
+        /*
+         * Prevent wide tables from forcing the entire
+         * page layout to expand.
+         */
+        .content table {
+            max-width: none;
+        }
+
+        /*
+         * Optional: make wide elements retain their
+         * natural width so horizontal scrolling works.
+         */
+        .content > * {
+            max-width: none;
+        }
+    </style>
 </head>
+
 <body>
+
     <header class="dashboard-header">
         <div class="logo">
             <h1>PROFOROPS</h1>
         </div>
+
         <div class="user-menu">
             <span>Welcome, {{ user.username }}!</span>
             <a href="{% url 'account' %}" class="profile-link">Profile</a>
@@ -47,37 +94,72 @@
     <div class="sidebar">
         <nav>
             <ul>
-                <li><a href="{% url 'dashboard' %}">Dashboard</a></li>
-                <li><a href="{% url 'company' %}">Company</a></li>
-                <li><a href="{% url 'employee_list' %}">Employees</a></li>
-                <li><a href="{% url 'service_list' %}">Service Requests</a></li>
-                <li><a href="{% url 'map1' %}">Map</a></li>
-                <li><a href="{% url 'video' %}">Videos</a></li>
+                <li>
+                    <a href="{% url 'dashboard' %}">Dashboard</a>
+                </li>
 
+                <li>
+                    <a href="{% url 'company' %}">Company</a>
+                </li>
 
-                
+                <li>
+                    <a href="{% url 'employee_list' %}">Employees</a>
+                </li>
+
+                <li>
+                    <a href="{% url 'service_list' %}">Service Requests</a>
+                </li>
+
+                <li>
+                    <a href="{% url 'map1' %}">Map</a>
+                </li>
+
+                <li>
+                    <a href="{% url 'video' %}">Videos</a>
+                </li>
+
                 {% if user.is_account_admin %}
-                <li><a href="{% url 'priceanalysis:priceanalysis_dashboard' %}">Pricing Analysis</a></li>
-                <li><a href="{% url 'item_list' %}">Inventory</a></li>
-                <li><a href="{% url 'prospect_dashboard' %}">Prospects</a></li>
-                <li><a href="{% url 'business_center' %}">Business Center</a></li>
+
+                <li>
+                    <a href="{% url 'priceanalysis:priceanalysis_dashboard' %}">
+                        Pricing Analysis
+                    </a>
+                </li>
+
+                <li>
+                    <a href="{% url 'item_list' %}">Inventory</a>
+                </li>
+
+                <li>
+                    <a href="{% url 'prospect_dashboard' %}">Prospects</a>
+                </li>
+
+                <li>
+                    <a href="{% url 'business_center' %}">
+                        Business Center
+                    </a>
+                </li>
+
                 {% endif %}
-                <li><a href="{% url 'message_list' %}">Messages</a></li>
+
+                <li>
+                    <a href="{% url 'message_list' %}">Messages</a>
+                </li>
+
                 <br>
                 <br>
-                <
             </ul>
         </nav>
     </div>
 
     <main class="content">
         <br>
+
         {% block content %}
         <br>
-
         <!-- block content -->
-
         {% endblock %}
+
         <br>
         <br>
         <br>
@@ -85,7 +167,13 @@
     </main>
 
     <footer class="dashboard-footer">
-        <p>&copy; 2025 PROFOROPS. All Rights Reserved. For customer service email contact@proforops.com</p>
+        <p>
+            &copy; 2025 PROFOROPS. All Rights Reserved.
+            For customer service email
+            contact@proforops.com
+        </p>
     </footer>
+
 </body>
+
 </html>
