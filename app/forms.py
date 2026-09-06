@@ -1,6 +1,87 @@
 from django import forms
 from users.models import CustomUser
 
+from django.urls import reverse, NoReverseMatch
+
+class CreateRelatedModelMixin:
+    """
+    Automatically identifies required ModelChoiceFields and adds
+    metadata used by the template to display a 'Create new model'
+    button.
+
+    A ModelChoiceField remains a normal Django field. The create
+    button is handled separately by the template.
+    """
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.create_model_fields = []
+
+        for field_name, field in self.fields.items():
+
+            # Only ModelChoiceField / ModelMultipleChoiceField
+            if not isinstance(
+                field,
+                (
+                    forms.ModelChoiceField,
+                    forms.ModelMultipleChoiceField,
+                )
+            ):
+                continue
+
+            # We only want required model fields
+            if not field.required:
+                continue
+
+            model = getattr(field.queryset, "model", None)
+
+            if not model:
+                continue
+
+            model_name = model._meta.model_name
+            verbose_name = model._meta.verbose_name
+
+            # Convention:
+            # location -> location_create
+            # equipment -> equipment_create
+            # service_type -> servicetype_create
+            #
+            # We try both the model name and common URL naming.
+            create_url = None
+
+            possible_url_names = [
+                f"{model_name}_create",
+                f"{model_name}create",
+            ]
+
+            # ServiceType commonly uses servicetype_create
+            if model_name == "service_type":
+                possible_url_names.insert(0, "servicetype_create")
+
+            for url_name in possible_url_names:
+                try:
+                    create_url = reverse(url_name)
+                    break
+                except NoReverseMatch:
+                    continue
+
+            self.create_model_fields.append({
+                "field_name": field_name,
+                "model": model,
+                "model_name": model_name,
+                "verbose_name": verbose_name,
+                "verbose_name_plural": model._meta.verbose_name_plural,
+                "create_url": create_url,
+            })
+
+            # Add useful HTML metadata directly to the widget.
+            field.widget.attrs.update({
+                "data-model-field": field_name,
+                "data-model-name": model_name,
+                "data-model-create-url": create_url or "",
+            })
+
 class CustomUserForm(forms.ModelForm):
     class Meta:
         model = CustomUser
