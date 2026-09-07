@@ -10,31 +10,34 @@
 
 <div class="service-list">
 
-        <div class="employee-table-container">
+    {% for employee in employees %}
 
-            <table class="employee-table">
+        <div class="service-container">
 
-                <thead>
+            <div class="employee-table-container">
 
-                    <tr>
+                <table class="employee-table">
 
-                        <th>Employee #</th>
-                        <th>First Name</th>
-                        <th>Last Name</th>
-                        <th>Callsign</th>
-                        <th>Phone</th>
-                        <th>Email</th>
-                        <th>Actions</th>
+                    <thead>
 
-                    </tr>
+                        <tr>
 
-                </thead>
+                            <th>Employee #</th>
+                            <th>First Name</th>
+                            <th>Last Name</th>
+                            <th>Callsign</th>
+                            <th>Phone</th>
+                            <th>Email</th>
+                            <th>Actions</th>
 
-                <tbody>
+                        </tr>
 
-                    {% for employee in employees %}
+                    </thead>
 
-                        <tr class="service-container">
+
+                    <tbody>
+
+                        <tr>
 
                             <td>
 
@@ -86,17 +89,15 @@
 
                         </tr>
 
-                    {% endfor %}
+                    </tbody>
 
-                    </div>
+                </table>
 
-                </tbody>
-
-            </table>
+            </div>
 
         </div>
 
-    </div>
+    {% endfor %}
 
 </div>
 
