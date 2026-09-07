@@ -727,13 +727,9 @@ def employee_list(request):
         return str(value).lower()
 
     employees.sort(
-        key=lambda employee: (
-            str(
-                getattr(employee, sort_field, '') or ''
-            ).lower()
-        ),
-        reverse=reverse,
-    )
+    key=employee_sort_key,
+    reverse=reverse,
+)
 
     # ------------------------------------------------------------
     # Pagination
