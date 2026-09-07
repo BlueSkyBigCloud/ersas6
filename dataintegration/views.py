@@ -111,6 +111,7 @@ def integration_dashboard(request):
     )
 
 
+
 # ============================================================
 # Upload
 # ============================================================
@@ -128,9 +129,18 @@ def integration_upload(request):
             "data_integration/upload.html",
         )
 
+    logger.info(
+        "UPLOAD START: user_id=%s",
+        request.user.id,
+    )
+
     uploaded_file = request.FILES.get("file")
 
     if not uploaded_file:
+        logger.warning(
+            "UPLOAD FAILED: no file received"
+        )
+
         messages.error(
             request,
             "Please select a file to upload.",
@@ -142,7 +152,21 @@ def integration_upload(request):
         )
 
     filename = uploaded_file.name
+
+    logger.info(
+        "UPLOAD FILE RECEIVED: filename=%s size=%s content_type=%s",
+        filename,
+        uploaded_file.size,
+        uploaded_file.content_type,
+    )
+
     source_type = detect_source_type(filename)
+
+    logger.info(
+        "UPLOAD SOURCE TYPE: filename=%s source_type=%s",
+        filename,
+        source_type,
+    )
 
     allowed_types = {
         DataImport.SourceType.CSV,
@@ -152,6 +176,12 @@ def integration_upload(request):
     }
 
     if source_type not in allowed_types:
+        logger.warning(
+            "UPLOAD REJECTED: unsupported file type filename=%s source_type=%s",
+            filename,
+            source_type,
+        )
+
         messages.error(
             request,
             "Unsupported file type. Please upload a CSV, XLS, XLSX, or DAT file.",
@@ -162,7 +192,13 @@ def integration_upload(request):
             "data_integration/upload.html",
         )
 
+    logger.info(
+        "UPLOAD STORAGE SAVE START: filename=%s",
+        filename,
+    )
+
     try:
+
         data_import = DataImport.objects.create(
             company=request.user.company,
             uploaded_by=request.user,
@@ -173,7 +209,20 @@ def integration_upload(request):
             status=DataImport.Status.UPLOADED,
         )
 
+        logger.info(
+            "UPLOAD STORAGE SAVE COMPLETE: import_id=%s filename=%s",
+            data_import.id,
+            filename,
+        )
+
     except Exception as exc:
+
+        logger.exception(
+            "UPLOAD FAILED: filename=%s error=%s",
+            filename,
+            exc,
+        )
+
         messages.error(
             request,
             f"Unable to create import: {exc}",
@@ -183,6 +232,11 @@ def integration_upload(request):
             request,
             "data_integration/upload.html",
         )
+
+    logger.info(
+        "UPLOAD REDIRECT: import_id=%s",
+        data_import.id,
+    )
 
     return redirect(
         "dataintegration:integration_analyze",
