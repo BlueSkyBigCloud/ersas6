@@ -708,6 +708,24 @@ def employee_list(request):
 
     reverse = sort.startswith('-')
 
+    def employee_sort_key(employee):
+
+        value = getattr(employee, sort_field, '') or ''
+
+        # Employee numbers should sort numerically
+        if sort_field == 'employee_number':
+
+            try:
+                return int(value)
+
+            except (ValueError, TypeError):
+
+                # Keep non-numeric employee numbers at the end
+                return float('inf')
+
+        # Other fields sort alphabetically
+        return str(value).lower()
+
     employees.sort(
         key=lambda employee: (
             str(
