@@ -667,3 +667,7 @@ class CostSheet(models.Model):
 
     def __str__(self):
         return f"CostSheet {self.id} for {self.employee} ({self.start_date} - {self.end_date})"
+
+
+
+

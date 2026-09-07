@@ -35,14 +35,14 @@ class EmployeeQualificationAdmin(admin.ModelAdmin):
     list_display = ('employee', 'qualification', 'status', 'date_completed', 'expiration_date')
     list_filter = ('status', 'date_completed', 'expiration_date')
     search_fields = ('employee__callsign', 'qualification__name')
-    readonly_fields = ['employee', 'qualification', 'status', 'date_completed', 'expiration_date', 'approved_by', 'notes', 'created_at']
+    readonly_fields = []
 
 @admin.register(Qualification)
 class QualificationAdmin(admin.ModelAdmin):
     list_display = ('name', 'type', 'rep_count', 'required_approval')
     list_filter = ('type', 'required_approval')
     search_fields = ('name',)
-    readonly_fields = ['name', 'type', 'rep_count', 'required_approval', 'field_1', 'field_2', 'field_3', 'date_created']
+    readonly_fields = []
     
 # Admin configuration for Employee
 @admin.register(Employee)
