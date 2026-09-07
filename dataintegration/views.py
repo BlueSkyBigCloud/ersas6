@@ -10,6 +10,8 @@ from django.views.decorators.http import require_http_methods, require_POST
 from .models import *
 import logging
 from .services import run_import_from_file
+from django.apps import apps
+
 
 
 logger = logging.getLogger(__name__)
@@ -591,6 +593,51 @@ def integration_validate(request, import_id):
         context,
     )
 
+from business.models import Customer
+
+# TARGET FIELD MAPPING HELPER
+
+def get_import_target_fields():
+    """
+    Return the available import fields for each supported target model.
+    """
+
+    target_models = {
+        "Employee": Employee,
+        "Equipment": Equipment,
+        "Location": Location,
+        "Customer": Customer,
+    }
+
+    model_fields = {}
+
+    for model_name, model_class in target_models.items():
+
+        fields = []
+
+        for field in model_class._meta.fields:
+
+            # Exclude fields that should not be imported
+            if field.name in [
+                "id",
+                "company",
+                "created_at",
+                "updated_at",
+            ]:
+                continue
+
+            # Exclude relational fields
+            if field.is_relation:
+                continue
+
+            fields.append({
+                "name": field.name,
+                "label": field.verbose_name.title(),
+            })
+
+        model_fields[model_name] = fields
+
+    return model_fields
 
 # ============================================================
 # Import
@@ -655,6 +702,7 @@ def integration_mapping(request, import_id):
         context = {
             "data_import": data_import,
             "columns": columns,
+            "model_fields": get_import_target_fields(),
         }
 
         return render(
