@@ -1,9 +1,49 @@
 {% extends "base2.html" %}
+
+{% block title %}Create Prospect{% endblock %}
+
 {% block content %}
-  <h1>Create Prospect</h1>
-  <form method="post">
+
+<main>
+    <h1>Create Prospect</h1>
+
+
+<form method="post" novalidate>
     {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit" class="btn btn-success">Save Prospect</button>
-  </form>
+
+    {{ form.non_field_errors }}
+
+    {% for field in form %}
+        <div class="form-group">
+
+            {{ field.label_tag }}
+
+            {% if field.errors %}
+                <div class="field-errors">
+                    {{ field.errors }}
+                </div>
+            {% endif %}
+
+            <div style="display: flex; align-items: center; width: 100%;">
+
+                {{ field }}
+
+            </div>
+
+            {% if field.help_text %}
+                <small class="help-text">
+                    {{ field.help_text }}
+                </small>
+            {% endif %}
+
+        </div>
+    {% endfor %}
+
+    <button type="submit" class="btn btn-success">
+        Save Prospect
+    </button>
+</form>
+
+
+</main>
 {% endblock %}
