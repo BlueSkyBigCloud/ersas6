@@ -15,6 +15,8 @@
             {{ field.label_tag }}
             <div style="display: flex; align-items: center;">
                 {{ field }}
+                {% if field.name == "customer" %}
+                <a href="{% url 'add_customer' %}" class="button small" style="margin-left: 10px;">Create Customer</a>
                 {% if field.name == "start_location" %}
                 <a href="{% url 'location_create' %}" class="button small" style="margin-left: 10px;">Create New Location</a>
                 {% elif field.name == "end_location" %}
