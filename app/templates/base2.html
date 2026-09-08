@@ -127,10 +127,6 @@
                 </li>
 
                 <li>
-                    <a href="{% url 'item_list' %}">Inventory</a>
-                </li>
-
-                <li>
                     <a href="{% url 'prospect_dashboard' %}">Prospects</a>
                 </li>
 
@@ -138,6 +134,14 @@
                     <a href="{% url 'business_center' %}">
                         Business Center
                     </a>
+                </li>
+
+                {% endif %}
+
+                {% if user.is_staff %}
+
+                <li>
+                    <a href="{% url 'item_list' %}">Inventory</a>
                 </li>
 
                 {% endif %}
