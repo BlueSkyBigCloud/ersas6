@@ -1,22 +1,51 @@
+{% extends 'base2.html' %}
 
-{% extends 'base2.html' %}  <!-- Extend the base template -->
-
-{% block title %}Message User{% endblock %}  <!-- Title for the page -->
+{% block title %}Message User{% endblock %}
 
 {% block content %}
-<head>
-    <meta charset="UTF-8">
-    <title>Send Message</title>
-</head>
-<body>
+
+<main>
     <h1>Send Message</h1>
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Send Message</button>
-    </form>
-    <a href="{% url 'message_list' %}">Back to Messages</a>
-</body>
 
+<form method="post" novalidate>
+    {% csrf_token %}
 
+    {{ form.non_field_errors }}
+
+    {% for field in form %}
+        <div class="form-group">
+
+            {{ field.label_tag }}
+
+            {% if field.errors %}
+                <div class="field-errors">
+                    {{ field.errors }}
+                </div>
+            {% endif %}
+
+            <div style="display: flex; align-items: center; width: 100%;">
+
+                {{ field }}
+
+            </div>
+
+            {% if field.help_text %}
+                <small class="help-text">
+                    {{ field.help_text }}
+                </small>
+            {% endif %}
+
+        </div>
+    {% endfor %}
+
+    <button type="submit" class="button">
+        Send Message
+    </button>
+
+    <a href="{% url 'message_list' %}" class="button">
+        Back to Messages
+    </a>
+</form>
+
+</main>
 {% endblock %}
