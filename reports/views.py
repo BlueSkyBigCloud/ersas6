@@ -53,6 +53,6 @@ def reports_dashboard(request):
 
     return render(
         request,
-        "reports/dashboard.html",
+        "reports/reports_dashboard.html",
         context,
     )
