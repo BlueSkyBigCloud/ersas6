@@ -1,0 +1,126 @@
+{% extends 'base2.html' %}
+
+{% block title %}Service Request Report{% endblock %}
+
+{% block content %}
+
+<h1>Service Request Report</h1>
+
+<div class="report-container">
+
+```
+<div class="report-summary">
+    Total Service Requests: {{ service_requests|length }}
+</div>
+
+<div class="table-wrapper">
+    <table class="report-table">
+        <thead>
+            <tr>
+                <th>Service Request</th>
+                <th>Service Type</th>
+                <th>Employee</th>
+                <th>Equipment</th>
+                <th>Start Location</th>
+                <th>End Location</th>
+                <th>Invoice</th>
+                <th>Created</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for service_request in service_requests %}
+                <tr>
+                    <td>
+                        {{ service_request }}
+                    </td>
+
+                    <td>
+                        {{ service_request.servicetype|default:"—" }}
+                    </td>
+
+                    <td>
+                        {% if service_request.employee %}
+                            {{ service_request.employee.first_name }}
+                            {{ service_request.employee.last_name }}
+                        {% else %}
+                            —
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        {{ service_request.equipment|default:"—" }}
+                    </td>
+
+                    <td>
+                        {{ service_request.start_location|default:"—" }}
+                    </td>
+
+                    <td>
+                        {{ service_request.end_location|default:"—" }}
+                    </td>
+
+                    <td>
+                        {{ service_request.invoice|default:"—" }}
+                    </td>
+
+                    <td>
+                        {{ service_request.created_at|date:"m/d/Y" }}
+                    </td>
+                </tr>
+
+            {% empty %}
+                <tr>
+                    <td colspan="8">
+                        No service requests found.
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+```
+
+</div>
+
+<style>
+    .report-container {
+        width: 100%;
+        margin-top: 20px;
+    }
+
+    .report-summary {
+        margin-bottom: 15px;
+        font-weight: bold;
+    }
+
+    .table-wrapper {
+        width: 100%;
+        overflow-x: auto;
+    }
+
+    .report-table {
+        width: 100%;
+        min-width: 1000px;
+        border-collapse: collapse;
+        background: #ffffff;
+    }
+
+    .report-table th,
+    .report-table td {
+        padding: 10px;
+        border: 1px solid #ddd;
+        text-align: left;
+        white-space: nowrap;
+    }
+
+    .report-table th {
+        background: #f0f0f0;
+    }
+
+    .report-table tbody tr:hover {
+        background: #f8f8f8;
+    }
+</style>
+
+{% endblock %}
