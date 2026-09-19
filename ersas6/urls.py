@@ -175,8 +175,6 @@ urlpatterns = [
     path('company/', company_view, name='company'),
     path('company/create', company_create, name='create_company'),
     path('company/edit/<uuid:pk>/', company_edit, name='edit_company'),
-
-
     path('company/createinvite/', create_invite, name='create_invite'),
 
     path('products1', products1_view, name='products1'),
@@ -244,7 +242,8 @@ urlpatterns = [
          name='django.contrib.sitemaps.views.sitemap'),
 
     path("robots.txt", TemplateView.as_view(template_name="robots.txt", content_type="text/plain")),
-   
+
+   path("reports/", include("reports.urls"))
  
 ]
 
