@@ -376,55 +376,134 @@ class ServiceType(models.Model):
 from datetime import time
 
 class ServiceRequest(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    service_request_number = models.CharField(max_length=20, unique=True, blank=True, null=True)
-    invoice = models.ForeignKey('business.Invoice', on_delete=models.PROTECT, null=True, blank=True)
-    start_date = models.DateField()
-    end_date = models.DateField()
-    start_location = models.ForeignKey(
-        'Location', 
-        on_delete=models.CASCADE, 
-        related_name='service_requests_start'
+    id = models.UUIDField(
+        primary_key=True,
+        default=uuid.uuid4,
+        editable=False
     )
-    end_location = models.ForeignKey(
-        'Location', 
-        on_delete=models.CASCADE, 
-        related_name='service_requests_end'
+
+    service_request_number = models.CharField(
+        max_length=20,
+        unique=True,
+        blank=True,
+        null=True
     )
-    customer = models.ForeignKey('business.Customer', on_delete=models.PROTECT, null=False, blank=False)
-    equipment = models.ForeignKey('Equipment', on_delete=models.PROTECT)
-    employee = models.ForeignKey('Employee', on_delete=models.PROTECT)
-    assigned_employees = models.ManyToManyField('Employee', related_name='assigned_service_requests', blank=True)
-    service_type = models.ForeignKey('ServiceType', on_delete=models.PROTECT)
-    created_by_user = models.ForeignKey(
-        settings.AUTH_USER_MODEL, 
-        on_delete=models.SET_NULL, 
-        null=True, 
+
+    company = models.ForeignKey(
+        'app.Company',
+        on_delete=models.PROTECT,
+        related_name='service_requests',
+    )
+
+    invoice = models.ForeignKey(
+        'business.Invoice',
+        on_delete=models.PROTECT,
+        null=True,
         blank=True
     )
-    created_timestamp = models.DateTimeField(auto_now_add=True)
-    status = models.CharField(max_length=255)
 
-    start_time = models.TimeField(null=True, blank=True)
-    end_time = models.TimeField(null=True, blank=True)
-    all_day = models.BooleanField(default=False)
+    start_date = models.DateField()
+    end_date = models.DateField()
+
+    start_location = models.ForeignKey(
+        'Location',
+        on_delete=models.CASCADE,
+        related_name='service_requests_start'
+    )
+
+    end_location = models.ForeignKey(
+        'Location',
+        on_delete=models.CASCADE,
+        related_name='service_requests_end'
+    )
+
+    customer = models.ForeignKey(
+        'business.Customer',
+        on_delete=models.PROTECT,
+        null=False,
+        blank=False
+    )
+
+    equipment = models.ForeignKey(
+        'Equipment',
+        on_delete=models.PROTECT
+    )
+
+    employee = models.ForeignKey(
+        'Employee',
+        on_delete=models.PROTECT
+    )
+
+    assigned_employees = models.ManyToManyField(
+        'Employee',
+        related_name='assigned_service_requests',
+        blank=True
+    )
+
+    service_type = models.ForeignKey(
+        'ServiceType',
+        on_delete=models.PROTECT
+    )
+
+    created_by_user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True
+    )
+
+    created_timestamp = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    status = models.CharField(
+        max_length=255
+    )
+
+    start_time = models.TimeField(
+        null=True,
+        blank=True
+    )
+
+    end_time = models.TimeField(
+        null=True,
+        blank=True
+    )
+
+    all_day = models.BooleanField(
+        default=False
+    )
 
     def save(self, *args, **kwargs):
-        """Ensure start_time and end_time are properly set if all_day is True."""
+        """
+        Automatically assign the ServiceRequest company from
+        the company associated with the creating user.
+        """
+
+        if self.created_by_user:
+            user_company = getattr(
+                self.created_by_user,
+                'company',
+                None
+            )
+
+            if user_company:
+                self.company = user_company
+
         if self.all_day:
-            self.start_time = time(0, 0)  # 12:00 AM
-            self.end_time = time(23, 59)  # 11:59 PM
+            self.start_time = time(0, 0)
+            self.end_time = time(23, 59)
+
         super().save(*args, **kwargs)
-    
 
     def add_note(self, content):
         """Add a note to the service request."""
         note = Note.create(content)
-        self.notes.add(note)  # Add the newly created note to the service request
+        self.notes.add(note)
         self.save()
 
     def get_notes(self):
-        """Retrieve all notes associated with this service request."""
+        """Retrieve all notes associated with the service request."""
         return self.notes.all()
 
     def decrypt_fields(self, user=None):
@@ -432,9 +511,10 @@ class ServiceRequest(models.Model):
             self.service_type.name = decrypt(self.service_type.name)
             self.employee.first_name = decrypt(self.employee.first_name)
             self.employee.last_name = decrypt(self.employee.last_name)
- 
+
     def __str__(self):
         return f"ServiceRequest {self.id}"
+
     
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
