@@ -13,9 +13,9 @@ admin.site.index_title = _("Welcome to TRADESEC ADMIN")
 # -------------------------------
 @admin.register(Customer)
 class CustomerAdmin(admin.ModelAdmin):
-    list_display = ('name',)
-    search_fields = ('name',)
-    list_filter = ('name',)
+    list_display = ('name', 'created_at')
+    search_fields = ('name', 'created_at')
+    list_filter = ('name', 'created_at')
     readonly_fields = [
         'email', 'name', 'created_by_user', 'address',
         'payment_terms', 'payment_method', 'phone_number', 'account_rep'
@@ -27,9 +27,9 @@ class CustomerAdmin(admin.ModelAdmin):
 # -------------------------------
 @admin.register(Invoice)
 class CustomerInvoice(admin.ModelAdmin):
-    list_display = ('id',)
-    search_fields = ('id',)
-    list_filter = ('id',)
+    list_display = ('id', 'created_at')
+    search_fields = ('id', 'created_at')
+    list_filter = ('id', 'created_at')
     readonly_fields = [
         'service_request', 'customer', 'created_by_user',
         'created_at'
