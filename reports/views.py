@@ -144,20 +144,16 @@ def reports_interactive(request):
         # Decrypt fields using the current logged-in user
         employee.decrypt_fields(user=request.user)
 
-        for employee in employees:
-            employee_data.append({
-                "id": str(employee.id),
-                "employee_number": employee.employee_number or "",
-                "first_name": employee.first_name or "",
-                "last_name": employee.last_name or "",
-                "position": employee.position or "",
-                "department": employee.department or "",
-                "status": employee.status or "",
-            })
+        employee_data.append({
+            "id": str(employee.id),
+            "employee_number": employee.employee_number or "",
+            "first_name": employee.first_name or "",
+            "last_name": employee.last_name or "",
+            "position": employee.position or "",
+            "department": employee.department or "",
+            "status": employee.status or "",
+        })
 
-    employees = Employee.objects.filter(
-            company=request.user.company
-        )
     
     logger.info(
             "INTERACTIVE REPORT - employee count=%s",
