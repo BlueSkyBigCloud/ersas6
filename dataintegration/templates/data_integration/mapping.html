@@ -416,6 +416,15 @@
                                 Customer
                             </option>
 
+                            <option
+                                value="ServiceRequest"
+                                {% if data_import.target_model == "ServiceRequest" %}
+                                    selected
+                                {% endif %}
+                            >
+                                Service Request
+                            </option>
+
                         </select>
 
                         <div class="form-text">
