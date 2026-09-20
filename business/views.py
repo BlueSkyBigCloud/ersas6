@@ -16,7 +16,8 @@ from django.shortcuts import redirect
 @login_required
 @onboarded()
 def businesscenter_view(request):
-    customers = Customer.objects.filter(created_by_user=request.user)  # Filter by user
+    company = request.user.company  # Get the company of the logged-in user
+    customers = Customer.objects.filter(company=company)  # Filter by company
     return render(request, 'businesscenter.html', {'customers': customers})
 
 
@@ -27,8 +28,9 @@ def add_customer_view(request):
         form = CustomerForm(request.POST)
         if form.is_valid():
             customer = form.save(commit=False)  # Do not save to the database yet
-            customer.created_by_user = request.user  # Assign the logged-in user
-            customer.save()  # Save with the assigned user
+            customer.company = request.user.company  # Assign the company of the logged-in user
+            customer.created_by_user = request.user
+            customer.save()  # Save with the assigned company
             return redirect('business_center')  # Redirect to the list view after saving
     else:
         form = CustomerForm()
@@ -36,7 +38,8 @@ def add_customer_view(request):
 
 @login_required
 def invoicelist_view(request):
-    invoices = Invoice.objects.filter(created_by_user=request.user)
+    company = request.user.company  # Get the company of the logged-in user
+    invoices = Invoice.objects.filter(company=company)
     return render(request, 'invoice_list.html', {'invoices': invoices})
 
 def invoicecustomerlist_view(request, customer_id):
