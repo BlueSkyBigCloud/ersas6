@@ -41,11 +41,11 @@ def reports_interactive(request):
         employees.count(),
     )
     logger.info(
-    "EMPLOYEE REPORT - queryset=%s serialized=%s unique_ids=%s",
-    employees.count(),
-    len(employee_data),
-    len({row["id"] for row in employee_data}),
-    )
+        "EMPLOYEE REPORT - queryset=%s serialized=%s unique_ids=%s",
+        employees.count(),
+        len(employee_data),
+        len({row["id"] for row in employee_data}),
+        )
 
     # ---------------------------------------------------------
     # Service Requests
