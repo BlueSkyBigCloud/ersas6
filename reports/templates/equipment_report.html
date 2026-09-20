@@ -1,0 +1,102 @@
+{% extends 'base2.html' %}
+
+{% block title %}Equipment Report{% endblock %}
+
+{% block content %}
+
+<h1>Equipment Report</h1>
+
+<div class="report-container">
+
+```
+<div class="report-summary">
+    Total Equipment: {{ equipment|length }}
+</div>
+
+<div class="table-wrapper">
+    <table class="report-table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Category</th>
+                <th>Quantity</th>
+                <th>Location</th>
+                <th>Make</th>
+                <th>Model</th>
+                <th>Stock Number</th>
+                <th>Year</th>
+                <th>Miles / Hours</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for item in equipment %}
+                <tr>
+                    <td>{{ item.name|default:"—" }}</td>
+                    <td>{{ item.description|default:"—" }}</td>
+                    <td>{{ item.category|default:"—" }}</td>
+                    <td>{{ item.quantity|default:"—" }}</td>
+                    <td>{{ item.location|default:"—" }}</td>
+                    <td>{{ item.make|default:"—" }}</td>
+                    <td>{{ item.model|default:"—" }}</td>
+                    <td>{{ item.stock_number|default:"—" }}</td>
+                    <td>{{ item.year|default:"—" }}</td>
+                    <td>{{ item.miles_hours|default:"—" }}</td>
+                </tr>
+
+            {% empty %}
+                <tr>
+                    <td colspan="10">
+                        No equipment found.
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+```
+
+</div>
+
+<style>
+    .report-container {
+        width: 100%;
+        margin-top: 20px;
+    }
+
+    .report-summary {
+        margin-bottom: 15px;
+        font-weight: bold;
+    }
+
+    .table-wrapper {
+        width: 100%;
+        overflow-x: auto;
+    }
+
+    .report-table {
+        width: 100%;
+        min-width: 1200px;
+        border-collapse: collapse;
+        background: #ffffff;
+    }
+
+    .report-table th,
+    .report-table td {
+        padding: 10px;
+        border: 1px solid #ddd;
+        text-align: left;
+        white-space: nowrap;
+    }
+
+    .report-table th {
+        background: #f0f0f0;
+    }
+
+    .report-table tbody tr:hover {
+        background: #f8f8f8;
+    }
+</style>
+
+{% endblock %}

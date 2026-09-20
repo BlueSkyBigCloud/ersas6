@@ -1,0 +1,106 @@
+{% extends 'base2.html' %}
+
+{% block title %}Invoice Report{% endblock %}
+
+{% block content %}
+
+<h1>Invoice Report</h1>
+
+<div class="report-container">
+
+```
+<div class="report-summary">
+    Total Invoices: {{ invoices|length }}
+</div>
+
+<div class="table-wrapper">
+    <table class="report-table">
+        <thead>
+            <tr>
+                <th>Invoice</th>
+                <th>Customer</th>
+                <th>Date</th>
+                <th>Status</th>
+                <th>Total</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for invoice in invoices %}
+                <tr>
+                    <td>
+                        {{ invoice }}
+                    </td>
+
+                    <td>
+                        {{ invoice.customer|default:"—" }}
+                    </td>
+
+                    <td>
+                        {{ invoice.created_at|date:"m/d/Y" }}
+                    </td>
+
+                    <td>
+                        {{ invoice.status|default:"—" }}
+                    </td>
+
+                    <td>
+                        {{ invoice.total|default:"—" }}
+                    </td>
+                </tr>
+
+            {% empty %}
+                <tr>
+                    <td colspan="5">
+                        No invoices found.
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+```
+
+</div>
+
+<style>
+    .report-container {
+        width: 100%;
+        margin-top: 20px;
+    }
+
+    .report-summary {
+        margin-bottom: 15px;
+        font-weight: bold;
+    }
+
+    .table-wrapper {
+        width: 100%;
+        overflow-x: auto;
+    }
+
+    .report-table {
+        width: 100%;
+        min-width: 800px;
+        border-collapse: collapse;
+        background: #ffffff;
+    }
+
+    .report-table th,
+    .report-table td {
+        padding: 10px;
+        border: 1px solid #ddd;
+        text-align: left;
+        white-space: nowrap;
+    }
+
+    .report-table th {
+        background: #f0f0f0;
+    }
+
+    .report-table tbody tr:hover {
+        background: #f8f8f8;
+    }
+</style>
+
+{% endblock %}
