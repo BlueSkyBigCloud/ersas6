@@ -2,6 +2,9 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 import json
 from app.decorators import onboarded
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 @onboarded()
@@ -22,6 +25,21 @@ def reports_interactive(request):
                 }
             },
         )
+
+    logger.info(
+    "INTERACTIVE REPORT - user=%s company=%s",
+    request.user.email,
+    getattr(request.user, "company_id", None),
+    )
+
+    employees = Employee.objects.filter(
+        company=request.user.company
+    )
+
+    logger.info(
+        "INTERACTIVE REPORT - employee count=%s",
+        employees.count(),
+    )
 
     # ---------------------------------------------------------
     # Service Requests
