@@ -1,7 +1,184 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
-
+import json
 from app.decorators import onboarded
+
+
+@onboarded()
+@login_required
+def reports_interactive(request):
+    user_company = getattr(request.user, "company", None)
+
+    if not user_company:
+        return render(
+            request,
+            "reports/reports_interactive.html",
+            {
+                "report_data": {
+                    "service_requests": [],
+                    "invoices": [],
+                    "employees": [],
+                    "equipment": [],
+                }
+            },
+        )
+
+    # ---------------------------------------------------------
+    # Service Requests
+    # ---------------------------------------------------------
+
+    service_requests = (
+        ServiceRequest.objects
+        .filter(company=user_company)
+        .select_related(
+            "customer",
+            "employee",
+            "equipment",
+            "service_type",
+            "start_location",
+            "end_location",
+            "invoice",
+        )
+        .order_by("-created_timestamp")
+    )
+
+    service_request_data = []
+
+    for service_request in service_requests:
+        service_request_data.append({
+            "id": str(service_request.id),
+            "number": service_request.service_request_number or "",
+            "start_date": (
+                service_request.start_date.isoformat()
+                if service_request.start_date
+                else ""
+            ),
+            "end_date": (
+                service_request.end_date.isoformat()
+                if service_request.end_date
+                else ""
+            ),
+            "status": service_request.status or "",
+            "service_type": (
+                service_request.service_type.name
+                if service_request.service_type
+                else ""
+            ),
+            "customer": (
+                str(service_request.customer)
+                if service_request.customer
+                else ""
+            ),
+            "created": (
+                service_request.created_timestamp.isoformat()
+                if service_request.created_timestamp
+                else ""
+            ),
+        })
+
+    # ---------------------------------------------------------
+    # Invoices
+    # ---------------------------------------------------------
+
+    invoices = (
+        Invoice.objects
+        .filter(service_request__company=user_company)
+        .select_related(
+            "customer",
+            "service_request",
+        )
+        .order_by("-created_at")
+    )
+
+    invoice_data = []
+
+    for invoice in invoices:
+        invoice_data.append({
+            "id": str(invoice.id),
+            "number": invoice.invoice_number or "",
+            "issue_date": (
+                invoice.issue_date.isoformat()
+                if invoice.issue_date
+                else ""
+            ),
+            "due_date": (
+                invoice.due_date.isoformat()
+                if invoice.due_date
+                else ""
+            ),
+            "status": invoice.payment_status or "",
+            "customer": (
+                str(invoice.customer)
+                if invoice.customer
+                else ""
+            ),
+            "created": (
+                invoice.created_at.isoformat()
+                if invoice.created_at
+                else ""
+            ),
+        })
+
+    # ---------------------------------------------------------
+    # Employees
+    # ---------------------------------------------------------
+
+    employees = (
+        Employee.objects
+        .filter(company=user_company)
+        .order_by("last_name", "first_name")
+    )
+
+    employee_data = []
+
+    for employee in employees:
+        employee_data.append({
+            "id": str(employee.id),
+            "employee_number": employee.employee_number or "",
+            "first_name": employee.first_name or "",
+            "last_name": employee.last_name or "",
+            "position": employee.position or "",
+            "department": employee.department or "",
+            "status": employee.status or "",
+        })
+
+    # ---------------------------------------------------------
+    # Equipment
+    # ---------------------------------------------------------
+
+    equipment = (
+        Equipment.objects
+        .filter(company=user_company)
+        .order_by("name")
+    )
+
+    equipment_data = []
+
+    for item in equipment:
+        equipment_data.append({
+            "id": str(item.id),
+            "name": item.name or "",
+            "category": item.category or "",
+            "make": item.make or "",
+            "model": item.model or "",
+            "stock_number": item.stock_number or "",
+            "quantity": item.quantity or 0,
+        })
+
+    report_data = {
+        "service_requests": service_request_data,
+        "invoices": invoice_data,
+        "employees": employee_data,
+        "equipment": equipment_data,
+    }
+
+    return render(
+        request,
+        "reports_interactive.html",
+        {
+            "report_data": json.dumps(report_data),
+        },
+    )
 
 
 @onboarded()

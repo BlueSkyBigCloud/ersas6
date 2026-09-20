@@ -1,0 +1,1549 @@
+{% extends "base2.html" %}
+{% load static %}
+
+{% block title %}Interactive Reports{% endblock %}
+
+{% block content %}
+
+<style>
+    .interactive-reports {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    .report-header {
+        margin-bottom: 20px;
+    }
+
+    .report-header h1 {
+        margin-bottom: 5px;
+    }
+
+    .report-header p {
+        color: #666;
+        margin-top: 0;
+    }
+
+    .report-controls {
+        background: #ffffff;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+
+    .control-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 15px;
+        align-items: end;
+    }
+
+    .control-group {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .control-group label {
+        font-weight: bold;
+        margin-bottom: 6px;
+    }
+
+    .control-group input,
+    .control-group select {
+        min-height: 40px;
+        padding: 8px 10px;
+        border: 1px solid #bbb;
+        border-radius: 5px;
+        background: #fff;
+        box-sizing: border-box;
+    }
+
+    .button-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 18px;
+    }
+
+    .report-button {
+        min-height: 40px;
+        padding: 8px 16px;
+        border: 1px solid #777;
+        border-radius: 5px;
+        cursor: pointer;
+        background: #f5f5f5;
+        font-weight: 600;
+    }
+
+    .report-button:hover {
+        background: #e8e8e8;
+    }
+
+    .report-button.primary {
+        background: #333;
+        color: #fff;
+        border-color: #333;
+    }
+
+    .report-button.primary:hover {
+        background: #222;
+    }
+
+    .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 15px;
+        margin-bottom: 20px;
+    }
+
+    .summary-card {
+        background: #fff;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 18px;
+    }
+
+    .summary-card .label {
+        color: #666;
+        font-size: 14px;
+    }
+
+    .summary-card .value {
+        font-size: 28px;
+        font-weight: bold;
+        margin-top: 5px;
+    }
+
+    .chart-panel,
+    .table-panel {
+        background: #fff;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        margin-bottom: 20px;
+    }
+
+    .panel-header {
+        padding: 15px 18px;
+        border-bottom: 1px solid #ddd;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 15px;
+        flex-wrap: wrap;
+    }
+
+    .panel-header h2 {
+        margin: 0;
+        font-size: 20px;
+    }
+
+    .chart-container {
+        padding: 20px;
+        min-height: 350px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        overflow-x: auto;
+    }
+
+    #reportChart {
+        width: 100%;
+        max-width: 1000px;
+        height: 350px;
+    }
+
+    .table-container {
+        overflow-x: auto;
+    }
+
+    .report-table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 700px;
+    }
+
+    .report-table th,
+    .report-table td {
+        padding: 10px 12px;
+        border-bottom: 1px solid #ddd;
+        text-align: left;
+        white-space: nowrap;
+    }
+
+    .report-table th {
+        background: #f5f5f5;
+        font-weight: bold;
+        position: sticky;
+        top: 0;
+    }
+
+    .report-table tbody tr:hover {
+        background: #f8f8f8;
+    }
+
+    .empty-message {
+        padding: 30px;
+        text-align: center;
+        color: #666;
+    }
+
+    .status-message {
+        margin-top: 10px;
+        color: #666;
+        font-size: 14px;
+    }
+
+    @media print {
+        body {
+            background: #fff !important;
+        }
+
+        .interactive-reports {
+            max-width: none;
+            padding: 0;
+        }
+
+        .report-header p {
+            display: none;
+        }
+
+        .report-controls,
+        .chart-panel {
+            display: none !important;
+        }
+
+        .summary-card,
+        .table-panel {
+            border: 1px solid #aaa;
+        }
+
+        .table-container {
+            overflow: visible;
+        }
+
+        .report-table {
+            min-width: 0;
+            font-size: 11px;
+        }
+
+        .report-table th {
+            position: static;
+        }
+    }
+
+    @media (max-width: 600px) {
+        .interactive-reports {
+            padding: 10px;
+        }
+
+        .control-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .button-row {
+            flex-direction: column;
+        }
+
+        .report-button {
+            width: 100%;
+        }
+
+        .chart-container {
+            padding: 10px;
+        }
+    }
+</style>
+
+<div class="interactive-reports">
+
+```
+<div class="report-header">
+    <h1>Interactive Reports</h1>
+    <p>
+        Select a report, filter the results, view the graph,
+        export the report to CSV, or print the current report.
+    </p>
+</div>
+
+<!-- Controls -->
+<div class="report-controls">
+
+    <div class="control-grid">
+
+        <div class="control-group">
+            <label for="reportType">Report</label>
+
+            <select id="reportType">
+                <option value="service_requests">
+                    Service Requests
+                </option>
+
+                <option value="invoices">
+                    Invoices
+                </option>
+
+                <option value="employees">
+                    Employees
+                </option>
+
+                <option value="equipment">
+                    Equipment
+                </option>
+            </select>
+        </div>
+
+        <div class="control-group">
+            <label for="dateFrom">Date From</label>
+
+            <input
+                type="date"
+                id="dateFrom"
+            >
+        </div>
+
+        <div class="control-group">
+            <label for="dateTo">Date To</label>
+
+            <input
+                type="date"
+                id="dateTo"
+            >
+        </div>
+
+        <div class="control-group">
+            <label for="statusFilter">Status</label>
+
+            <select id="statusFilter">
+                <option value="">All Statuses</option>
+            </select>
+        </div>
+
+        <div class="control-group">
+            <label for="chartType">Chart</label>
+
+            <select id="chartType">
+                <option value="status">
+                    Status Distribution
+                </option>
+
+                <option value="monthly">
+                    Monthly Activity
+                </option>
+
+                <option value="category">
+                    Category / Type
+                </option>
+            </select>
+        </div>
+
+    </div>
+
+    <div class="button-row">
+
+        <button
+            type="button"
+            class="report-button primary"
+            id="applyFilters"
+        >
+            Apply Filters
+        </button>
+
+        <button
+            type="button"
+            class="report-button"
+            id="clearFilters"
+        >
+            Clear Filters
+        </button>
+
+        <button
+            type="button"
+            class="report-button"
+            id="exportCsv"
+        >
+            Export CSV
+        </button>
+
+        <button
+            type="button"
+            class="report-button"
+            id="printReport"
+        >
+            Print Report
+        </button>
+
+    </div>
+
+    <div
+        id="statusMessage"
+        class="status-message"
+        aria-live="polite"
+    ></div>
+
+</div>
+
+<!-- Summary -->
+<div class="summary-grid">
+
+    <div class="summary-card">
+        <div class="label">
+            Total Records
+        </div>
+
+        <div
+            class="value"
+            id="totalRecords"
+        >
+            0
+        </div>
+    </div>
+
+    <div class="summary-card">
+        <div class="label">
+            Filtered Records
+        </div>
+
+        <div
+            class="value"
+            id="filteredRecords"
+        >
+            0
+        </div>
+    </div>
+
+    <div class="summary-card">
+        <div class="label">
+            Report
+        </div>
+
+        <div
+            class="value"
+            id="summaryReport"
+            style="font-size: 20px;"
+        >
+            Service Requests
+        </div>
+    </div>
+
+</div>
+
+<!-- Chart -->
+<div class="chart-panel">
+
+    <div class="panel-header">
+        <h2 id="chartTitle">
+            Status Distribution
+        </h2>
+    </div>
+
+    <div class="chart-container">
+        <canvas id="reportChart"></canvas>
+    </div>
+
+</div>
+
+<!-- Table -->
+<div class="table-panel">
+
+    <div class="panel-header">
+        <h2 id="tableTitle">
+            Service Requests
+        </h2>
+
+        <span id="tableCount">
+            0 records
+        </span>
+    </div>
+
+    <div class="table-container">
+
+        <table class="report-table">
+
+            <thead id="reportTableHead">
+            </thead>
+
+            <tbody id="reportTableBody">
+            </tbody>
+
+        </table>
+
+        <div
+            id="emptyMessage"
+            class="empty-message"
+            style="display: none;"
+        >
+            No records match the selected filters.
+        </div>
+
+    </div>
+
+</div>
+```
+
+</div>
+
+{{ report_data|json_script:"report-data" }}
+
+<script>
+(function () {
+
+    "use strict";
+
+    const reportDataElement =
+        document.getElementById("report-data");
+
+    if (!reportDataElement) {
+        return;
+    }
+
+    let reportData;
+
+    try {
+        reportData =
+            JSON.parse(reportDataElement.textContent);
+    } catch (error) {
+        console.error(
+            "Unable to parse report data:",
+            error
+        );
+        return;
+    }
+
+    const reportType =
+        document.getElementById("reportType");
+
+    const dateFrom =
+        document.getElementById("dateFrom");
+
+    const dateTo =
+        document.getElementById("dateTo");
+
+    const statusFilter =
+        document.getElementById("statusFilter");
+
+    const chartType =
+        document.getElementById("chartType");
+
+    const applyFilters =
+        document.getElementById("applyFilters");
+
+    const clearFilters =
+        document.getElementById("clearFilters");
+
+    const exportCsv =
+        document.getElementById("exportCsv");
+
+    const printReport =
+        document.getElementById("printReport");
+
+    const totalRecords =
+        document.getElementById("totalRecords");
+
+    const filteredRecords =
+        document.getElementById("filteredRecords");
+
+    const summaryReport =
+        document.getElementById("summaryReport");
+
+    const tableTitle =
+        document.getElementById("tableTitle");
+
+    const tableCount =
+        document.getElementById("tableCount");
+
+    const tableHead =
+        document.getElementById("reportTableHead");
+
+    const tableBody =
+        document.getElementById("reportTableBody");
+
+    const emptyMessage =
+        document.getElementById("emptyMessage");
+
+    const chartTitle =
+        document.getElementById("chartTitle");
+
+    const statusMessage =
+        document.getElementById("statusMessage");
+
+    const canvas =
+        document.getElementById("reportChart");
+
+    const ctx =
+        canvas.getContext("2d");
+
+
+    const reportNames = {
+        service_requests: "Service Requests",
+        invoices: "Invoices",
+        employees: "Employees",
+        equipment: "Equipment"
+    };
+
+
+    const reportColumns = {
+
+        service_requests: [
+            {
+                key: "number",
+                label: "Service Request"
+            },
+            {
+                key: "customer",
+                label: "Customer"
+            },
+            {
+                key: "service_type",
+                label: "Service Type"
+            },
+            {
+                key: "status",
+                label: "Status"
+            },
+            {
+                key: "start_date",
+                label: "Start Date"
+            },
+            {
+                key: "end_date",
+                label: "End Date"
+            }
+        ],
+
+        invoices: [
+            {
+                key: "number",
+                label: "Invoice"
+            },
+            {
+                key: "customer",
+                label: "Customer"
+            },
+            {
+                key: "status",
+                label: "Payment Status"
+            },
+            {
+                key: "issue_date",
+                label: "Issue Date"
+            },
+            {
+                key: "due_date",
+                label: "Due Date"
+            }
+        ],
+
+        employees: [
+            {
+                key: "employee_number",
+                label: "Employee Number"
+            },
+            {
+                key: "first_name",
+                label: "First Name"
+            },
+            {
+                key: "last_name",
+                label: "Last Name"
+            },
+            {
+                key: "position",
+                label: "Position"
+            },
+            {
+                key: "department",
+                label: "Department"
+            },
+            {
+                key: "status",
+                label: "Status"
+            }
+        ],
+
+        equipment: [
+            {
+                key: "name",
+                label: "Name"
+            },
+            {
+                key: "category",
+                label: "Category"
+            },
+            {
+                key: "make",
+                label: "Make"
+            },
+            {
+                key: "model",
+                label: "Model"
+            },
+            {
+                key: "stock_number",
+                label: "Stock Number"
+            },
+            {
+                key: "quantity",
+                label: "Quantity"
+            }
+        ]
+    };
+
+
+    let currentRows = [];
+
+
+    function getRows() {
+
+        return Array.isArray(
+            reportData[reportType.value]
+        )
+            ? reportData[reportType.value]
+            : [];
+    }
+
+
+    function getDateField(row) {
+
+        switch (reportType.value) {
+
+            case "service_requests":
+                return row.start_date || "";
+
+            case "invoices":
+                return row.issue_date || "";
+
+            case "employees":
+                return "";
+
+            case "equipment":
+                return "";
+
+            default:
+                return "";
+        }
+    }
+
+
+    function populateStatusFilter(rows) {
+
+        const currentValue =
+            statusFilter.value;
+
+        statusFilter.innerHTML = "";
+
+        const allOption =
+            document.createElement("option");
+
+        allOption.value = "";
+        allOption.textContent = "All Statuses";
+
+        statusFilter.appendChild(allOption);
+
+        const statuses = new Set();
+
+        rows.forEach(function (row) {
+
+            if (row.status !== undefined &&
+                row.status !== null &&
+                String(row.status).trim() !== "") {
+
+                statuses.add(
+                    String(row.status)
+                );
+            }
+        });
+
+        Array.from(statuses)
+            .sort(function (a, b) {
+                return a.localeCompare(b);
+            })
+            .forEach(function (status) {
+
+                const option =
+                    document.createElement("option");
+
+                option.value = status;
+                option.textContent = status;
+
+                statusFilter.appendChild(option);
+            });
+
+        if (
+            Array.from(statuses).includes(currentValue)
+        ) {
+            statusFilter.value =
+                currentValue;
+        }
+    }
+
+
+    function filterRows() {
+
+        const rows = getRows();
+
+        const from =
+            dateFrom.value || "";
+
+        const to =
+            dateTo.value || "";
+
+        const status =
+            statusFilter.value || "";
+
+        return rows.filter(function (row) {
+
+            const rowDate =
+                getDateField(row);
+
+            if (from && rowDate && rowDate < from) {
+                return false;
+            }
+
+            if (to && rowDate && rowDate > to) {
+                return false;
+            }
+
+            if (status) {
+
+                const rowStatus =
+                    String(row.status || "");
+
+                if (rowStatus !== status) {
+                    return false;
+                }
+            }
+
+            return true;
+        });
+    }
+
+
+    function formatDate(value) {
+
+        if (!value) {
+            return "";
+        }
+
+        const parts =
+            String(value).split("-");
+
+        if (parts.length !== 3) {
+            return value;
+        }
+
+        return (
+            parts[1] +
+            "/" +
+            parts[2] +
+            "/" +
+            parts[0]
+        );
+    }
+
+
+    function formatCellValue(key, value) {
+
+        if (value === null ||
+            value === undefined) {
+            return "";
+        }
+
+        if (
+            key === "start_date" ||
+            key === "end_date" ||
+            key === "issue_date" ||
+            key === "due_date"
+        ) {
+            return formatDate(value);
+        }
+
+        return String(value);
+    }
+
+
+    function renderTable(rows) {
+
+        tableHead.innerHTML = "";
+        tableBody.innerHTML = "";
+
+        const columns =
+            reportColumns[reportType.value] || [];
+
+        const headerRow =
+            document.createElement("tr");
+
+        columns.forEach(function (column) {
+
+            const th =
+                document.createElement("th");
+
+            th.textContent =
+                column.label;
+
+            headerRow.appendChild(th);
+        });
+
+        tableHead.appendChild(headerRow);
+
+        if (!rows.length) {
+
+            emptyMessage.style.display =
+                "block";
+
+            return;
+        }
+
+        emptyMessage.style.display =
+            "none";
+
+        rows.forEach(function (row) {
+
+            const tr =
+                document.createElement("tr");
+
+            columns.forEach(function (column) {
+
+                const td =
+                    document.createElement("td");
+
+                td.textContent =
+                    formatCellValue(
+                        column.key,
+                        row[column.key]
+                    );
+
+                tr.appendChild(td);
+            });
+
+            tableBody.appendChild(tr);
+        });
+    }
+
+
+    function clearCanvas() {
+
+        ctx.clearRect(
+            0,
+            0,
+            canvas.width,
+            canvas.height
+        );
+    }
+
+
+    function resizeCanvas() {
+
+        const rect =
+            canvas.getBoundingClientRect();
+
+        const width =
+            Math.max(
+                600,
+                Math.floor(rect.width)
+            );
+
+        const height = 350;
+
+        const ratio =
+            window.devicePixelRatio || 1;
+
+        canvas.width =
+            width * ratio;
+
+        canvas.height =
+            height * ratio;
+
+        canvas.style.height =
+            height + "px";
+
+        ctx.setTransform(
+            ratio,
+            0,
+            0,
+            ratio,
+            0,
+            0
+        );
+
+        return {
+            width: width,
+            height: height
+        };
+    }
+
+
+    function getStatusCounts(rows) {
+
+        const counts = {};
+
+        rows.forEach(function (row) {
+
+            const status =
+                String(
+                    row.status || "Unknown"
+                );
+
+            counts[status] =
+                (counts[status] || 0) + 1;
+        });
+
+        return counts;
+    }
+
+
+    function getCategoryCounts(rows) {
+
+        const counts = {};
+
+        rows.forEach(function (row) {
+
+            let category = "Unknown";
+
+            if (
+                reportType.value ===
+                "service_requests"
+            ) {
+                category =
+                    row.service_type ||
+                    "Unknown";
+            }
+
+            else if (
+                reportType.value ===
+                "employees"
+            ) {
+                category =
+                    row.department ||
+                    "Unknown";
+            }
+
+            else if (
+                reportType.value ===
+                "equipment"
+            ) {
+                category =
+                    row.category ||
+                    "Unknown";
+            }
+
+            else if (
+                reportType.value ===
+                "invoices"
+            ) {
+                category =
+                    row.customer ||
+                    "Unknown";
+            }
+
+            counts[category] =
+                (counts[category] || 0) + 1;
+        });
+
+        return counts;
+    }
+
+
+    function getMonthlyCounts(rows) {
+
+        const counts = {};
+
+        rows.forEach(function (row) {
+
+            const date =
+                getDateField(row);
+
+            if (!date) {
+                return;
+            }
+
+            const month =
+                date.substring(0, 7);
+
+            counts[month] =
+                (counts[month] || 0) + 1;
+        });
+
+        return counts;
+    }
+
+
+    function drawBarChart(counts, title) {
+
+        clearCanvas();
+
+        const dimensions =
+            resizeCanvas();
+
+        const width =
+            dimensions.width;
+
+        const height =
+            dimensions.height;
+
+        chartTitle.textContent =
+            title;
+
+        const labels =
+            Object.keys(counts);
+
+        if (!labels.length) {
+
+            ctx.fillStyle = "#666";
+            ctx.font = "16px Arial";
+            ctx.textAlign = "center";
+
+            ctx.fillText(
+                "No chart data available",
+                width / 2,
+                height / 2
+            );
+
+            return;
+        }
+
+        labels.sort(function (a, b) {
+            return counts[b] - counts[a];
+        });
+
+        const maxItems = 12;
+
+        const displayLabels =
+            labels.slice(0, maxItems);
+
+        const values =
+            displayLabels.map(function (label) {
+                return counts[label];
+            });
+
+        const maxValue =
+            Math.max.apply(null, values);
+
+        const left =
+            60;
+
+        const right =
+            20;
+
+        const top =
+            30;
+
+        const bottom =
+            75;
+
+        const chartWidth =
+            width - left - right;
+
+        const chartHeight =
+            height - top - bottom;
+
+        const barWidth =
+            chartWidth / displayLabels.length * 0.65;
+
+        const gap =
+            chartWidth / displayLabels.length * 0.35;
+
+        ctx.font = "12px Arial";
+
+        displayLabels.forEach(function (
+            label,
+            index
+        ) {
+
+            const value =
+                counts[label];
+
+            const slot =
+                chartWidth /
+                displayLabels.length;
+
+            const x =
+                left +
+                index * slot +
+                gap / 2;
+
+            const barHeight =
+                maxValue > 0
+                    ? (value / maxValue) *
+                      chartHeight
+                    : 0;
+
+            const y =
+                top +
+                chartHeight -
+                barHeight;
+
+            ctx.fillStyle =
+                "#444";
+
+            ctx.fillRect(
+                x,
+                y,
+                barWidth,
+                barHeight
+            );
+
+            ctx.fillStyle =
+                "#222";
+
+            ctx.textAlign =
+                "center";
+
+            ctx.fillText(
+                String(value),
+                x + barWidth / 2,
+                y - 6
+            );
+
+            ctx.save();
+
+            ctx.translate(
+                x + barWidth / 2,
+                height - 15
+            );
+
+            ctx.rotate(-Math.PI / 4);
+
+            ctx.fillStyle =
+                "#444";
+
+            ctx.fillText(
+                String(label).substring(
+                    0,
+                    18
+                ),
+                0,
+                0
+            );
+
+            ctx.restore();
+        });
+
+        ctx.strokeStyle =
+            "#999";
+
+        ctx.beginPath();
+
+        ctx.moveTo(
+            left,
+            top
+        );
+
+        ctx.lineTo(
+            left,
+            top + chartHeight
+        );
+
+        ctx.lineTo(
+            width - right,
+            top + chartHeight
+        );
+
+        ctx.stroke();
+    }
+
+
+    function drawChart(rows) {
+
+        if (chartType.value === "monthly") {
+
+            drawBarChart(
+                getMonthlyCounts(rows),
+                "Monthly Activity"
+            );
+
+            return;
+        }
+
+        if (chartType.value === "category") {
+
+            drawBarChart(
+                getCategoryCounts(rows),
+                "Category / Type"
+            );
+
+            return;
+        }
+
+        drawBarChart(
+            getStatusCounts(rows),
+            "Status Distribution"
+        );
+    }
+
+
+    function renderReport() {
+
+        const rows =
+            getRows();
+
+        const filtered =
+            filterRows();
+
+        currentRows =
+            filtered;
+
+        const reportName =
+            reportNames[
+                reportType.value
+            ] || "Report";
+
+        totalRecords.textContent =
+            rows.length;
+
+        filteredRecords.textContent =
+            filtered.length;
+
+        summaryReport.textContent =
+            reportName;
+
+        tableTitle.textContent =
+            reportName;
+
+        tableCount.textContent =
+            filtered.length +
+            (
+                filtered.length === 1
+                    ? " record"
+                    : " records"
+            );
+
+        renderTable(filtered);
+
+        drawChart(filtered);
+
+        statusMessage.textContent =
+            "Showing " +
+            filtered.length +
+            " of " +
+            rows.length +
+            " records.";
+    }
+
+
+    function csvEscape(value) {
+
+        const stringValue =
+            value === null ||
+            value === undefined
+                ? ""
+                : String(value);
+
+        return '"' +
+            stringValue.replace(
+                /"/g,
+                '""'
+            ) +
+            '"';
+    }
+
+
+    function exportReportCsv() {
+
+        const columns =
+            reportColumns[reportType.value] || [];
+
+        const lines = [];
+
+        lines.push(
+            columns
+                .map(function (column) {
+                    return csvEscape(
+                        column.label
+                    );
+                })
+                .join(",")
+        );
+
+        currentRows.forEach(function (row) {
+
+            lines.push(
+                columns
+                    .map(function (column) {
+
+                        return csvEscape(
+                            formatCellValue(
+                                column.key,
+                                row[column.key]
+                            )
+                        );
+
+                    })
+                    .join(",")
+            );
+        });
+
+        const csv =
+            lines.join("\r\n");
+
+        const blob =
+            new Blob(
+                [csv],
+                {
+                    type:
+                        "text/csv;charset=utf-8;"
+                }
+            );
+
+        const url =
+            URL.createObjectURL(blob);
+
+        const link =
+            document.createElement("a");
+
+        const reportName =
+            reportType.value;
+
+        link.href = url;
+
+        link.download =
+            reportName +
+            "_report.csv";
+
+        document.body.appendChild(link);
+
+        link.click();
+
+        document.body.removeChild(link);
+
+        URL.revokeObjectURL(url);
+    }
+
+
+    function updateForReportType() {
+
+        const rows =
+            getRows();
+
+        populateStatusFilter(rows);
+
+        /*
+         * Date filters only apply to reports
+         * that actually contain date information.
+         */
+        const dateControls =
+            [
+                dateFrom,
+                dateTo
+            ];
+
+        const dateEnabled =
+            reportType.value ===
+                "service_requests" ||
+            reportType.value ===
+                "invoices";
+
+        dateControls.forEach(function (control) {
+
+            control.disabled =
+                !dateEnabled;
+
+            if (!dateEnabled) {
+                control.value = "";
+            }
+        });
+
+        renderReport();
+    }
+
+
+    reportType.addEventListener(
+        "change",
+        function () {
+
+            updateForReportType();
+        }
+    );
+
+
+    statusFilter.addEventListener(
+        "change",
+        function () {
+
+            renderReport();
+        }
+    );
+
+
+    chartType.addEventListener(
+        "change",
+        function () {
+
+            drawChart(currentRows);
+        }
+    );
+
+
+    applyFilters.addEventListener(
+        "click",
+        function () {
+
+            if (
+                dateFrom.value &&
+                dateTo.value &&
+                dateFrom.value >
+                    dateTo.value
+            ) {
+
+                statusMessage.textContent =
+                    "Date From cannot be later than Date To.";
+
+                return;
+            }
+
+            renderReport();
+        }
+    );
+
+
+    clearFilters.addEventListener(
+        "click",
+        function () {
+
+            dateFrom.value = "";
+            dateTo.value = "";
+
+            statusFilter.value = "";
+
+            renderReport();
+        }
+    );
+
+
+    exportCsv.addEventListener(
+        "click",
+        function () {
+
+            exportReportCsv();
+        }
+    );
+
+
+    printReport.addEventListener(
+        "click",
+        function () {
+
+            window.print();
+        }
+    );
+
+
+    window.addEventListener(
+        "resize",
+        function () {
+
+            drawChart(currentRows);
+        }
+    );
+
+
+    /*
+     * Initial render
+     */
+    updateForReportType();
+
+})();
+</script>
+
+{% endblock %}
