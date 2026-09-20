@@ -607,6 +607,7 @@ def get_import_target_fields():
         "Equipment": Equipment,
         "Location": Location,
         "Customer": Customer,
+        "ServiceRequest": ServiceRequest
     }
 
     model_fields = {}
@@ -1227,6 +1228,7 @@ def integration_create_import_models(request, import_id):
         "Employee": Employee,
         "Equipment": Equipment,
         "Location": Location,
+        "Customer": Customer,
         "ServiceRequest": ServiceRequest,
     }
 
