@@ -63,6 +63,53 @@ from django.shortcuts import render
 from app.decorators import onboarded
 from app.models import Employee, Equipment
 from business.models import Invoice
+from app.models import ServiceRequest
+
+@onboarded()
+@login_required
+def service_request_report(request):
+    """
+    Display service requests for the user's company.
+    """
+
+    user_company = getattr(request.user, "company", None)
+
+    if not user_company:
+        return render(
+            request,
+            "reports/service_request_report.html",
+            {
+                "service_requests": ServiceRequest.objects.none(),
+                "user_company": None,
+            },
+        )
+
+    service_requests = (
+        ServiceRequest.objects
+        .filter(company=user_company)
+        .select_related(
+            "employee",
+            "equipment",
+            "start_location",
+            "end_location",
+            "servicetype",
+            "invoice",
+        )
+        .order_by("-created_at")
+    )
+
+    context = {
+        "service_requests": service_requests,
+        "user_company": user_company,
+        "report_title": "Service Request Report",
+    }
+
+    return render(
+        request,
+        "reports/service_request_report.html",
+        context,
+    )
+
 
 
 @onboarded()
