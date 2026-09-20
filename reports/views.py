@@ -92,7 +92,7 @@ def service_request_report(request):
             "equipment",
             "start_location",
             "end_location",
-            "servicetype",
+            "service_type",
             "invoice",
         )
         .order_by("-created_timestamp")
