@@ -28,7 +28,7 @@ class Customer(models.Model):
     phone_number = models.CharField(max_length=15)
     account_rep = models.CharField(max_length=255)
     created_at = models.DateTimeField(auto_now_add=True)
-    company = models.ForeignKey( 'app.Company', on_delete=models.PROTECT, null=True, blank=True, related_name='customers', )
+    company = models.ForeignKey( 'app.Company', on_delete=models.PROTECT, null=True, blank=True, related_name='company_customers', )
 
     def __str__(self):
         return self.name
@@ -51,6 +51,8 @@ class Invoice(models.Model):
     payment_status = models.CharField(max_length=20, choices=PAYMENT_STATUS_CHOICES, default='PENDING')
     notes = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    company = models.ForeignKey( 'app.Company', on_delete=models.PROTECT, null=True, blank=True, related_name='invoice_customers', )
+    
 
     def __str__(self):
         return f"Invoice {self.invoice_number} - {self.customer.name}"
