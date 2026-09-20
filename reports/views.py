@@ -95,7 +95,7 @@ def service_request_report(request):
             "servicetype",
             "invoice",
         )
-        .order_by("-created_at")
+        .order_by("-created_timestamp")
     )
 
     context = {
@@ -135,7 +135,7 @@ def invoice_report(request):
     invoices = (
         Invoice.objects
         .filter(company=user_company)
-        .order_by("-created_at")
+        .order_by("-created_timestamp")
     )
 
     context = {
