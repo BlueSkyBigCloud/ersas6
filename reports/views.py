@@ -194,7 +194,7 @@ def reports_interactive(request):
         request,
         "reports_interactive.html",
         {
-            "report_data": json.dumps(report_data),
+            "report_data": report_data,
         },
     )
 
