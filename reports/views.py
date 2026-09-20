@@ -134,7 +134,7 @@ def invoice_report(request):
 
     invoices = (
         Invoice.objects
-        .filter(company=user_company)
+        .filter(service_request__company=user_company)
         .order_by("-created_timestamp")
     )
 
