@@ -112,7 +112,6 @@ urlpatterns = [
     path('logout/', logout_view, name='logout'),
 
     path('dashboard/', dashboard_view, name='dashboard'),
-    path('reports/', reports1_view, name='reports'),
     path('config/', config_view, name='config'),
 
     path('fetch_service_requests/', fetch_service_requests, name='fetch_service_requests'),  # URL to fetch service requests
