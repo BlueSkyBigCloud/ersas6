@@ -90,8 +90,9 @@ body {
 }
 
 .dashboard-header .logo h1 {
-    font-size: 1.2rem;
+    font-size: 3.2rem;
     margin: 0;
+    text-align: center;
 }
 
 .user-menu {
