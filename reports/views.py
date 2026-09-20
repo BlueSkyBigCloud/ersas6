@@ -16,7 +16,7 @@ def reports_dashboard(request):
     if not user_company:
         return render(
             request,
-            "reports/dashboard.html",
+            "reports_dashboard.html",
             {
                 "reports": [],
                 "user_company": None,
@@ -77,7 +77,7 @@ def service_request_report(request):
     if not user_company:
         return render(
             request,
-            "reports/service_request_report.html",
+            "service_request_report.html",
             {
                 "service_requests": ServiceRequest.objects.none(),
                 "user_company": None,
@@ -106,7 +106,7 @@ def service_request_report(request):
 
     return render(
         request,
-        "reports/service_request_report.html",
+        "service_request_report.html",
         context,
     )
 
@@ -146,7 +146,7 @@ def invoice_report(request):
 
     return render(
         request,
-        "reports/invoice_report.html",
+        "invoice_report.html",
         context,
     )
 
@@ -163,7 +163,7 @@ def employee_report(request):
     if not user_company:
         return render(
             request,
-            "reports/employee_report.html",
+            "employee_report.html",
             {
                 "employees": Employee.objects.none(),
                 "user_company": None,
@@ -185,7 +185,7 @@ def employee_report(request):
 
     return render(
         request,
-        "reports/employee_report.html",
+        "employee_report.html",
         context,
     )
 
@@ -202,7 +202,7 @@ def equipment_report(request):
     if not user_company:
         return render(
             request,
-            "reports/equipment_report.html",
+            "equipment_report.html",
             {
                 "equipment": Equipment.objects.none(),
                 "user_company": None,
@@ -224,6 +224,6 @@ def equipment_report(request):
 
     return render(
         request,
-        "reports/equipment_report.html",
+        "equipment_report.html",
         context,
     )
