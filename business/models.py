@@ -28,6 +28,7 @@ class Customer(models.Model):
     phone_number = models.CharField(max_length=15)
     account_rep = models.CharField(max_length=255)
     created_at = models.DateTimeField(auto_now_add=True)
+    company = models.ForeignKey( 'app.Company', on_delete=models.PROTECT, related_name='customers', )
 
     def __str__(self):
         return self.name
