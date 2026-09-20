@@ -32,21 +32,6 @@ def reports_interactive(request):
     getattr(request.user, "company_id", None),
     )
 
-    employees = Employee.objects.filter(
-        company=request.user.company
-    )
-
-    logger.info(
-        "INTERACTIVE REPORT - employee count=%s",
-        employees.count(),
-    )
-    logger.info(
-        "EMPLOYEE REPORT - queryset=%s serialized=%s unique_ids=%s",
-        employees.count(),
-        len(employee_data),
-        len({row["id"] for row in employee_data}),
-        )
-
     # ---------------------------------------------------------
     # Service Requests
     # ---------------------------------------------------------
@@ -169,6 +154,21 @@ def reports_interactive(request):
                 "department": employee.department or "",
                 "status": employee.status or "",
             })
+
+    employees = Employee.objects.filter(
+            company=request.user.company
+        )
+    
+    logger.info(
+            "INTERACTIVE REPORT - employee count=%s",
+            employees.count(),
+        )
+    logger.info(
+            "EMPLOYEE REPORT - queryset=%s serialized=%s unique_ids=%s",
+            employees.count(),
+            len(employee_data),
+            len({row["id"] for row in employee_data}),
+        )
 
     # ---------------------------------------------------------
     # Equipment
