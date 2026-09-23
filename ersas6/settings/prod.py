@@ -18,17 +18,58 @@ CORS_ALLOWED_ORIGINS = [
     "https://tradesec.us",
     ]
 
+
 LOGGING = {
+
     'version': 1,
+
     'disable_existing_loggers': False,
+
     'handlers': {
         'console': {
             'level': 'DEBUG',
             'class': 'logging.StreamHandler',
         },
     },
+
     'root': {
         'handlers': ['console'],
         'level': 'DEBUG',
+    },
+
+    'loggers': {
+
+        # ---------------------------------------------------------
+        # Data Integration
+        # Keep detailed application-level logging.
+        # ---------------------------------------------------------
+        'dataintegration': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+
+        # ---------------------------------------------------------
+        # AWS / S3
+        # Prevent botocore from logging request signing,
+        # Authorization headers, CanonicalRequest, etc.
+        # ---------------------------------------------------------
+        'boto3': {
+            'handlers': ['console'],
+            'level': 'WARNING',
+            'propagate': False,
+        },
+
+        'botocore': {
+            'handlers': ['console'],
+            'level': 'WARNING',
+            'propagate': False,
+        },
+
+        's3transfer': {
+            'handlers': ['console'],
+            'level': 'WARNING',
+            'propagate': False,
+        },
     },
 }
