@@ -1,4 +1,8 @@
+
 import os
+import logging
+
+from collections import Counter
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -6,15 +10,29 @@ from django.db import transaction
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
-from django.views.decorators.http import require_http_methods, require_POST
-from .models import *
-import logging
-from .services import run_import_from_file
+from django.views.decorators.http import (
+    require_http_methods,
+    require_POST,
+)
+
 from django.apps import apps
-from collections import Counter
+
+from .models import *
+from .services import run_import_from_file
+from .importers import read_import_rows
+from .validators import (
+    is_empty,
+    normalize_value,
+    validate_import,
+    update_import_validation_status,
+)
+
+from business.models import Customer
+from app.models import *
 
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("dataintegration")
+
 
 # ============================================================
 # Helpers
@@ -24,18 +42,52 @@ def get_company_import(request, import_id):
     """
     Return a DataImport belonging to the currently authenticated
     user's company.
-
-    This is important for multi-company data isolation.
     """
 
+    logger.debug(
+        "DATAIMPORT GET COMPANY IMPORT START "
+        "import_id=%s user_id=%s",
+        import_id,
+        getattr(request.user, "id", None),
+    )
+
     if not request.user.is_authenticated:
+        logger.warning(
+            "DATAIMPORT GET COMPANY IMPORT REJECTED "
+            "import_id=%s reason=unauthenticated",
+            import_id,
+        )
         raise Http404
 
-    return get_object_or_404(
+    company = getattr(request.user, "company", None)
+
+    if not company:
+        logger.warning(
+            "DATAIMPORT GET COMPANY IMPORT REJECTED "
+            "import_id=%s user_id=%s reason=no_company",
+            import_id,
+            request.user.id,
+        )
+        raise Http404
+
+    data_import = get_object_or_404(
         DataImport,
         id=import_id,
-        company=request.user.company,
+        company=company,
     )
+
+    logger.debug(
+        "DATAIMPORT GET COMPANY IMPORT COMPLETE "
+        "import_id=%s company_id=%s status=%s "
+        "filename=%s target_model=%s",
+        data_import.id,
+        data_import.company_id,
+        data_import.status,
+        data_import.filename,
+        data_import.target_model,
+    )
+
+    return data_import
 
 
 def detect_source_type(filename):
@@ -44,6 +96,13 @@ def detect_source_type(filename):
     """
 
     extension = os.path.splitext(filename)[1].lower()
+
+    logger.debug(
+        "DATAIMPORT SOURCE TYPE DETECTION "
+        "filename=%s extension=%s",
+        filename,
+        extension,
+    )
 
     if extension == ".csv":
         return DataImport.SourceType.CSV
@@ -63,12 +122,20 @@ def detect_source_type(filename):
 def get_target_model_name(data_import):
     """
     Normalize the target model name.
-
-    Eventually this can be replaced by a registry of supported
-    import targets.
     """
 
-    return data_import.target_model.lower().strip()
+    target_model = (
+        data_import.target_model or ""
+    ).lower().strip()
+
+    logger.debug(
+        "DATAIMPORT TARGET MODEL NORMALIZED "
+        "import_id=%s target_model=%s",
+        data_import.id,
+        target_model,
+    )
+
+    return target_model
 
 
 # ============================================================
@@ -77,9 +144,6 @@ def get_target_model_name(data_import):
 
 @login_required
 def integration_dashboard(request):
-    """
-    Main Data Integration dashboard.
-    """
 
     imports = (
         DataImport.objects
@@ -113,7 +177,6 @@ def integration_dashboard(request):
     )
 
 
-
 # ============================================================
 # Upload
 # ============================================================
@@ -125,22 +188,38 @@ def integration_upload(request):
     Upload a CSV/XLSX/XLS/DAT file and create a DataImport record.
     """
 
+    logger.debug(
+        "DATAIMPORT UPLOAD START "
+        "user_id=%s method=%s",
+        request.user.id,
+        request.method,
+    )
+
     if request.method == "GET":
+
+        logger.debug(
+            "DATAIMPORT UPLOAD GET "
+            "user_id=%s",
+            request.user.id,
+        )
+
         return render(
             request,
             "data_integration/upload.html",
         )
 
-    logger.info(
-        "UPLOAD START: user_id=%s",
-        request.user.id,
-    )
+    # --------------------------------------------------------
+    # Receive uploaded file
+    # --------------------------------------------------------
 
     uploaded_file = request.FILES.get("file")
 
     if not uploaded_file:
+
         logger.warning(
-            "UPLOAD FAILED: no file received"
+            "DATAIMPORT UPLOAD FAILED "
+            "user_id=%s reason=no_file",
+            request.user.id,
         )
 
         messages.error(
@@ -155,17 +234,27 @@ def integration_upload(request):
 
     filename = uploaded_file.name
 
-    logger.info(
-        "UPLOAD FILE RECEIVED: filename=%s size=%s content_type=%s",
+    logger.debug(
+        "DATAIMPORT UPLOAD FILE RECEIVED "
+        "user_id=%s filename=%s size=%s content_type=%s",
+        request.user.id,
         filename,
         uploaded_file.size,
         uploaded_file.content_type,
     )
 
-    source_type = detect_source_type(filename)
+    # --------------------------------------------------------
+    # Detect source type
+    # --------------------------------------------------------
 
-    logger.info(
-        "UPLOAD SOURCE TYPE: filename=%s source_type=%s",
+    source_type = detect_source_type(
+        filename
+    )
+
+    logger.debug(
+        "DATAIMPORT UPLOAD SOURCE DETECTED "
+        "user_id=%s filename=%s source_type=%s",
+        request.user.id,
         filename,
         source_type,
     )
@@ -177,16 +266,29 @@ def integration_upload(request):
         DataImport.SourceType.DAT,
     }
 
+    logger.debug(
+        "DATAIMPORT UPLOAD ALLOWED TYPES "
+        "filename=%s source_type=%s allowed=%s",
+        filename,
+        source_type,
+        source_type in allowed_types,
+    )
+
     if source_type not in allowed_types:
+
         logger.warning(
-            "UPLOAD REJECTED: unsupported file type filename=%s source_type=%s",
+            "DATAIMPORT UPLOAD REJECTED "
+            "user_id=%s filename=%s source_type=%s "
+            "reason=unsupported_type",
+            request.user.id,
             filename,
             source_type,
         )
 
         messages.error(
             request,
-            "Unsupported file type. Please upload a CSV, XLS, XLSX, or DAT file.",
+            "Unsupported file type. "
+            "Please upload a CSV, XLS, XLSX, or DAT file.",
         )
 
         return render(
@@ -194,9 +296,17 @@ def integration_upload(request):
             "data_integration/upload.html",
         )
 
-    logger.info(
-        "UPLOAD STORAGE SAVE START: filename=%s",
+    # --------------------------------------------------------
+    # Create DataImport
+    # --------------------------------------------------------
+
+    logger.debug(
+        "DATAIMPORT UPLOAD DATABASE CREATE START "
+        "user_id=%s company_id=%s filename=%s source_type=%s",
+        request.user.id,
+        request.user.company_id,
         filename,
+        source_type,
     )
 
     try:
@@ -211,16 +321,22 @@ def integration_upload(request):
             status=DataImport.Status.UPLOADED,
         )
 
-        logger.info(
-            "UPLOAD STORAGE SAVE COMPLETE: import_id=%s filename=%s",
+        logger.debug(
+            "DATAIMPORT UPLOAD DATABASE CREATE COMPLETE "
+            "import_id=%s company_id=%s filename=%s "
+            "status=%s",
             data_import.id,
-            filename,
+            data_import.company_id,
+            data_import.filename,
+            data_import.status,
         )
 
     except Exception as exc:
 
         logger.exception(
-            "UPLOAD FAILED: filename=%s error=%s",
+            "DATAIMPORT UPLOAD DATABASE CREATE FAILED "
+            "user_id=%s filename=%s error=%s",
+            request.user.id,
             filename,
             exc,
         )
@@ -235,8 +351,36 @@ def integration_upload(request):
             "data_integration/upload.html",
         )
 
-    logger.info(
-        "UPLOAD REDIRECT: import_id=%s",
+    # --------------------------------------------------------
+    # Storage information
+    #
+    # Do NOT log credentials, Authorization headers, or
+    # signed S3 URLs.
+    # --------------------------------------------------------
+
+    logger.debug(
+        "DATAIMPORT UPLOAD STORAGE COMPLETE "
+        "import_id=%s filename=%s "
+        "storage_name=%s",
+        data_import.id,
+        filename,
+        getattr(
+            data_import.file,
+            "name",
+            None,
+        ),
+    )
+
+    logger.debug(
+        "DATAIMPORT UPLOAD COMPLETE "
+        "import_id=%s status=%s",
+        data_import.id,
+        data_import.status,
+    )
+
+    logger.debug(
+        "DATAIMPORT UPLOAD REDIRECT "
+        "import_id=%s destination=integration_analyze",
         data_import.id,
     )
 
@@ -249,6 +393,7 @@ def integration_upload(request):
 # ============================================================
 # Analyze
 # ============================================================
+
 @login_required
 @require_http_methods(["GET", "POST"])
 def integration_analyze(request, import_id):
@@ -258,13 +403,35 @@ def integration_analyze(request, import_id):
     - column headers
     - total data rows
     - detected target model
-
-    The actual file parsing is handled by importers.py.
     """
+
+    logger.debug(
+        "DATAIMPORT ANALYZE START "
+        "import_id=%s user_id=%s method=%s",
+        import_id,
+        request.user.id,
+        request.method,
+    )
+
+    # --------------------------------------------------------
+    # Load import
+    # --------------------------------------------------------
 
     data_import = get_company_import(
         request,
         import_id,
+    )
+
+    logger.debug(
+        "DATAIMPORT ANALYZE IMPORT LOADED "
+        "import_id=%s company_id=%s filename=%s "
+        "source_type=%s target_model=%s status=%s",
+        data_import.id,
+        data_import.company_id,
+        data_import.filename,
+        data_import.source_type,
+        data_import.target_model,
+        data_import.status,
     )
 
     # --------------------------------------------------------
@@ -275,6 +442,14 @@ def integration_analyze(request, import_id):
         DataImport.Status.COMPLETED,
         DataImport.Status.CANCELLED,
     ]:
+
+        logger.warning(
+            "DATAIMPORT ANALYZE REJECTED "
+            "import_id=%s status=%s reason=terminal_status",
+            data_import.id,
+            data_import.status,
+        )
+
         messages.warning(
             request,
             "This import can no longer be analyzed.",
@@ -288,17 +463,32 @@ def integration_analyze(request, import_id):
     # Set status
     # --------------------------------------------------------
 
+    old_status = data_import.status
+
     data_import.status = DataImport.Status.ANALYZING
 
     data_import.save(
         update_fields=["status"]
     )
 
+    logger.debug(
+        "DATAIMPORT ANALYZE STATUS CHANGE "
+        "import_id=%s old_status=%s new_status=%s",
+        data_import.id,
+        old_status,
+        data_import.status,
+    )
+
     try:
 
         # ----------------------------------------------------
-        # Analyze uploaded file
+        # Import analyzer
         # ----------------------------------------------------
+
+        logger.debug(
+            "DATAIMPORT ANALYZE IMPORTER START "
+            "import_id=%s",
+        )
 
         from .importers import analyze_import_file
 
@@ -306,14 +496,20 @@ def integration_analyze(request, import_id):
             data_import
         )
 
-        logger.info(
-            "ANALYZE RESULT - import_id=%s analysis_data=%r",
+        logger.debug(
+            "DATAIMPORT ANALYZE IMPORTER COMPLETE "
+            "import_id=%s result_type=%s result_keys=%s",
             data_import.id,
-            analysis_data,
+            type(analysis_data).__name__,
+            (
+                list(analysis_data.keys())
+                if isinstance(analysis_data, dict)
+                else None
+            ),
         )
 
         # ----------------------------------------------------
-        # Validate importer response
+        # Validate analyzer response
         # ----------------------------------------------------
 
         if not isinstance(
@@ -329,13 +525,6 @@ def integration_analyze(request, import_id):
             [],
         )
 
-        logger.info(
-            "ANALYZE HEADERS - import_id=%s headers=%r count=%s",
-            data_import.id,
-            headers,
-            len(headers),
-        )
-
         total_rows = analysis_data.get(
             "total_rows",
             0,
@@ -345,8 +534,18 @@ def integration_analyze(request, import_id):
             "detected_model"
         )
 
+        logger.debug(
+            "DATAIMPORT ANALYZE RESULT "
+            "import_id=%s header_count=%s "
+            "total_rows=%s detected_model=%s",
+            data_import.id,
+            len(headers) if isinstance(headers, list) else None,
+            total_rows,
+            detected_model,
+        )
+
         # ----------------------------------------------------
-        # Basic validation of analysis results
+        # Headers
         # ----------------------------------------------------
 
         if not isinstance(
@@ -357,24 +556,58 @@ def integration_analyze(request, import_id):
                 "File analyzer returned invalid column headers."
             )
 
+        logger.debug(
+            "DATAIMPORT ANALYZE HEADERS "
+            "import_id=%s headers=%s",
+            data_import.id,
+            headers,
+        )
+
+        # ----------------------------------------------------
+        # Delete previous columns
+        # ----------------------------------------------------
+
+        deleted_count, _ = (
+            DataImportColumn.objects
+            .filter(
+                data_import=data_import
+            )
+            .delete()
+        )
+
+        logger.debug(
+            "DATAIMPORT ANALYZE OLD COLUMNS REMOVED "
+            "import_id=%s deleted=%s",
+            data_import.id,
+            deleted_count,
+        )
+
         # ----------------------------------------------------
         # Create DataImportColumn records
         # ----------------------------------------------------
-
-        DataImportColumn.objects.filter(
-            data_import=data_import
-        ).delete()
 
         column_objects = []
 
         for column_order, header in enumerate(headers):
 
             if header is None:
+                logger.debug(
+                    "DATAIMPORT ANALYZE HEADER SKIPPED "
+                    "import_id=%s column_order=%s reason=none",
+                    data_import.id,
+                    column_order,
+                )
                 continue
 
             header = str(header).strip()
 
             if not header:
+                logger.debug(
+                    "DATAIMPORT ANALYZE HEADER SKIPPED "
+                    "import_id=%s column_order=%s reason=empty",
+                    data_import.id,
+                    column_order,
+                )
                 continue
 
             column_objects.append(
@@ -388,50 +621,91 @@ def integration_analyze(request, import_id):
                 )
             )
 
+            logger.debug(
+                "DATAIMPORT ANALYZE COLUMN DISCOVERED "
+                "import_id=%s column_order=%s source_column=%s",
+                data_import.id,
+                column_order,
+                header,
+            )
 
         DataImportColumn.objects.bulk_create(
             column_objects
         )
 
-        logger.info(
-            "ANALYZE COLUMNS CREATED - import_id=%s count=%s",
+        logger.debug(
+            "DATAIMPORT ANALYZE COLUMNS CREATED "
+            "import_id=%s count=%s",
             data_import.id,
             len(column_objects),
         )
 
+        # ----------------------------------------------------
+        # Validate row count
+        # ----------------------------------------------------
+
         try:
+
             total_rows = int(
                 total_rows
             )
+
         except (
             TypeError,
             ValueError,
         ):
+
             raise ValueError(
                 "File analyzer returned an invalid row count."
             )
 
         if total_rows < 0:
+
             raise ValueError(
                 "File analyzer returned a negative row count."
             )
+
+        logger.debug(
+            "DATAIMPORT ANALYZE ROW COUNT VALID "
+            "import_id=%s total_rows=%s",
+            data_import.id,
+            total_rows,
+        )
 
         # ----------------------------------------------------
         # Save detected model
         # ----------------------------------------------------
 
         if detected_model:
+
             data_import.target_model = str(
                 detected_model
             ).strip()
 
+            logger.debug(
+                "DATAIMPORT ANALYZE TARGET MODEL DETECTED "
+                "import_id=%s target_model=%s",
+                data_import.id,
+                data_import.target_model,
+            )
+
+        else:
+
+            logger.debug(
+                "DATAIMPORT ANALYZE TARGET MODEL NOT DETECTED "
+                "import_id=%s",
+                data_import.id,
+            )
+
         # ----------------------------------------------------
-        # Save analysis statistics
+        # Save analysis
         # ----------------------------------------------------
 
         data_import.total_rows = total_rows
 
-        data_import.status = DataImport.Status.MAPPING
+        data_import.status = (
+            DataImport.Status.MAPPING
+        )
 
         data_import.save(
             update_fields=[
@@ -441,16 +715,40 @@ def integration_analyze(request, import_id):
             ]
         )
 
+        logger.debug(
+            "DATAIMPORT ANALYZE COMPLETE "
+            "import_id=%s total_rows=%s "
+            "columns=%s target_model=%s status=%s",
+            data_import.id,
+            total_rows,
+            len(column_objects),
+            data_import.target_model,
+            data_import.status,
+        )
+
     except Exception as exc:
 
-        # ----------------------------------------------------
-        # Mark import as failed
-        # ----------------------------------------------------
+        logger.exception(
+            "DATAIMPORT ANALYZE FAILED "
+            "import_id=%s filename=%s error=%s",
+            data_import.id,
+            data_import.filename,
+            exc,
+        )
 
-        data_import.status = DataImport.Status.FAILED
+        data_import.status = (
+            DataImport.Status.FAILED
+        )
 
         data_import.save(
             update_fields=["status"]
+        )
+
+        logger.debug(
+            "DATAIMPORT ANALYZE STATUS FAILED "
+            "import_id=%s status=%s",
+            data_import.id,
+            data_import.status,
         )
 
         messages.error(
@@ -463,8 +761,14 @@ def integration_analyze(request, import_id):
         )
 
     # --------------------------------------------------------
-    # Render analysis results
+    # Render
     # --------------------------------------------------------
+
+    logger.debug(
+        "DATAIMPORT ANALYZE RENDER "
+        "import_id=%s template=data_integration/analyze.html",
+        data_import.id,
+    )
 
     context = {
         "data_import": data_import,
@@ -478,136 +782,22 @@ def integration_analyze(request, import_id):
     )
 
 
-
 # ============================================================
-# Validation
-# ============================================================
-from .importers import read_import_rows
-from .validators import (
-    is_empty,
-    normalize_value,
-    validate_import,
-    update_import_validation_status,
-)
-
-
-@login_required
-@require_http_methods(["GET", "POST"])
-def integration_validate(request, import_id):
-    """
-    Validate the mapped import before allowing the import operation.
-    """
-
-    data_import = get_company_import(
-        request,
-        import_id,
-    )
-
-    mappings = (
-        DataImportColumn.objects
-        .filter(data_import=data_import)
-        .order_by("column_order")
-    )
-
-    if not mappings.exists():
-        messages.error(
-            request,
-            "No column mappings have been configured.",
-        )
-
-        return redirect(
-            "dataintegration:integration_mapping",
-            import_id=data_import.id,
-        )
-
-    # --------------------------------------------------------
-    # Set status to VALIDATING
-    # --------------------------------------------------------
-
-    data_import.status = DataImport.Status.VALIDATING
-
-    data_import.save(
-        update_fields=["status"]
-    )
-
-    try:
-        # ----------------------------------------------------
-        # Read the uploaded file
-        # ----------------------------------------------------
-
-        rows = read_import_rows(
-            data_import
-        )
-
-        # ----------------------------------------------------
-        # Validate the imported rows
-        # ----------------------------------------------------
-
-        validation_data = validate_import(
-            data_import=data_import,
-            rows=rows,
-        )
-
-        # ----------------------------------------------------
-        # Update DataImport statistics/status
-        # ----------------------------------------------------
-
-        update_import_validation_status(
-            data_import=data_import,
-            validation_result=validation_data,
-        )
-
-    except Exception as exc:
-
-        data_import.status = DataImport.Status.FAILED
-
-        data_import.save(
-            update_fields=["status"]
-        )
-
-        messages.error(
-            request,
-            f"Validation failed: {exc}",
-        )
-
-        return redirect(
-            "dataintegration:integration_dashboard"
-        )
-
-    # --------------------------------------------------------
-    # Refresh the object so the template receives the
-    # current validation status/statistics.
-    # --------------------------------------------------------
-
-    data_import.refresh_from_db()
-
-    context = {
-        "data_import": data_import,
-        "mappings": mappings,
-        "validation": validation_data,
-    }
-
-    return render(
-        request,
-        "data_integration/validation.html",
-        context,
-    )
-
-from business.models import Customer
-
 # TARGET FIELD MAPPING HELPER
+# ============================================================
 
 def get_import_target_fields():
-    """
-    Return the available import fields for each supported target model.
-    """
+
+    logger.debug(
+        "DATAIMPORT TARGET FIELDS START"
+    )
 
     target_models = {
         "Employee": Employee,
         "Equipment": Equipment,
         "Location": Location,
         "Customer": Customer,
-        "ServiceRequest": ServiceRequest
+        "ServiceRequest": ServiceRequest,
     }
 
     model_fields = {}
@@ -616,9 +806,14 @@ def get_import_target_fields():
 
         fields = []
 
+        logger.debug(
+            "DATAIMPORT TARGET FIELDS MODEL "
+            "model=%s",
+            model_name,
+        )
+
         for field in model_class._meta.fields:
 
-            # Exclude fields that should not be imported
             if field.name in [
                 "id",
                 "company",
@@ -627,8 +822,13 @@ def get_import_target_fields():
             ]:
                 continue
 
-            # Exclude relational fields
             if field.is_relation:
+                logger.debug(
+                    "DATAIMPORT TARGET FIELD SKIPPED RELATION "
+                    "model=%s field=%s",
+                    model_name,
+                    field.name,
+                )
                 continue
 
             fields.append({
@@ -638,10 +838,25 @@ def get_import_target_fields():
 
         model_fields[model_name] = fields
 
+        logger.debug(
+            "DATAIMPORT TARGET FIELDS MODEL COMPLETE "
+            "model=%s field_count=%s fields=%s",
+            model_name,
+            len(fields),
+            [field["name"] for field in fields],
+        )
+
+    logger.debug(
+        "DATAIMPORT TARGET FIELDS COMPLETE "
+        "model_count=%s",
+        len(model_fields),
+    )
+
     return model_fields
 
+
 # ============================================================
-# Import
+# Mapping
 # ============================================================
 
 @login_required
@@ -651,28 +866,50 @@ def integration_mapping(request, import_id):
     Display and save the column mapping and target model.
     """
 
-    logger.info(
-            "MAPPING CHECK - SECOND 222 integration_mapping VIEW "
-            "user=%s import_id=%s method=%s",
-            request.user.email,
-            import_id,
-            request.method,
-        )
+    logger.debug(
+        "DATAIMPORT MAPPING START "
+        "user_id=%s import_id=%s method=%s",
+        request.user.id,
+        import_id,
+        request.method,
+    )
 
     data_import = get_company_import(
         request,
         import_id,
     )
 
+    logger.debug(
+        "DATAIMPORT MAPPING IMPORT LOADED "
+        "import_id=%s filename=%s source_type=%s "
+        "target_model=%s status=%s",
+        data_import.id,
+        data_import.filename,
+        data_import.source_type,
+        data_import.target_model,
+        data_import.status,
+    )
+
     # --------------------------------------------------------
-    # Verify import is available for mapping
+    # Verify status
     # --------------------------------------------------------
 
-    if data_import.status not in [
+    allowed_statuses = [
         DataImport.Status.MAPPING,
         DataImport.Status.UPLOADED,
         DataImport.Status.ANALYZING,
-    ]:
+    ]
+
+    if data_import.status not in allowed_statuses:
+
+        logger.warning(
+            "DATAIMPORT MAPPING REJECTED "
+            "import_id=%s status=%s allowed=%s",
+            data_import.id,
+            data_import.status,
+            allowed_statuses,
+        )
+
         messages.warning(
             request,
             "This import is not currently available for mapping.",
@@ -683,7 +920,7 @@ def integration_mapping(request, import_id):
         )
 
     # --------------------------------------------------------
-    # Existing mappings
+    # Existing columns
     # --------------------------------------------------------
 
     columns = (
@@ -694,27 +931,54 @@ def integration_mapping(request, import_id):
         .order_by("column_order")
     )
 
+    column_count = columns.count()
+
+    logger.debug(
+        "DATAIMPORT MAPPING COLUMNS LOADED "
+        "import_id=%s count=%s",
+        data_import.id,
+        column_count,
+    )
+
     # --------------------------------------------------------
     # GET
     # --------------------------------------------------------
 
     if request.method == "GET":
 
-        context = {
-            "data_import": data_import,
-            "columns": columns,
-            "model_fields": get_import_target_fields(),
-        }
+        model_fields = (
+            get_import_target_fields()
+        )
+
+        logger.debug(
+            "DATAIMPORT MAPPING GET "
+            "import_id=%s column_count=%s "
+            "model_count=%s",
+            data_import.id,
+            column_count,
+            len(model_fields),
+        )
 
         return render(
             request,
             "data_integration/mapping.html",
-            context,
+            {
+                "data_import": data_import,
+                "columns": columns,
+                "model_fields": model_fields,
+            },
         )
 
     # --------------------------------------------------------
     # POST
     # --------------------------------------------------------
+
+    logger.debug(
+        "DATAIMPORT MAPPING POST RECEIVED "
+        "import_id=%s post_keys=%s",
+        data_import.id,
+        list(request.POST.keys()),
+    )
 
     try:
 
@@ -724,12 +988,28 @@ def integration_mapping(request, import_id):
             # Target Model
             # ------------------------------------------------
 
-            target_model = request.POST.get(
-                "target_model",
-                ""
-            ).strip()
+            target_model = (
+                request.POST.get(
+                    "target_model",
+                    "",
+                )
+                .strip()
+            )
+
+            logger.debug(
+                "DATAIMPORT MAPPING TARGET MODEL "
+                "import_id=%s target_model=%s",
+                data_import.id,
+                target_model,
+            )
 
             if not target_model:
+
+                logger.warning(
+                    "DATAIMPORT MAPPING FAILED "
+                    "import_id=%s reason=no_target_model",
+                    data_import.id,
+                )
 
                 messages.error(
                     request,
@@ -745,21 +1025,49 @@ def integration_mapping(request, import_id):
             # Save target model
             # ------------------------------------------------
 
-            data_import.target_model = target_model
+            old_target_model = (
+                data_import.target_model
+            )
+
+            data_import.target_model = (
+                target_model
+            )
+
+            logger.debug(
+                "DATAIMPORT MAPPING TARGET MODEL UPDATED "
+                "import_id=%s old=%s new=%s",
+                data_import.id,
+                old_target_model,
+                target_model,
+            )
 
             # ------------------------------------------------
             # Remove existing mappings
             # ------------------------------------------------
 
-            DataImportColumn.objects.filter(
-                data_import=data_import
-            ).delete()
+            deleted_count, _ = (
+                DataImportColumn.objects
+                .filter(
+                    data_import=data_import
+                )
+                .delete()
+            )
+
+            logger.debug(
+                "DATAIMPORT MAPPING OLD MAPPINGS REMOVED "
+                "import_id=%s deleted=%s",
+                data_import.id,
+                deleted_count,
+            )
 
             # ------------------------------------------------
             # Recreate mappings
             # ------------------------------------------------
 
             column_index = 0
+            submitted_count = 0
+            mapped_count = 0
+            unmapped_count = 0
 
             while True:
 
@@ -771,12 +1079,12 @@ def integration_mapping(request, import_id):
                     f"target_field_{column_index}"
                 )
 
-                # No more columns submitted
-
                 if source_column is None:
                     break
 
-                source_column = source_column.strip()
+                source_column = (
+                    source_column.strip()
+                )
 
                 target_field = (
                     target_field or ""
@@ -788,11 +1096,13 @@ def integration_mapping(request, import_id):
                     ) == "on"
                 )
 
-                # ------------------------------------------------
-                # Create mapping
-                # ------------------------------------------------
+                submitted_count += 1
 
                 if source_column:
+
+                    is_mapped = bool(
+                        target_field
+                    )
 
                     DataImportColumn.objects.create(
                         data_import=data_import,
@@ -800,27 +1110,58 @@ def integration_mapping(request, import_id):
                         target_field=target_field,
                         column_order=column_index,
                         is_required=is_required,
-                        is_mapped=bool(
-                            target_field
-                        ),
+                        is_mapped=is_mapped,
+                    )
+
+                    if is_mapped:
+                        mapped_count += 1
+                    else:
+                        unmapped_count += 1
+
+                    logger.debug(
+                        "DATAIMPORT MAPPING COLUMN "
+                        "import_id=%s index=%s source=%s "
+                        "target=%s mapped=%s required=%s",
+                        data_import.id,
+                        column_index,
+                        source_column,
+                        target_field or "<unmapped>",
+                        is_mapped,
+                        is_required,
+                    )
+
+                else:
+
+                    logger.debug(
+                        "DATAIMPORT MAPPING COLUMN SKIPPED "
+                        "import_id=%s index=%s reason=empty_source",
+                        data_import.id,
+                        column_index,
                     )
 
                 column_index += 1
 
-            # ------------------------------------------------
-            # Make sure at least one field was mapped
-            # ------------------------------------------------
-
-            mapped_columns = (
-                DataImportColumn.objects
-                .filter(
-                    data_import=data_import,
-                    is_mapped=True,
-                )
-                .count()
+            logger.debug(
+                "DATAIMPORT MAPPING POST PROCESSED "
+                "import_id=%s submitted=%s mapped=%s "
+                "unmapped=%s",
+                data_import.id,
+                submitted_count,
+                mapped_count,
+                unmapped_count,
             )
 
-            if mapped_columns == 0:
+            # ------------------------------------------------
+            # Require at least one mapped field
+            # ------------------------------------------------
+
+            if mapped_count == 0:
+
+                logger.warning(
+                    "DATAIMPORT MAPPING FAILED "
+                    "import_id=%s reason=no_mapped_columns",
+                    data_import.id,
+                )
 
                 raise ValueError(
                     "At least one source column must be mapped "
@@ -828,8 +1169,10 @@ def integration_mapping(request, import_id):
                 )
 
             # ------------------------------------------------
-            # Move import to validation
+            # Set validation status
             # ------------------------------------------------
+
+            old_status = data_import.status
 
             data_import.status = (
                 DataImport.Status.VALIDATING
@@ -842,7 +1185,22 @@ def integration_mapping(request, import_id):
                 ]
             )
 
+            logger.debug(
+                "DATAIMPORT MAPPING STATUS CHANGE "
+                "import_id=%s old_status=%s new_status=%s",
+                data_import.id,
+                old_status,
+                data_import.status,
+            )
+
     except Exception as exc:
+
+        logger.exception(
+            "DATAIMPORT MAPPING FAILED "
+            "import_id=%s error=%s",
+            data_import.id,
+            exc,
+        )
 
         messages.error(
             request,
@@ -854,9 +1212,16 @@ def integration_mapping(request, import_id):
             import_id=data_import.id,
         )
 
-    # --------------------------------------------------------
-    # Continue to validation
-    # --------------------------------------------------------
+    logger.debug(
+        "DATAIMPORT MAPPING COMPLETE "
+        "import_id=%s target_model=%s "
+        "mapped=%s unmapped=%s status=%s",
+        data_import.id,
+        data_import.target_model,
+        mapped_count,
+        unmapped_count,
+        data_import.status,
+    )
 
     return redirect(
         "dataintegration:integration_validate",
@@ -865,234 +1230,321 @@ def integration_mapping(request, import_id):
 
 
 # ============================================================
-# Results
+# Validation
 # ============================================================
 
 @login_required
-def integration_results(request, import_id):
+@require_http_methods(["GET", "POST"])
+def integration_validate(request, import_id):
     """
-    Display the final result of an import.
+    Validate the mapped import before allowing the import operation.
     """
+
+    logger.debug(
+        "DATAIMPORT VALIDATE START "
+        "import_id=%s user_id=%s method=%s",
+        import_id,
+        request.user.id,
+        request.method,
+    )
+
+    # --------------------------------------------------------
+    # Load DataImport
+    # --------------------------------------------------------
 
     data_import = get_company_import(
         request,
         import_id,
     )
+
+    logger.debug(
+        "DATAIMPORT VALIDATE IMPORT LOADED "
+        "import_id=%s filename=%s source_type=%s "
+        "target_model=%s status=%s total_rows=%s",
+        data_import.id,
+        data_import.filename,
+        data_import.source_type,
+        data_import.target_model,
+        data_import.status,
+        data_import.total_rows,
+    )
+
+    # --------------------------------------------------------
+    # Load mappings
+    # --------------------------------------------------------
 
     mappings = (
         DataImportColumn.objects
-        .filter(data_import=data_import)
+        .filter(
+            data_import=data_import
+        )
         .order_by("column_order")
     )
 
-    context = {
-        "data_import": data_import,
-        "mappings": mappings,
-    }
+    mapping_count = mappings.count()
 
-    return render(
-        request,
-        "data_integration/results.html",
-        context,
+    mapped_count = mappings.filter(
+        is_mapped=True
+    ).count()
+
+    unmapped_count = mapping_count - mapped_count
+
+    logger.debug(
+        "DATAIMPORT VALIDATE MAPPINGS LOADED "
+        "import_id=%s total=%s mapped=%s unmapped=%s",
+        data_import.id,
+        mapping_count,
+        mapped_count,
+        unmapped_count,
     )
 
+    if not mapping_count:
 
-# ============================================================
-# Cancel
-# ============================================================
+        logger.warning(
+            "DATAIMPORT VALIDATE REJECTED "
+            "import_id=%s reason=no_mappings",
+            data_import.id,
+        )
 
-@login_required
-@require_POST
-def integration_cancel(request, import_id):
-    """
-    Cancel an import that has not completed.
-    """
-
-    data_import = get_company_import(
-        request,
-        import_id,
-    )
-
-    if data_import.status in [
-        DataImport.Status.COMPLETED,
-        DataImport.Status.FAILED,
-        DataImport.Status.CANCELLED,
-    ]:
-        messages.warning(
+        messages.error(
             request,
-            "This import cannot be cancelled.",
+            "No column mappings have been configured.",
         )
 
         return redirect(
-            "dataintegration:integration_dashboard"
+            "dataintegration:integration_mapping",
+            import_id=data_import.id,
         )
 
-    data_import.status = DataImport.Status.CANCELLED
+    # --------------------------------------------------------
+    # Log mapping definitions
+    # --------------------------------------------------------
+
+    mapping_debug = []
+
+    for mapping in mappings:
+
+        mapping_debug.append({
+            "source": mapping.source_column,
+            "target": mapping.target_field or None,
+            "mapped": mapping.is_mapped,
+            "required": mapping.is_required,
+        })
+
+    logger.debug(
+        "DATAIMPORT VALIDATE MAPPING DETAILS "
+        "import_id=%s mappings=%s",
+        data_import.id,
+        mapping_debug,
+    )
+
+    # --------------------------------------------------------
+    # Set status
+    # --------------------------------------------------------
+
+    old_status = data_import.status
+
+    data_import.status = (
+        DataImport.Status.VALIDATING
+    )
 
     data_import.save(
         update_fields=["status"]
     )
 
-    messages.success(
-        request,
-        "Import cancelled.",
-    )
-
-    return redirect(
-        "dataintegration:integration_dashboard"
-    )
-
-from .services import run_import 
-
-@login_required
-@require_POST
-def integration_import(request, import_id):
-    """
-    Execute an import that has successfully passed validation.
-    """
-
-    logger.info(
-        "IMPORT START requested: import_id=%s user_id=%s",
-        import_id,
-        request.user.id,
-    )
-
-    data_import = get_company_import(
-        request,
-        import_id,
-    )
-
-    logger.info(
-        "IMPORT START loaded: import_id=%s status=%s",
+    logger.debug(
+        "DATAIMPORT VALIDATE STATUS CHANGE "
+        "import_id=%s old_status=%s new_status=%s",
         data_import.id,
+        old_status,
         data_import.status,
-    )
-
-    # --------------------------------------------------------
-    # Verify import is ready
-    # --------------------------------------------------------
-
-    if data_import.status != DataImport.Status.READY:
-
-        logger.warning(
-            "IMPORT START rejected: import_id=%s status=%s expected=%s",
-            data_import.id,
-            data_import.status,
-            DataImport.Status.READY,
-        )
-
-        messages.error(
-            request,
-            "This import is not ready to be imported.",
-        )
-
-        return redirect(
-            "dataintegration:integration_validate",
-            import_id=data_import.id,
-        )
-
-    # --------------------------------------------------------
-    # Execute import
-    # --------------------------------------------------------
-
-    logger.info(
-        "IMPORT EXECUTION beginning: import_id=%s",
-        data_import.id,
     )
 
     try:
 
-        with transaction.atomic():
+        # ----------------------------------------------------
+        # Read file
+        # ----------------------------------------------------
 
-            logger.info(
-                "IMPORT TRANSACTION opened: import_id=%s",
+        logger.debug(
+            "DATAIMPORT VALIDATE FILE READ START "
+            "import_id=%s filename=%s source_type=%s",
+            data_import.id,
+            data_import.filename,
+            data_import.source_type,
+        )
+
+        rows = read_import_rows(
+            data_import
+        )
+
+        logger.debug(
+            "DATAIMPORT VALIDATE FILE READ COMPLETE "
+            "import_id=%s row_count=%s",
+            data_import.id,
+            len(rows),
+        )
+
+        if rows:
+
+            first_row = rows[0]
+
+            logger.debug(
+                "DATAIMPORT VALIDATE FIRST ROW STRUCTURE "
+                "import_id=%s field_count=%s fields=%s",
+                data_import.id,
+                len(first_row),
+                list(first_row.keys()),
+            )
+
+        else:
+
+            logger.warning(
+                "DATAIMPORT VALIDATE FILE EMPTY "
+                "import_id=%s",
                 data_import.id,
             )
 
-            # -----------------------------------------------
-            # Run the actual importer
-            # -----------------------------------------------
+        # ----------------------------------------------------
+        # Validate rows
+        # ----------------------------------------------------
 
-            logger.info(
-                "IMPORT RUNNER starting: import_id=%s",
+        logger.debug(
+            "DATAIMPORT VALIDATE ENGINE START "
+            "import_id=%s rows=%s mappings=%s target_model=%s",
+            data_import.id,
+            len(rows),
+            mapping_count,
+            data_import.target_model,
+        )
+
+        validation_data = validate_import(
+            data_import=data_import,
+            rows=rows,
+        )
+
+        # ----------------------------------------------------
+        # Inspect validation result structure
+        # ----------------------------------------------------
+
+        logger.debug(
+            "DATAIMPORT VALIDATE ENGINE COMPLETE "
+            "import_id=%s result_type=%s result_keys=%s",
+            data_import.id,
+            type(validation_data).__name__,
+            (
+                list(validation_data.keys())
+                if isinstance(
+                    validation_data,
+                    dict,
+                )
+                else None
+            ),
+        )
+
+        validation_rows = []
+
+        if isinstance(
+            validation_data,
+            dict,
+        ):
+
+            validation_rows = (
+                validation_data.get(
+                    "rows",
+                    [],
+                )
+            )
+
+        logger.debug(
+            "DATAIMPORT VALIDATE RESULT ROWS "
+            "import_id=%s count=%s",
+            data_import.id,
+            len(validation_rows),
+        )
+
+        # ----------------------------------------------------
+        # Summarize validation without logging row data
+        # ----------------------------------------------------
+
+        valid_count = 0
+        invalid_count = 0
+        error_counter = Counter()
+
+        for row_result in validation_rows:
+
+            if row_result.get("valid"):
+                valid_count += 1
+
+            else:
+                invalid_count += 1
+
+                for error in row_result.get(
+                    "errors",
+                    [],
+                ):
+
+                    error_counter[
+                        str(error)
+                    ] += 1
+
+        logger.debug(
+            "DATAIMPORT VALIDATE SUMMARY "
+            "import_id=%s total=%s valid=%s invalid=%s "
+            "unique_errors=%s",
+            data_import.id,
+            len(validation_rows),
+            valid_count,
+            invalid_count,
+            len(error_counter),
+        )
+
+        if error_counter:
+
+            logger.debug(
+                "DATAIMPORT VALIDATE ERROR SUMMARY "
+                "import_id=%s errors=%s",
                 data_import.id,
+                dict(error_counter),
             )
 
-            result = run_import(
-                data_import=data_import,
-            )
+        # ----------------------------------------------------
+        # Update status/statistics
+        # ----------------------------------------------------
 
-            logger.info(
-                "IMPORT RUNNER completed: import_id=%s result=%s",
-                data_import.id,
-                result,
-            )
+        logger.debug(
+            "DATAIMPORT VALIDATE STATUS UPDATE START "
+            "import_id=%s",
+            data_import.id,
+        )
 
-            # -----------------------------------------------
-            # Update import statistics
-            # -----------------------------------------------
+        update_import_validation_status(
+            data_import=data_import,
+            validation_result=validation_data,
+        )
 
-            validated_count = result.get(
-                "validated_count",
-                0,
-            )
+        data_import.refresh_from_db()
 
-            updated_count = result.get(
-                "updated_count",
-                0,
-            )
-
-            skipped_count = result.get(
-                "skipped_count",
-                0,
-            )
-
-            error_count = result.get(
-                "error_count",
-                0,
-            )
-
-            logger.info(
-                (
-                    "IMPORT STATISTICS: import_id=%s "
-                    "validated=%s updated=%s skipped=%s errors=%s"
-                ),
-                data_import.id,
-                validated_count,
-                updated_count,
-                skipped_count,
-                error_count,
-            )
-
-            # -----------------------------------------------
-            # Complete import
-            # -----------------------------------------------
-
-            data_import.status = (
-                DataImport.Status.COMPLETED
-            )
-
-            data_import.completed_at = timezone.now()
-
-            data_import.save(
-                update_fields=[
-                    "status",
-                    "completed_at",
-                ]
-            )
-
-            logger.info(
-                "IMPORT COMPLETED: import_id=%s status=%s completed_at=%s",
-                data_import.id,
-                data_import.status,
-                data_import.completed_at,
-            )
+        logger.debug(
+            "DATAIMPORT VALIDATE STATUS UPDATE COMPLETE "
+            "import_id=%s status=%s total_rows=%s "
+            "valid_rows=%s error_rows=%s",
+            data_import.id,
+            data_import.status,
+            data_import.total_rows,
+            data_import.valid_rows,
+            data_import.error_rows,
+        )
 
     except Exception as exc:
 
         logger.exception(
-            "IMPORT FAILED: import_id=%s error=%s",
+            "DATAIMPORT VALIDATE FAILED "
+            "import_id=%s filename=%s "
+            "target_model=%s error=%s",
             data_import.id,
+            data_import.filename,
+            data_import.target_model,
             exc,
         )
 
@@ -1101,609 +1553,56 @@ def integration_import(request, import_id):
         )
 
         data_import.save(
-            update_fields=[
-                "status",
-            ]
+            update_fields=["status"]
         )
 
-        logger.info(
-            "IMPORT STATUS updated to FAILED: import_id=%s",
+        logger.debug(
+            "DATAIMPORT VALIDATE STATUS FAILED "
+            "import_id=%s status=%s",
             data_import.id,
+            data_import.status,
         )
 
         messages.error(
             request,
-            f"Import failed: {exc}",
+            f"Validation failed: {exc}",
         )
 
         return redirect(
-            "dataintegration:integration_validate",
-            import_id=data_import.id,
+            "dataintegration:integration_dashboard"
         )
 
     # --------------------------------------------------------
-    # Display import results
+    # Final refresh
     # --------------------------------------------------------
 
-    logger.info(
-        (
-            "IMPORT RESULTS redirect: import_id=%s "
-            "validated=%s updated=%s skipped=%s errors=%s"
-        ),
-        data_import.id,
-        validated_count,
-        updated_count,
-        skipped_count,
-        error_count,
-    )
+    data_import.refresh_from_db()
 
-    messages.success(
-        request,
-        (
-            f"Import completed successfully. "
-            f"{validated_count} record(s) validated."
-        ),
-    )
-
-    return redirect(
-        "dataintegration:integration_results",
-        import_id=data_import.id,
-    )
-
-
-
-from django.contrib import messages
-from django.contrib.auth.decorators import login_required
-from django.db import IntegrityError, transaction
-from django.shortcuts import redirect
-from django.utils import timezone
-from django.views.decorators.http import require_POST
-
-from .importers import read_import_rows
-from app.models import *
-
-
-@login_required
-@require_POST
-def integration_create_import_models(request, import_id):
-    """
-    Create target-model records from a READY DataImport.
-
-    Only rows that individually passed validation are imported.
-
-    Import behavior:
-        - Valid rows are created.
-        - Invalid validation rows are skipped.
-        - Database failures on individual rows are recorded and skipped.
-        - Remaining rows continue to import.
-        - DataImport is marked COMPLETED when processing finishes,
-          even if some rows failed.
-    """
-
-    logger.info(
-        "CREATE MODELS START: import_id=%s user_id=%s",
-        import_id,
-        request.user.id,
-    )
-
-    # --------------------------------------------------------
-    # Get DataImport belonging to user's company
-    # --------------------------------------------------------
-
-    data_import = get_company_import(
-        request,
-        import_id,
-    )
-
-    logger.info(
-        "CREATE MODELS LOADED: import_id=%s status=%s target_model=%s",
+    logger.debug(
+        "DATAIMPORT VALIDATE COMPLETE "
+        "import_id=%s status=%s total_rows=%s "
+        "valid_rows=%s error_rows=%s",
         data_import.id,
         data_import.status,
-        data_import.target_model,
+        data_import.total_rows,
+        data_import.valid_rows,
+        data_import.error_rows,
     )
 
-    # --------------------------------------------------------
-    # Must be READY
-    # --------------------------------------------------------
-
-    if data_import.status != DataImport.Status.READY:
-
-        messages.error(
-            request,
-            "This import is not ready to be imported.",
-        )
-
-        return redirect(
-            "dataintegration:integration_validate",
-            import_id=data_import.id,
-        )
-
-    # --------------------------------------------------------
-    # Resolve target model
-    # --------------------------------------------------------
-
-    target_model_name = data_import.target_model or ""
-
-    target_models = {
-        "Employee": Employee,
-        "Equipment": Equipment,
-        "Location": Location,
-        "Customer": Customer,
-        "ServiceRequest": ServiceRequest,
+    context = {
+        "data_import": data_import,
+        "mappings": mappings,
+        "validation": validation_data,
     }
 
-    target_model = target_models.get(
-        target_model_name
-    )
-
-    if target_model is None:
-
-        messages.error(
-            request,
-            f"Unsupported target model: {data_import.target_model}",
-        )
-
-        return redirect(
-            "dataintegration:integration_validate",
-            import_id=data_import.id,
-        )
-
-    logger.info(
-        "CREATE MODELS TARGET: import_id=%s model=%s",
+    logger.debug(
+        "DATAIMPORT VALIDATE RENDER "
+        "import_id=%s template=data_integration/validation.html",
         data_import.id,
-        target_model.__name__,
     )
 
-    # --------------------------------------------------------
-    # Get mapped columns
-    # --------------------------------------------------------
-
-    mappings = list(
-        DataImportColumn.objects
-        .filter(
-            data_import=data_import,
-            is_mapped=True,
-        )
-        .order_by("column_order")
-    )
-
-    if not mappings:
-
-        messages.error(
-            request,
-            "No mapped columns were found for this import.",
-        )
-
-        return redirect(
-            "dataintegration:integration_validate",
-            import_id=data_import.id,
-        )
-
-    # --------------------------------------------------------
-    # Read uploaded file
-    # --------------------------------------------------------
-
-    try:
-
-        rows = read_import_rows(
-            data_import
-        )
-
-    except Exception as exc:
-
-        logger.exception(
-            "CREATE MODELS READ FAILED: import_id=%s",
-            data_import.id,
-        )
-
-        messages.error(
-            request,
-            f"Unable to read the import file: {exc}",
-        )
-
-        return redirect(
-            "dataintegration:integration_validate",
-            import_id=data_import.id,
-        )
-
-    if not rows:
-
-        messages.error(
-            request,
-            "The import file does not contain any records.",
-        )
-
-        return redirect(
-            "dataintegration:integration_validate",
-            import_id=data_import.id,
-        )
-
-    # --------------------------------------------------------
-    # Validate again
-    #
-    # We intentionally revalidate here because the current
-    # validation results are stored as statistics, not as
-    # persistent row records.
-    # --------------------------------------------------------
-
-    try:
-
-        validation_result = validate_import(
-            data_import=data_import,
-            rows=rows,
-        )
-
-        logger.info(
-            "CREATE MODELS VALIDATION RESULT: import_id=%s keys=%s",
-            data_import.id,
-            validation_result.keys(),
-        )
-
-        logger.info(
-            "CREATE MODELS VALIDATION ROW COUNT: import_id=%s count=%s",
-            data_import.id,
-            len(
-                validation_result.get(
-                    "rows",
-                    [],
-                )
-            ),
-        )
-
-    except Exception as exc:
-
-        logger.exception(
-            "CREATE MODELS VALIDATION FAILED: import_id=%s",
-            data_import.id,
-        )
-
-        messages.error(
-            request,
-            f"Unable to validate the import: {exc}",
-        )
-
-        return redirect(
-            "dataintegration:integration_validate",
-            import_id=data_import.id,
-        )
-
-    # --------------------------------------------------------
-    # Create target records
-    #
-    # IMPORTANT:
-    # There is intentionally NO transaction.atomic() around
-    # the entire loop.
-    #
-    # Each row is processed independently so that a failure
-    # on one row does not stop the remaining rows.
-    # --------------------------------------------------------
-
-    created_count = 0
-    skipped_count = 0
-    failed_count = 0
-
-    failed_rows = []
-
-    for row_result in validation_result["rows"]:
-
-        row_number = row_result["row_number"]
-
-        # ----------------------------------------------------
-        # Import ONLY individually valid rows
-        # ----------------------------------------------------
-
-        if not row_result["valid"]:
-
-            skipped_count += 1
-
-            logger.info(
-                (
-                    "CREATE MODELS SKIPPED: "
-                    "import_id=%s row=%s errors=%s"
-                ),
-                data_import.id,
-                row_number,
-                row_result["errors"],
-            )
-
-            failed_rows.append(
-                {
-                    "row_number": row_number,
-                    "type": "validation",
-                    "errors": row_result["errors"],
-                }
-            )
-
-            continue
-
-        row = row_result["data"]
-
-        # ----------------------------------------------------
-        # Build target model data
-        # ----------------------------------------------------
-
-        model_data = {}
-
-        for mapping in mappings:
-
-            target_field = (
-                mapping.target_field or ""
-            ).strip()
-
-            if not target_field:
-                continue
-
-            source_column = (
-                mapping.source_column
-            )
-
-            value = row.get(
-                source_column
-            )
-
-            value = normalize_value(
-                value
-            )
-
-            if is_empty(value):
-                continue
-
-            model_data[target_field] = value
-
-        # ----------------------------------------------------
-        # Automatically assign company if target model
-        # has a company field.
-        # ----------------------------------------------------
-
-        try:
-
-            target_model._meta.get_field(
-                "company"
-            )
-
-            model_data["company"] = (
-                data_import.company
-            )
-
-        except Exception:
-
-            pass
-
-        # ----------------------------------------------------
-        # Create target record
-        #
-        # Each individual row gets its own transaction.
-        # If the create fails, only that row is rolled back.
-        # ----------------------------------------------------
-
-        logger.info(
-            (
-                "CREATE MODELS ATTEMPT: "
-                "import_id=%s row=%s model=%s data=%s"
-            ),
-            data_import.id,
-            row_number,
-            target_model.__name__,
-            model_data,
-        )
-
-        try:
-
-            with transaction.atomic():
-
-                target_model.objects.create(
-                    **model_data
-                )
-
-        except IntegrityError as exc:
-
-            failed_count += 1
-
-            logger.exception(
-                (
-                    "CREATE MODELS FAILED: "
-                    "import_id=%s row=%s model=%s "
-                    "error=%s"
-                ),
-                data_import.id,
-                row_number,
-                target_model.__name__,
-                exc,
-            )
-
-            failed_rows.append(
-                {
-                    "row_number": row_number,
-                    "type": "database",
-                    "errors": [
-                        str(exc)
-                    ],
-                    "data": model_data,
-                }
-            )
-
-            # ----------------------------------------------
-            # IMPORTANT:
-            # Continue importing the remaining rows.
-            # ----------------------------------------------
-
-            continue
-
-        except Exception as exc:
-
-            failed_count += 1
-
-            logger.exception(
-                (
-                    "CREATE MODELS FAILED: "
-                    "import_id=%s row=%s model=%s "
-                    "error=%s"
-                ),
-                data_import.id,
-                row_number,
-                target_model.__name__,
-                exc,
-            )
-
-            failed_rows.append(
-                {
-                    "row_number": row_number,
-                    "type": "error",
-                    "errors": [
-                        str(exc)
-                    ],
-                    "data": model_data,
-                }
-            )
-
-            # ----------------------------------------------
-            # Continue importing remaining rows.
-            # ----------------------------------------------
-
-            continue
-
-        # ----------------------------------------------------
-        # Successful creation
-        # ----------------------------------------------------
-
-        created_count += 1
-
-        logger.info(
-            "CREATE MODELS SUCCESS: import_id=%s row=%s model=%s",
-            data_import.id,
-            row_number,
-            target_model.__name__,
-        )
-
-        logger.info(
-            (
-                "CREATE MODELS CREATED: "
-                "import_id=%s row=%s model=%s"
-            ),
-            data_import.id,
-            row_number,
-            target_model.__name__,
-        )
-
-    # --------------------------------------------------------
-    # Mark DataImport completed
-    #
-    # The import itself completed even if individual rows
-    # failed.
-    # --------------------------------------------------------
-
-    try:
-
-        data_import.status = (
-            DataImport.Status.COMPLETED
-        )
-
-        data_import.completed_at = (
-            timezone.now()
-        )
-
-        data_import.save(
-            update_fields=[
-                "status",
-                "completed_at",
-            ]
-        )
-
-    except Exception as exc:
-
-        logger.exception(
-            (
-                "CREATE MODELS STATUS UPDATE FAILED: "
-                "import_id=%s error=%s"
-            ),
-            data_import.id,
-            exc,
-        )
-
-        messages.error(
-            request,
-            f"Unable to finalize the import: {exc}",
-        )
-
-        return redirect(
-            "dataintegration:integration_validate",
-            import_id=data_import.id,
-        )
-
-    # --------------------------------------------------------
-    # Store failed rows for results page
-    #
-    # This assumes your DataImport model has a field available
-    # for storing this information. If it does not, we can
-    # instead pass/display the failures another way.
-    # --------------------------------------------------------
-
-    logger.info(
-        (
-            "CREATE MODELS COMPLETED: "
-            "import_id=%s created=%s skipped=%s failed=%s"
-        ),
-        data_import.id,
-        created_count,
-        skipped_count,
-        failed_count,
-    )
-
-    # --------------------------------------------------------
-    # User messages
-    # --------------------------------------------------------
-
-    if failed_count or skipped_count:
-
-        messages.warning(
-            request,
-            (
-                f"Import completed with issues. "
-                f"{created_count} "
-                f"{data_import.target_model} "
-                f"record(s) created, "
-                f"{failed_count + skipped_count} "
-                f"row(s) were not imported."
-            ),
-        )
-
-    else:
-
-        messages.success(
-            request,
-            (
-                f"Import completed successfully. "
-                f"{created_count} "
-                f"{data_import.target_model} "
-                f"record(s) created."
-            ),
-        )
-
-    if skipped_count:
-
-        messages.info(
-            request,
-            (
-                f"{skipped_count} row(s) failed "
-                f"validation and were skipped."
-            ),
-        )
-
-    if failed_count:
-
-        messages.warning(
-            request,
-            (
-                f"{failed_count} row(s) could not be "
-                f"created because of database errors."
-            ),
-        )
-
-    # --------------------------------------------------------
-    # Redirect to results
-    # --------------------------------------------------------
-
-    return redirect(
-        "dataintegration:integration_results",
-        import_id=data_import.id,
+    return render(
+        request,
+        "data_integration/validation.html",
+        context,
     )

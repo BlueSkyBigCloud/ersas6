@@ -126,7 +126,7 @@ class Customer(models.Model):
     # ]
     # ---------------------------------------------------------
 
-    addres_list = ArrayField(
+    address_list = ArrayField(
         base_field=models.TextField(),
         default=list,
         blank=True
