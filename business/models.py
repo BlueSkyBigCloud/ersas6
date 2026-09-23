@@ -3,35 +3,134 @@ from django.conf import settings
 from app.models import *
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
+import uuid
+import random
+import string
+from django.core.validators import RegexValidator
+
 
 
 class Customer(models.Model):
+
     PAYMENT_TERMS = [
         ('MONTHLY', 'MONTHLY'),
         ('30DAYS', '30DAYS'),
         ('DUEONINVOICE', 'DUEONINVOICE'),
         ('ANNUAL', 'ANNUAL'),
-
     ]
 
     PAYMENT_METHOD_CHOICES = [
         ('CREDIT_CARD', 'Credit Card'),
         ('BANK_TRANSFER', 'Bank Transfer'),
     ]
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    created_by_user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='customers')
-    name = models.CharField(max_length=255)
+
+    customer_number_validator = RegexValidator(
+        regex=r'^[A-Za-z0-9]{6,16}$',
+        message='Customer number must contain only letters and numbers and be 6 to 16 characters long.'
+    )
+
+    id = models.UUIDField(
+        primary_key=True,
+        default=uuid.uuid4,
+        editable=False
+    )
+
+    customer_number = models.CharField(
+        max_length=16,
+        blank=True,
+        null=True,
+        validators=[customer_number_validator]
+    )
+
+    created_by_user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='customers'
+    )
+
+    name = models.CharField(
+        max_length=255
+    )
+
     address = models.TextField()
-    email = models.CharField(max_length=255)
-    payment_terms = models.CharField(max_length=50, choices=PAYMENT_TERMS)
-    payment_method = models.CharField(max_length=50, choices=PAYMENT_METHOD_CHOICES)
-    phone_number = models.CharField(max_length=15)
-    account_rep = models.CharField(max_length=255)
-    created_at = models.DateTimeField(auto_now_add=True)
-    company = models.ForeignKey( 'app.Company', on_delete=models.PROTECT, null=True, blank=True, related_name='company_customers', )
+
+    email = models.CharField(
+        max_length=255
+    )
+
+    payment_terms = models.CharField(
+        max_length=50,
+        choices=PAYMENT_TERMS
+    )
+
+    payment_method = models.CharField(
+        max_length=50,
+        choices=PAYMENT_METHOD_CHOICES
+    )
+
+    phone_number = models.CharField(
+        max_length=15
+    )
+
+    account_rep = models.CharField(
+        max_length=255
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    company = models.ForeignKey(
+        'app.Company',
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name='company_customers'
+    )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['company', 'customer_number'],
+                name='unique_customer_number_per_company'
+            ),
+        ]
+
+    def generate_customer_number(self):
+        """
+        Generate a random 6-character alphanumeric customer number.
+        Example: ABC001, X7K92P, 4F8B21
+        """
+
+        characters = string.ascii_uppercase + string.digits
+
+        while True:
+            customer_number = ''.join(
+                random.choices(characters, k=6)
+            )
+
+            if not Customer.objects.filter(
+                company=self.company,
+                customer_number=customer_number
+            ).exists():
+                return customer_number
+
+    def save(self, *args, **kwargs):
+        """
+        Automatically generate a customer number if one
+        was not provided.
+        """
+
+        if not self.customer_number:
+            self.customer_number = self.generate_customer_number()
+
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.name
+
     
 
 class Invoice(models.Model):
