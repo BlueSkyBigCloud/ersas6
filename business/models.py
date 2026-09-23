@@ -7,7 +7,7 @@ import uuid
 import random
 import string
 from django.core.validators import RegexValidator
-
+from django.contrib.postgres.fields import ArrayField
 
 
 class Customer(models.Model):
@@ -24,9 +24,19 @@ class Customer(models.Model):
         ('BANK_TRANSFER', 'Bank Transfer'),
     ]
 
+    ADDRESS_TYPE_CHOICES = [
+        ('BILLING', 'Billing'),
+        ('SHIPPING', 'Shipping'),
+        ('MAILING', 'Mailing'),
+        ('OTHER', 'Other'),
+    ]
+
     customer_number_validator = RegexValidator(
         regex=r'^[A-Za-z0-9]{6,16}$',
-        message='Customer number must contain only letters and numbers and be 6 to 16 characters long.'
+        message=(
+            'Customer number must contain only letters and numbers '
+            'and be 6 to 16 characters long.'
+        )
     )
 
     id = models.UUIDField(
@@ -54,7 +64,73 @@ class Customer(models.Model):
         max_length=255
     )
 
-    address = models.TextField()
+    # ---------------------------------------------------------
+    # Primary / Structured Address
+    # ---------------------------------------------------------
+
+    address_type = models.CharField(
+        max_length=20,
+        choices=ADDRESS_TYPE_CHOICES,
+        default='MAILING'
+    )
+
+    address_line_1 = models.CharField(
+        max_length=255,
+        blank=True
+    )
+
+    address_line_2 = models.CharField(
+        max_length=255,
+        blank=True
+    )
+
+    city = models.CharField(
+        max_length=100,
+        blank=True
+    )
+
+    state = models.CharField(
+        max_length=100,
+        blank=True
+    )
+
+    postal_code = models.CharField(
+        max_length=20,
+        blank=True
+    )
+
+    country = models.CharField(
+        max_length=100,
+        default='United States',
+        blank=True
+    )
+
+    # ---------------------------------------------------------
+    # Combined Address
+    # ---------------------------------------------------------
+
+    address = models.TextField(
+        blank=True
+    )
+
+    # ---------------------------------------------------------
+    # Additional Customer Addresses
+    #
+    # Each item is a complete address stored as a string.
+    #
+    # Example:
+    #
+    # [
+    #     "123 Main Street\nHouston, Texas 77001\nUnited States",
+    #     "500 Market Street\nDallas, Texas 75201\nUnited States"
+    # ]
+    # ---------------------------------------------------------
+
+    addres_list = ArrayField(
+        base_field=models.TextField(),
+        default=list,
+        blank=True
+    )
 
     email = models.CharField(
         max_length=255
@@ -101,7 +177,11 @@ class Customer(models.Model):
     def generate_customer_number(self):
         """
         Generate a random 6-character alphanumeric customer number.
-        Example: ABC001, X7K92P, 4F8B21
+
+        Examples:
+            ABC001
+            X7K92P
+            4F8B21
         """
 
         characters = string.ascii_uppercase + string.digits
@@ -117,19 +197,49 @@ class Customer(models.Model):
             ).exists():
                 return customer_number
 
+    def build_address(self):
+        """
+        Combine the structured address fields into
+        the primary address text field.
+        """
+
+        address_parts = [
+            self.address_line_1,
+            self.address_line_2,
+            self.city,
+            self.state,
+            self.postal_code,
+            self.country,
+        ]
+
+        return '\n'.join(
+            part.strip()
+            for part in address_parts
+            if part and part.strip()
+        )
+
     def save(self, *args, **kwargs):
         """
         Automatically generate a customer number if one
         was not provided.
+
+        Also rebuild the primary address from the
+        structured address fields.
         """
 
         if not self.customer_number:
             self.customer_number = self.generate_customer_number()
 
+        self.address = self.build_address()
+
+        if self.addres_list is None:
+            self.addres_list = []
+
         super().save(*args, **kwargs)
 
     def __str__(self):
         return self.name
+
 
     
 
