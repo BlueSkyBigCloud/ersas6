@@ -1,7 +1,9 @@
 from django.urls import path
 
-from .views import training_dashboard
+from app import views
 
+from . import views
+from .views import *
 
 app_name = "training"
 
