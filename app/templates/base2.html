@@ -121,6 +121,10 @@
                 {% if user.is_account_admin %}
 
                 <li>
+                    <a href="{% url 'training' %}">Training</a>
+                </li>
+
+                <li>
                     <a href="{% url 'priceanalysis:priceanalysis_dashboard' %}">
                         Pricing Analysis
                     </a>

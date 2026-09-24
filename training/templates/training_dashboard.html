@@ -1,0 +1,228 @@
+{% extends "base2.html" %}
+
+{% block title %}Training Dashboard{% endblock %}
+
+{% block content %}
+
+<main>
+
+
+<h1>Training Dashboard</h1>
+
+<!-- Qualification Summary -->
+
+<section>
+    <h2>Qualifications</h2>
+
+    {% if qualifications %}
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Qualification</th>
+                    <th>Type</th>
+                    <th>Repetitions</th>
+                    <th>Approval Required</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for qualification in qualifications %}
+                    <tr>
+                        <td>
+                            {{ qualification.name }}
+                        </td>
+
+                        <td>
+                            {{ qualification.get_type_display }}
+                        </td>
+
+                        <td>
+                            {{ qualification.rep_count }}
+                        </td>
+
+                        <td>
+                            {% if qualification.required_approval %}
+                                Yes
+                            {% else %}
+                                No
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+    {% else %}
+
+        <p>No qualifications have been created.</p>
+
+    {% endif %}
+
+</section>
+
+
+<!-- Employee Qualification Records -->
+
+<section>
+
+    <h2>Employee Qualifications</h2>
+
+    {% if employee_qualifications %}
+
+        <table>
+
+            <thead>
+                <tr>
+                    <th>Employee #</th>
+                    <th>Callsign</th>
+                    <th>Employee</th>
+                    <th>Qualification</th>
+                    <th>Type</th>
+                    <th>Date Completed</th>
+                    <th>Expiration</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                {% for record in employee_qualifications %}
+
+                    <tr>
+
+                        <td>
+                            {{ record.employee.employee_number }}
+                        </td>
+
+                        <td>
+                            {{ record.employee.callsign }}
+                        </td>
+
+                        <td>
+                            {{ record.employee.first_name }}
+                            {{ record.employee.last_name }}
+                        </td>
+
+                        <td>
+                            {{ record.qualification.name }}
+                        </td>
+
+                        <td>
+                            {{ record.qualification.get_type_display }}
+                        </td>
+
+                        <td>
+                            {% if record.date_completed %}
+                                {{ record.date_completed|date:"m/d/Y" }}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {% if record.expiration_date %}
+                                {{ record.expiration_date|date:"m/d/Y" }}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {{ record.get_status_display }}
+                        </td>
+
+                    </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    {% else %}
+
+        <p>No employee qualifications have been assigned.</p>
+
+    {% endif %}
+
+</section>
+
+
+<!-- Employees -->
+
+<section>
+
+    <h2>Employees</h2>
+
+    {% if employees %}
+
+        <table>
+
+            <thead>
+                <tr>
+                    <th>Employee #</th>
+                    <th>Callsign</th>
+                    <th>Name</th>
+                    <th>Level</th>
+                    <th>Position</th>
+                    <th>Department</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                {% for employee in employees %}
+
+                    <tr>
+
+                        <td>
+                            {{ employee.employee_number }}
+                        </td>
+
+                        <td>
+                            {{ employee.callsign }}
+                        </td>
+
+                        <td>
+                            {{ employee.first_name }}
+                            {{ employee.last_name }}
+                        </td>
+
+                        <td>
+                            {{ employee.get_level_display }}
+                        </td>
+
+                        <td>
+                            {{ employee.position }}
+                        </td>
+
+                        <td>
+                            {{ employee.department }}
+                        </td>
+
+                        <td>
+                            {{ employee.status }}
+                        </td>
+
+                    </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    {% else %}
+
+        <p>No employees found.</p>
+
+    {% endif %}
+
+</section>
+
+
+</main>
+
+{% endblock %}
