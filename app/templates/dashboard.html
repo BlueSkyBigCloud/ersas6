@@ -2,9 +2,10 @@
 {% load static %}
 {% block title %}Account Information{% endblock %}
 
+
+{% block content %}
 <br>
 <h2>{{ user.company.name }}</h2>
-{% block content %}
     <a class="button" href="{% url 'edit_account' %}">Edit Account</a>  <!-- Link to edit account -->
     <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
     <div class="account-info">
