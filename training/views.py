@@ -15,7 +15,7 @@ def training_dashboard(request):
     if not user_company:
         return render(
             request,
-            "training/training_dashboard.html",
+            "training_dashboard.html",
             {
                 "employees": [],
                 "qualifications": [],
@@ -34,13 +34,13 @@ def training_dashboard(request):
         employee.decrypt_fields(user=request.user)
 
         # Replace None values with N/A for display.
-        employee.phone_number = employee.phone_number or "N/A"
-        employee.position = employee.position or "N/A"
-        employee.department = employee.department or "N/A"
-        employee.group = employee.group or "N/A"
-        employee.status = employee.status or "N/A"
-        employee.level = employee.level or "N/A"
-        employee.location = employee.location or "N/A"
+        employee.phone_number = employee.phone_number if employee.phone_number else "N/A"
+        employee.position = employee.position if employee.position else "N/A"
+        employee.department = employee.department if employee.department else "N/A"
+        employee.group = employee.group if employee.group else "N/A"
+        employee.status = employee.status if employee.status else "N/A"
+        employee.level = employee.level if employee.level else "N/A"
+        employee.location = employee.location if employee.location else "N/A"
 
     qualifications = list(
         Qualification.objects
@@ -49,15 +49,15 @@ def training_dashboard(request):
     )
 
     for qualification in qualifications:
-        qualification.type = qualification.type or "N/A"
+        qualification.type = qualification.type if qualification.type else "N/A"
         qualification.rep_count = (
             qualification.rep_count
             if qualification.rep_count is not None
             else "N/A"
         )
-        qualification.field_1 = qualification.field_1 or "N/A"
-        qualification.field_2 = qualification.field_2 or "N/A"
-        qualification.field_3 = qualification.field_3 or "N/A"
+        qualification.field_1 = qualification.field_1 if qualification.field_1 else "N/A"
+        qualification.field_2 = qualification.field_2 if qualification.field_2 else "N/A"
+        qualification.field_3 = qualification.field_3 if qualification.field_3 else "N/A"
 
     employee_qualifications = list(
         EmployeeQualification.objects
@@ -87,11 +87,11 @@ def training_dashboard(request):
             else "N/A"
         )
 
-        record.notes = record.notes or "N/A"
+        record.notes = record.notes if record.notes else "N/A"
 
     return render(
         request,
-        "training/training_dashboard.html",
+        "training_dashboard.html",
         {
             "employees": employees,
             "qualifications": qualifications,
