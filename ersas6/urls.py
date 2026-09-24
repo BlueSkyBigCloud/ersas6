@@ -244,7 +244,7 @@ urlpatterns = [
 
    path("reports/", include("reports.urls")),
 
-   path("training/", include("training.urls", namespace="training"))
+   path("training/", include("training.urls"))
  
 ]
 
