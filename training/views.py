@@ -61,7 +61,7 @@ def training_dashboard(request):
 
     return render(
         request,
-        "training/training_dashboard.html",
+        "training_dashboard.html",
         {
             "employees": employees,
             "qualifications": qualifications,
