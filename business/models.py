@@ -232,8 +232,8 @@ class Customer(models.Model):
 
         self.address = self.build_address()
 
-        if self.addres_list is None:
-            self.addres_list = []
+        if self.address_list is None:
+            self.address_list = []
 
         super().save(*args, **kwargs)
 
