@@ -29,18 +29,37 @@ def training_dashboard(request):
         .order_by("employee_number")
     )
 
-    # Employee fields are encrypted in the database.
-    # Decrypt the objects before sending them to the template.
+    # Decrypt employee fields.
     for employee in employees:
         employee.decrypt_fields(user=request.user)
 
-    qualifications = (
+        # Replace None values with N/A for display.
+        employee.phone_number = employee.phone_number or "N/A"
+        employee.position = employee.position or "N/A"
+        employee.department = employee.department or "N/A"
+        employee.group = employee.group or "N/A"
+        employee.status = employee.status or "N/A"
+        employee.level = employee.level or "N/A"
+        employee.location = employee.location or "N/A"
+
+    qualifications = list(
         Qualification.objects
         .all()
         .order_by("name")
     )
 
-    employee_qualifications = (
+    for qualification in qualifications:
+        qualification.type = qualification.type or "N/A"
+        qualification.rep_count = (
+            qualification.rep_count
+            if qualification.rep_count is not None
+            else "N/A"
+        )
+        qualification.field_1 = qualification.field_1 or "N/A"
+        qualification.field_2 = qualification.field_2 or "N/A"
+        qualification.field_3 = qualification.field_3 or "N/A"
+
+    employee_qualifications = list(
         EmployeeQualification.objects
         .filter(employee__company=user_company)
         .select_related(
@@ -53,15 +72,26 @@ def training_dashboard(request):
         )
     )
 
-    # Decrypt employee fields on the related objects.
-    for employee_qualification in employee_qualifications:
-        employee_qualification.employee.decrypt_fields(
-            user=request.user
+    for record in employee_qualifications:
+        record.employee.decrypt_fields(user=request.user)
+
+        record.date_completed = (
+            record.date_completed
+            if record.date_completed is not None
+            else "N/A"
         )
+
+        record.expiration_date = (
+            record.expiration_date
+            if record.expiration_date is not None
+            else "N/A"
+        )
+
+        record.notes = record.notes or "N/A"
 
     return render(
         request,
-        "training_dashboard.html",
+        "training/training_dashboard.html",
         {
             "employees": employees,
             "qualifications": qualifications,
