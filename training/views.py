@@ -40,7 +40,7 @@ def training_dashboard(request):
         employee.group = employee.group if employee.group else "N/A"
         employee.status = employee.status if employee.status else "N/A"
         employee.level = employee.level if employee.level else "N/A"
-        employee.location = employee.location if employee.location else "N/A"
+        employee.location.name = employee.location.name if employee.location.name else "N/A"
 
     qualifications = list(
         Qualification.objects
