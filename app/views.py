@@ -16,6 +16,7 @@ from .decorators import onboarded
 from business.forms import *
 from django.db.models import Count, Sum, Q
 from django.core.paginator import Paginator
+from training.models import Qualification, EmployeeQualification
 
 def staff_required(view_func):
     def _wrapped_view(request, *args, **kwargs):
