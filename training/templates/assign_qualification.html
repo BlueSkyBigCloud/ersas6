@@ -1,0 +1,104 @@
+
+{% extends "base2.html" %}
+
+{% block title %}Assign Qualification{% endblock %}
+
+{% block content %}
+
+<main>
+
+    <h1>Assign Qualification</h1>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <div class="form-group">
+            <label for="id_qualification">
+                Qualification
+            </label>
+
+            <select
+                name="qualification"
+                id="id_qualification"
+                required
+            >
+                <option value="">-- Select Qualification --</option>
+
+                {% for qualification in qualifications %}
+                    <option
+                        value="{{ qualification.id }}"
+                        {% if selected_qualification.id == qualification.id %}
+                            selected
+                        {% endif %}
+                    >
+                        {{ qualification.name }}
+                        ({{ qualification.get_type_display }})
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+
+        <div class="form-group">
+
+            <h2>Employees</h2>
+
+            <p>
+                Select the employees who have earned this qualification.
+            </p>
+
+            {% if employees %}
+
+                {% for employee in employees %}
+
+                    <div class="employee-row">
+
+                        <label>
+                            <input
+                                type="checkbox"
+                                name="employees"
+                                value="{{ employee.id }}"
+                                {% if employee.id|stringformat:"s" in selected_employee_ids %}
+                                    checked
+                                {% endif %}
+                            >
+
+                            {{ employee.callsign }}
+                            -
+                            {{ employee.first_name }}
+                            {{ employee.last_name }}
+
+                        </label>
+
+                    </div>
+
+                {% endfor %}
+
+            {% else %}
+
+                <p>
+                    No employees are available.
+                </p>
+
+            {% endif %}
+
+        </div>
+
+
+        <div class="form-actions">
+
+            <button type="submit">
+                Assign Qualification
+            </button>
+
+            <a href="{% url 'training:training_dashboard' %}">
+                Cancel
+            </a>
+
+        </div>
+
+    </form>
+
+</main>
+
+{% endblock %}

@@ -306,7 +306,7 @@ def assign_qualification(request):
 
     return render(
         request,
-        "training/assign_qualification.html",
+        "assign_qualification.html",
         {
             "qualifications": qualifications,
             "employees": employees,
