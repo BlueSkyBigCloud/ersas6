@@ -1,13 +1,13 @@
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render
-
-from app.models import (
-    Employee
-)
-
 from .models import EmployeeQualification, Qualification
+from django.contrib import messages
+from django.db import transaction
+from django.shortcuts import get_object_or_404, redirect, render
+from app.models import Employee
+from app.decorators import onboarded
 
 
+@onboarded()
 @login_required
 def training_dashboard(request):
     user_company = getattr(request.user, "company", None)
@@ -99,12 +99,6 @@ def training_dashboard(request):
     )
 
 
-from django.contrib import messages
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import redirect, render
-
-from .models import Qualification
-from app.decorators import onboarded
 
 
 @onboarded()
@@ -212,3 +206,110 @@ def create_qualification(request):
             "type_choices": Qualification.TYPE_CHOICES,
         },
     )
+
+
+
+@onboarded()
+@login_required
+def assign_qualification(request):
+    user_company = getattr(request.user, "company", None)
+
+    if not user_company:
+        messages.error(
+            request,
+            "You are not associated with a company."
+        )
+        return redirect("training:training_dashboard")
+
+    if request.method == "POST":
+        qualification_id = request.POST.get("qualification")
+        employee_ids = request.POST.getlist("employees")
+
+        if not qualification_id:
+            messages.error(
+                request,
+                "Please select a qualification."
+            )
+            return redirect("training:assign_qualification")
+
+        qualification = get_object_or_404(
+            Qualification,
+            id=qualification_id,
+            company=user_company,
+        )
+
+        if not employee_ids:
+            messages.error(
+                request,
+                "Please select at least one employee."
+            )
+            return render(
+                request,
+                "training/assign_qualification.html",
+                {
+                    "qualifications": Qualification.objects.filter(
+                        company=user_company
+                    ),
+                    "selected_qualification": qualification,
+                    "employees": Employee.objects.filter(
+                        company=user_company
+                    ).order_by("last_name", "first_name"),
+                    "selected_employee_ids": employee_ids,
+                },
+            )
+
+        employees = Employee.objects.filter(
+            id__in=employee_ids,
+            company=user_company,
+        )
+
+        assigned_count = 0
+
+        with transaction.atomic():
+            for employee in employees:
+
+                # Do not create duplicate assignments
+                employee_qualification, created = (
+                    EmployeeQualification.objects.get_or_create(
+                        employee=employee,
+                        qualification=qualification,
+                        defaults={
+                            "status": "approved",
+                        },
+                    )
+                )
+
+                if created:
+                    assigned_count += 1
+
+        if assigned_count == 1:
+            messages.success(
+                request,
+                f'"{qualification.name}" was assigned to 1 employee.'
+            )
+        else:
+            messages.success(
+                request,
+                f'"{qualification.name}" was assigned to '
+                f'{assigned_count} employees.'
+            )
+
+        return redirect("training:training_dashboard")
+
+    qualifications = Qualification.objects.filter(
+        company=user_company
+    ).order_by("name")
+
+    employees = Employee.objects.filter(
+        company=user_company
+    ).order_by("last_name", "first_name")
+
+    return render(
+        request,
+        "training/assign_qualification.html",
+        {
+            "qualifications": qualifications,
+            "employees": employees,
+        },
+    )
+
