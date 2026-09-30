@@ -1,0 +1,114 @@
+{% extends "base2.html" %}
+
+{% block title %}Create Qualification{% endblock %}
+
+{% block content %}
+
+<main>
+
+    <h1>Create Qualification</h1>
+
+    <form method="post" novalidate>
+        {% csrf_token %}
+
+        <div class="form-group">
+            <label for="id_name">Qualification Name</label>
+            <input
+                type="text"
+                name="name"
+                id="id_name"
+                maxlength="255"
+                value="{{ form_data.name|default:'' }}"
+                required
+            >
+        </div>
+
+        <div class="form-group">
+            <label for="id_type">Type</label>
+            <select name="type" id="id_type">
+                {% for value, label in type_choices %}
+                    <option
+                        value="{{ value }}"
+                        {% if form_data.type == value %}selected{% endif %}
+                    >
+                        {{ label }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="id_rep_count">Repetitions / Renewals Required</label>
+            <input
+                type="number"
+                name="rep_count"
+                id="id_rep_count"
+                min="0"
+                value="{{ form_data.rep_count|default:'0' }}"
+            >
+            <small>
+                Number of repetitions or renewals required.
+            </small>
+        </div>
+
+        <div class="form-group">
+            <label>
+                <input
+                    type="checkbox"
+                    name="required_approval"
+                    id="id_required_approval"
+                    {% if form_data.required_approval %}checked{% endif %}
+                >
+                Required Approval
+            </label>
+        </div>
+
+        <div class="form-group">
+            <label for="id_field_1">Additional Field 1</label>
+            <input
+                type="text"
+                name="field_1"
+                id="id_field_1"
+                maxlength="255"
+                value="{{ form_data.field_1|default:'' }}"
+            >
+        </div>
+
+        <div class="form-group">
+            <label for="id_field_2">Additional Field 2</label>
+            <input
+                type="text"
+                name="field_2"
+                id="id_field_2"
+                maxlength="255"
+                value="{{ form_data.field_2|default:'' }}"
+            >
+        </div>
+
+        <div class="form-group">
+            <label for="id_field_3">Additional Field 3</label>
+            <input
+                type="text"
+                name="field_3"
+                id="id_field_3"
+                maxlength="255"
+                value="{{ form_data.field_3|default:'' }}"
+            >
+        </div>
+
+        <div class="form-actions">
+            <button type="submit">
+                Create Qualification
+            </button>
+
+            <a href="{% url 'training:training_dashboard' %}">
+                Cancel
+            </a>
+        </div>
+
+    </form>
+
+</main>
+
+{% endblock %}
+

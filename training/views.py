@@ -5,6 +5,8 @@ from app.models import (
     Employee
 )
 
+from .models import EmployeeQualification, Qualification
+
 
 @login_required
 def training_dashboard(request):
@@ -93,5 +95,120 @@ def training_dashboard(request):
             "employees": employees,
             "qualifications": qualifications,
             "employee_qualifications": employee_qualifications,
+        },
+    )
+
+
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import redirect, render
+
+from .models import Qualification
+from app.decorators import onboarded
+
+
+@onboarded()
+@login_required
+def create_qualification(request):
+    user_company = getattr(request.user, "company", None)
+
+    if not user_company:
+        messages.error(
+            request,
+            "You are not associated with a company."
+        )
+        return redirect("training:training_dashboard")
+
+    if request.method == "POST":
+        name = request.POST.get("name", "").strip()
+        qualification_type = request.POST.get("type", "training").strip()
+        rep_count = request.POST.get("rep_count", "0").strip()
+        required_approval = request.POST.get("required_approval") == "on"
+        field_1 = request.POST.get("field_1", "").strip()
+        field_2 = request.POST.get("field_2", "").strip()
+        field_3 = request.POST.get("field_3", "").strip()
+
+        # Required field
+        if not name:
+            messages.error(
+                request,
+                "Qualification name is required."
+            )
+
+            return render(
+                request,
+                "training/create_qualification.html",
+                {
+                    "form_data": request.POST,
+                    "type_choices": Qualification.TYPE_CHOICES,
+                },
+            )
+
+        # Prevent duplicate qualification names within this company
+        if Qualification.objects.filter(
+            company=user_company,
+            name__iexact=name,
+        ).exists():
+            messages.error(
+                request,
+                f'A qualification named "{name}" already exists.'
+            )
+
+            return render(
+                request,
+                "training/create_qualification.html",
+                {
+                    "form_data": request.POST,
+                    "type_choices": Qualification.TYPE_CHOICES,
+                },
+            )
+
+        # Validate repetition count
+        try:
+            rep_count = int(rep_count or 0)
+
+            if rep_count < 0:
+                raise ValueError
+
+        except (TypeError, ValueError):
+            messages.error(
+                request,
+                "Repetition count must be a valid number."
+            )
+
+            return render(
+                request,
+                "training/create_qualification.html",
+                {
+                    "form_data": request.POST,
+                    "type_choices": Qualification.TYPE_CHOICES,
+                },
+            )
+
+        qualification = Qualification(
+            company=user_company,
+            name=name,
+            type=qualification_type,
+            rep_count=rep_count,
+            required_approval=required_approval,
+            field_1=field_1 or None,
+            field_2=field_2 or None,
+            field_3=field_3 or None,
+        )
+
+        qualification.save()
+
+        messages.success(
+            request,
+            f'Qualification "{qualification.name}" was created successfully.'
+        )
+
+        return redirect("training:training_dashboard")
+
+    return render(
+        request,
+        "create_qualification.html",
+        {
+            "type_choices": Qualification.TYPE_CHOICES,
         },
     )

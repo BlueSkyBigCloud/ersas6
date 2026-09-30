@@ -10,4 +10,5 @@ app_name = "training"
 urlpatterns = [
     path("", views.training_dashboard, name="training_dashboard"),
     path("training_dashboard", views.training_dashboard, name="training_dashboard"),
+    path("create_qualification", views.create_qualification, name="create_qualification"),
 ]
