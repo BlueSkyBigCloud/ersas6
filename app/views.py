@@ -833,7 +833,7 @@ from .forms import ServiceRequestForm
 @onboarded()
 @login_required
 def employee_detail(request, employee_id):
-    employee = get_object_or_404(Employee, id=employee_id)
+    employee = get_object_or_404(Employee, id=employee_id, company=request.user.company,)
     employee.decrypt_fields(user=request.user)
     return render(request, 'employee_detail.html', {'employee': employee})
 
@@ -845,7 +845,7 @@ from django.db.models.deletion import ProtectedError
 @onboarded()
 @login_required
 def employee_delete(request, pk):  # Accepts pk as an argument
-    employee = get_object_or_404(Employee, id=pk)  # Uses pk to get the Employee
+    employee = get_object_or_404(Employee, id=pk, company=request.user.company)  # Uses pk to get the Employee
     try:
         employee.delete()
         messages.success(request, "Employee deleted successfully.")

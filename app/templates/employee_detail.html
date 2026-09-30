@@ -1,27 +1,107 @@
-{% extends 'base2.html' %}  <!-- Extend the base template -->
 
-{% block title %}Employee Detail{% endblock %}  <!-- Title for the page -->
+{% extends 'base2.html' %}
+
+{% block title %}Employee Detail{% endblock %}
 
 {% block content %}
-<head>
-    <meta charset="UTF-8">
-    <title>Employee Detail</title>
-</head>
-<body>
-    <h1>{{ employee.first_name }} {{ employee.last_name }}</h1>
-    <p><strong>Email:</strong> {{ employee.email }}</p>
-    <p><strong>Phone Number:</strong> {{ employee.phone_number }}</p>
-    <p><strong>Position:</strong> {{ employee.position }}</p>
-    <p><strong>Level:</strong> {{ employee.level }}</p>
-    <p><strong>Department:</strong> {{ employee.department }}</p>
-    <p><strong>Date Hired:</strong> {{ employee.date_hired|date:"F j, Y" }}</p>  <!-- Format date if applicable -->
-    <p><strong>Location:</strong> {{ employee.location }}</p>  <!-- Assuming you have a location field -->
 
-    <p><strong>Assigned User:</strong> {{ employee.assigned_user }}</p>  <!-- Assuming you have a location field -->
-    <p><strong>Assigned User Email:</strong> {{ employee.assigned_user.email }}</p>  <!-- Assuming you have a location field -->
+<h1>{{ employee.first_name }} {{ employee.last_name }}</h1>
+
+<p><strong>Email:</strong> {{ employee.email }}</p>
+<p><strong>Phone Number:</strong> {{ employee.phone_number }}</p>
+<p><strong>Position:</strong> {{ employee.position }}</p>
+<p><strong>Level:</strong> {{ employee.level }}</p>
+<p><strong>Department:</strong> {{ employee.department }}</p>
+<p><strong>Date Hired:</strong> {{ employee.date_hired|date:"F j, Y" }}</p>
+<p><strong>Location:</strong> {{ employee.location }}</p>
+
+<p><strong>Assigned User:</strong> {{ employee.assigned_user }}</p>
+<p><strong>Assigned User Email:</strong> {{ employee.assigned_user.email }}</p>
 
 
-    <a href="{% url 'employee_list' %}">Back to Employee List</a>
-    <a href="{% url 'employee_edit' employee.id %}">Edit Employee</a>  <!-- Link to edit the employee, if applicable -->
-</body>
+<h2>Qualifications</h2>
+
+{% if employee.employee_qualifications.all %}
+
+    <table>
+        <thead>
+            <tr>
+                <th>Qualification</th>
+                <th>Type</th>
+                <th>Date Completed</th>
+                <th>Expiration Date</th>
+                <th>Status</th>
+                <th>Approved By</th>
+                <th>Notes</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for employee_qualification in employee.employee_qualifications.all %}
+                <tr>
+                    <td>
+                        {{ employee_qualification.qualification.name }}
+                    </td>
+
+                    <td>
+                        {{ employee_qualification.qualification.get_type_display }}
+                    </td>
+
+                    <td>
+                        {% if employee_qualification.date_completed %}
+                            {{ employee_qualification.date_completed|date:"F j, Y" }}
+                        {% else %}
+                            N/A
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        {% if employee_qualification.expiration_date %}
+                            {{ employee_qualification.expiration_date|date:"F j, Y" }}
+                        {% else %}
+                            N/A
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        {{ employee_qualification.get_status_display }}
+                    </td>
+
+                    <td>
+                        {% if employee_qualification.approved_by %}
+                            {{ employee_qualification.approved_by }}
+                        {% else %}
+                            N/A
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        {% if employee_qualification.notes %}
+                            {{ employee_qualification.notes }}
+                        {% else %}
+                            N/A
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+{% else %}
+
+    <p>No qualifications assigned.</p>
+
+{% endif %}
+
+
+<br>
+
+<a href="{% url 'employee_list' %}">
+    Back to Employee List
+</a>
+
+<a href="{% url 'employee_edit' employee.id %}">
+    Edit Employee
+</a>
+
 {% endblock %}
