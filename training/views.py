@@ -304,6 +304,8 @@ def assign_qualification(request):
         company=user_company
     ).order_by("last_name", "first_name")
 
+    employee.decrypt_fields(user=request.user)
+
     return render(
         request,
         "assign_qualification.html",
