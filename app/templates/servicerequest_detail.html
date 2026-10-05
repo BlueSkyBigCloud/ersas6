@@ -42,14 +42,42 @@
         <p><strong>Name:</strong> <a href="{% url 'equipment_detail' service_request.equipment.id %}">{{ service_request.equipment.name }}</a></p>
         <p><strong>Quantity:</strong> {{ service_request.equipment.quantity }}</p>
     </div>
-
+    
     <!-- Service Details -->
     <div class="section">
         <h3>Service Details</h3>
-        <p><strong>Service Type:</strong> {{ service_request.service_type.name }}</p>
-        <p><strong>Supervising Manager:</strong> <a href="{% url 'employee_detail' service_request.manager_employee.id %}">{{ service_request.manager_employee.first_name }} {{ service_request.manager_employee.last_name }}</a></p>
-        <p><strong>Call Sign:</strong> {{ service_request.manager_employee.callsign }}</p>
+
+        <p>
+            <strong>Service Type:</strong>
+            {{ service_request.service_type.name }}
+        </p>
+
+        {% if service_request.manager_employee %}
+            <p>
+                <strong>Supervising Manager:</strong>
+                <a href="{% url 'employee_detail' service_request.manager_employee.id %}">
+                    {{ service_request.manager_employee.first_name }}
+                    {{ service_request.manager_employee.last_name }}
+                </a>
+            </p>
+
+            <p>
+                <strong>Call Sign:</strong>
+                {{ service_request.manager_employee.callsign }}
+            </p>
+        {% else %}
+            <p>
+                <strong>Supervising Manager:</strong>
+                N/A
+            </p>
+
+            <p>
+                <strong>Call Sign:</strong>
+                N/A
+            </p>
+        {% endif %}
     </div>
+
 
     <!-- Created By -->
     <div class="section">
