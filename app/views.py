@@ -1106,13 +1106,50 @@ def assign_employee_servicerequest(request, id):
 
         employee_id = request.POST.get('employee')
 
+        print(
+            f"ASSIGN EMPLOYEE POST: "
+            f"service_request={service_request.id}, "
+            f"employee_id={employee_id}, "
+            f"user={request.user.email}"
+        )
+
+        if not employee_id:
+            messages.error(
+                request,
+                'Please select an employee.'
+            )
+
+            return redirect(
+                'assign_employee_servicerequest',
+                id=service_request.id
+            )
+
         employee = get_object_or_404(
             Employee,
             id=employee_id,
             company=request.user.company
         )
 
+        # Assign employee to the ServiceRequest
         service_request.assigned_employees.add(employee)
+
+        # Verify assignment
+        if service_request.assigned_employees.filter(
+            id=employee.id
+        ).exists():
+
+            messages.success(
+                request,
+                f'Employee {employee.first_name} '
+                f'{employee.last_name} successfully assigned.'
+            )
+
+        else:
+
+            messages.error(
+                request,
+                'The employee could not be assigned.'
+            )
 
         return redirect(
             'servicerequest_detail',
@@ -1127,6 +1164,7 @@ def assign_employee_servicerequest(request, id):
             'service_request': service_request,
         }
     )
+
 
 
 
