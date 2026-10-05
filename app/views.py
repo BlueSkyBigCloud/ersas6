@@ -1105,6 +1105,7 @@ def create_servicetype(request):
             servicetype = form.save(commit=False)
             # Optionally, you can associate the created service type with the user
             servicetype.created_by_user = request.user
+            servicetype.company = request.user.company
             servicetype.save()
             # Optionally, add a success message
             messages.success(request, 'Service Type successfully created!')
