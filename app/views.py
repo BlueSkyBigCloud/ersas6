@@ -1083,22 +1083,51 @@ def service_request_list(request):
         message = None
     return render(request, 'service_list.html', {'services': services, 'message': message, 'page_obj': page_obj})
 
+
 @onboarded()
 @login_required
 def assign_employee_servicerequest(request, id):
-    service_request = ServiceRequest.objects.get(id=id)
-    employees = Employee.objects.all()
+
+    service_request = get_object_or_404(
+        ServiceRequest,
+        id=id,
+        company=request.user.company
+    )
+
+    employees = Employee.objects.filter(
+        company=request.user.company
+    ).order_by('employee_number')
+
+    # Decrypt employee fields for display
+    for employee in employees:
+        employee.decrypt_fields(user=request.user)
 
     if request.method == 'POST':
-        employee_id = request.POST.get('employee')
-        employee = Employee.objects.get(id=employee_id)
-        service_request.assigned_employees.add(employee)
-        return redirect('servicerequest_detail', id=service_request.id)
 
-    return render(request, 'assign_employee_servicerequest.html', {
-        'employees': employees,
-        'service_request': service_request
-    })
+        employee_id = request.POST.get('employee')
+
+        employee = get_object_or_404(
+            Employee,
+            id=employee_id,
+            company=request.user.company
+        )
+
+        service_request.assigned_employees.add(employee)
+
+        return redirect(
+            'servicerequest_detail',
+            id=service_request.id
+        )
+
+    return render(
+        request,
+        'assign_employee_servicerequest.html',
+        {
+            'employees': employees,
+            'service_request': service_request,
+        }
+    )
+
 
 
 #SERVicE TYPES
