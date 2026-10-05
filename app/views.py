@@ -1023,7 +1023,7 @@ def calendar_view_date(request, year, month, day):
 
 
     for service_request in service_requests:
-        service_request.employee.decrypt_fields(user=request.user)
+        service_request.manager_employee.decrypt_fields(user=request.user)
         
 
     prev_day = date_obj - timedelta(days=1)
@@ -2634,7 +2634,7 @@ def cost_sheet_view(request, service_request_id):
     cost_sheet, created = CostSheet.objects.get_or_create(
         service_request=service_request,
         defaults={
-            'employee': service_request.employee,
+            'employee': service_request.manager_employee,
             'equipment': service_request.equipment,
             'location': service_request.start_location,
             'service_type': service_request.service_type,

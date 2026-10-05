@@ -40,9 +40,9 @@
                     </td>
 
                     <td>
-                        {% if service_request.employee %}
-                            {{ service_request.employee.first_name }}
-                            {{ service_request.employee.last_name }}
+                        {% if service_request.manager_employee %}
+                            {{ service_request.manager_employee.first_name }}
+                            {{ service_request.manager_employee.last_name }}
                         {% else %}
                             —
                         {% endif %}

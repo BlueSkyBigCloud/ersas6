@@ -318,14 +318,16 @@ class ServiceRequest(models.Model):
         on_delete=models.PROTECT
     )
 
-    employee = models.ForeignKey(
-        'Employee',
-        on_delete=models.PROTECT
+    manager_employee = models.ForeignKey(
+    'Employee',
+    on_delete=models.PROTECT,
+    related_name='manager_employee_service_requests', null=True, blank=True
     )
 
+    # Multiple employees assigned to the ServiceRequest
     assigned_employees = models.ManyToManyField(
         'Employee',
-        related_name='assigned_service_requests',
+        related_name='assigned_employee_service_requests',
         blank=True
     )
 

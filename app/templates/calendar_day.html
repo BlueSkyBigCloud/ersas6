@@ -29,7 +29,7 @@
             {% for service_request in service_requests %}
                 <tr>
                     <td>{{ service_request.service_type }}</td>
-                    <td>{{ service_request.employee.first_name }} {{ service_request.employee.last_name }}</td>
+                    <td>{{ service_request.manager_employee.first_name }} {{ service_request.manager_employee.last_name }}</td>
                     <td>{{ service_request.start_location }} {{ service_request.end_location }}</td>
                     <td>{{ service_request.start_date }}</td>
                     <td>{{ service_request.end_date }}</td>

@@ -47,8 +47,8 @@
     <div class="section">
         <h3>Service Details</h3>
         <p><strong>Service Type:</strong> {{ service_request.service_type.name }}</p>
-        <p><strong>Assigned Employee:</strong> <a href="{% url 'employee_detail' service_request.employee.id %}">{{ service_request.employee.first_name }} {{ service_request.employee.last_name }}</a></p>
-        <p><strong>Call Sign:</strong> {{ service_request.employee.callsign }}</p>
+        <p><strong>Supervising Manager:</strong> <a href="{% url 'employee_detail' service_request.manager_employee.id %}">{{ service_request.manager_employee.first_name }} {{ service_request.manager_employee.last_name }}</a></p>
+        <p><strong>Call Sign:</strong> {{ service_request.manager_employee.callsign }}</p>
     </div>
 
     <!-- Created By -->

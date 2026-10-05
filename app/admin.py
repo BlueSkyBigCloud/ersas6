@@ -28,7 +28,7 @@ class ServiceRequestAdmin(admin.ModelAdmin):
     list_display = ('id', 'start_date', 'end_date', 'start_location', 'end_location', 'service_type')
     list_filter = ('service_type', 'start_date', 'end_date')
     search_fields = ('id', 'start_location__name', 'end_location__name')  # Enable searching by location name
-    readonly_fields = ['status', 'invoice', 'created_timestamp', 'created_by_user', 'start_date', 'end_date', 'start_location', 'end_location', 'equipment', 'employee', 'service_type']
+    readonly_fields = ['status', 'invoice', 'created_timestamp', 'created_by_user', 'start_date', 'end_date', 'start_location', 'end_location', 'equipment', 'manager_employee', 'service_type']
 
     
 # Admin configuration for Employee

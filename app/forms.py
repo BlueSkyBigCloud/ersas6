@@ -134,7 +134,7 @@ class EmployeeForm(forms.ModelForm):
 class ServiceRequestForm(forms.ModelForm):
     class Meta:
         model = ServiceRequest
-        fields = ['customer', 'service_type', 'start_date', 'end_date', 'start_location', 'end_location', 'equipment', 'employee', 'start_time', 'end_time']
+        fields = ['customer', 'service_type', 'start_date', 'end_date', 'start_location', 'end_location', 'equipment', 'manager_employee', 'start_time', 'end_time']
         widgets = {
             'start_date': forms.DateInput(attrs={'type': 'date'}),
             'end_date': forms.DateInput(attrs={'type': 'date'}),
