@@ -805,7 +805,7 @@ def employee_create(request):
     else:
         form = EmployeeForm()
 
-        form.fields['location'].queryset = Location.objects.filter(created_by_user=request.user)
+        form.fields['location'].queryset = Location.objects.filter(company=request.user.company)
 
         form.fields['assigned_user'].queryset = CustomUser.objects.filter(company=request.user.company)
 
@@ -815,7 +815,7 @@ def employee_create(request):
 @onboarded()
 @login_required
 def employee_edit(request, employee_id):
-    
+    user_company = getattr(request.user, 'company', None) 
     employee = get_object_or_404(Employee, id=employee_id)
     employee.decrypt_fields(user=request.user)
     if request.method == 'POST':
@@ -826,8 +826,8 @@ def employee_edit(request, employee_id):
     else:
         form = EmployeeForm(instance=employee)  # Pre-fill the form with existing employee data
 
-        form.fields['location'].queryset = Location.objects.filter(company=request.user.company)
-        form.fields['assigned_user'].queryset = CustomUser.objects.filter(company=request.user.company)
+        form.fields['location'].queryset = Location.objects.filter(company=user_company)
+        form.fields['assigned_user'].queryset = CustomUser.objects.filter(company=user_company)
 
     
     return render(request, 'employee_form.html', {'form': form, 'employee': employee})
@@ -902,14 +902,14 @@ def create_service_request(request):
         form = ServiceRequestForm()
 
         # Filter based on matching company of the logged-in user and the created_by_user
-        company = request.user.company  # Get the logged-in user's company
+        user_company = getattr(request.user, 'company', None)
 
-        form.fields['customer'].queryset = Customer.objects.filter(created_by_user__company=company)
-        form.fields['start_location'].queryset = Location.objects.filter(created_by_user__company=company)
-        form.fields['end_location'].queryset = Location.objects.filter(created_by_user__company=company)
-        form.fields['employee'].queryset = Employee.objects.filter(created_by_user__company=company)
-        form.fields['equipment'].queryset = Equipment.objects.filter(created_by_user__company=company)
-        form.fields['service_type'].queryset = ServiceType.objects.filter(created_by_user__company=company)
+        form.fields['customer'].queryset = Customer.objects.filter(company=user_company)
+        form.fields['start_location'].queryset = Location.objects.filter(company=user_company)
+        form.fields['end_location'].queryset = Location.objects.filter(company=user_company)
+        form.fields['employee'].queryset = Employee.objects.filter(company=user_company)
+        form.fields['equipment'].queryset = Equipment.objects.filter(company=user_company)
+        form.fields['service_type'].queryset = ServiceType.objects.filter(company=user_company)
     
     return render(request, 'service_request_form.html', {'form': form})
 
@@ -917,6 +917,7 @@ def create_service_request(request):
 @login_required
 def edit_service_request(request, id):
     service_request = get_object_or_404(ServiceRequest, id=id)
+    user_company = getattr(request.user, 'company', None)
 
     if request.method == 'POST':
         form = ServiceRequestForm(request.POST, instance=service_request)
@@ -925,13 +926,12 @@ def edit_service_request(request, id):
             return redirect('servicerequest_detail', id=service_request.id)
     else:
         form = ServiceRequestForm(instance=service_request)
-        company = request.user.company
-        form.fields['customer'].queryset = Customer.objects.filter(created_by_user__company=company)
-        form.fields['start_location'].queryset = Location.objects.filter(created_by_user__company=company)
-        form.fields['end_location'].queryset = Location.objects.filter(created_by_user__company=company)
-        form.fields['employee'].queryset = Employee.objects.filter(created_by_user__company=company)
-        form.fields['equipment'].queryset = Equipment.objects.filter(created_by_user__company=company)
-        form.fields['service_type'].queryset = ServiceType.objects.filter(created_by_user__company=company)
+        form.fields['customer'].queryset = Customer.objects.filter(company=user_company)
+        form.fields['start_location'].queryset = Location.objects.filter(company=user_company)
+        form.fields['end_location'].queryset = Location.objects.filter(company=user_company)
+        form.fields['employee'].queryset = Employee.objects.filter(company=user_company)
+        form.fields['equipment'].queryset = Equipment.objects.filter(company=user_company)
+        form.fields['service_type'].queryset = ServiceType.objects.filter(company=user_company)
 
     return render(request, 'service_request_form.html', {'form': form, 'service_request': service_request})
 
@@ -1014,10 +1014,11 @@ from django.contrib import messages
 @login_required
 def calendar_view_date(request, year, month, day):
     date_obj = date(year, month, day)
+    user_company = getattr(request.user, 'company', None)
     service_requests = ServiceRequest.objects.filter(
         start_date__lte=date_obj,
         end_date__gte=date_obj,
-        created_by_user=request.user
+        company=user_company
     )
 
 
@@ -1068,7 +1069,8 @@ from django.shortcuts import render
 @onboarded()   
 @login_required
 def service_request_list(request):
-    services = ServiceRequest.objects.filter(created_by_user=request.user)
+    user_company = getattr(request.user, 'company', None)
+    services = ServiceRequest.objects.filter(company=user_company).order_by('-start_date')  # Order by start_date descending
     paginator = Paginator(services, 10)  # Show 10 services per page
     page_number = request.GET.get('page')  # Get the current page number from the query string
     page_obj = paginator.get_page(page_number)  # Get the services for the current page
@@ -1131,13 +1133,7 @@ def servicetype_list(request):
             'servicetypes': [],
             'message': "No company associated with the current user.",
         })
-
-    # Retrieve and order the QuerySet, filtered by company
-    servicetypes = ServiceType.objects.filter(
-        created_by_user__company=user_company
-    ).order_by('id')
-
-    # Paginate the QuerySet
+    servicetypes = ServiceType.objects.filter(company=user_company).order_by('id')
     paginator = Paginator(servicetypes, 10)  # Show 10 service types per page
     page_number = request.GET.get('page')  # Get the current page number from the query string
     page_obj = paginator.get_page(page_number)  # Get the service types for the current page
