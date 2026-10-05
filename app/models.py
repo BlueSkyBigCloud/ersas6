@@ -397,12 +397,20 @@ class ServiceRequest(models.Model):
         """Retrieve all notes associated with the service request."""
         return self.notes.all()
 
-    def decrypt_fields(self, user=None):
-        if user and self.created_by_user == user:
-            self.service_type.name = decrypt(self.service_type.name)
-            self.manager_employee.first_name = decrypt(self.manager_employee.first_name)
-            self.manager_employee.last_name = decrypt(self.manager_employee.last_name)
-
+    def decrypt_fields(self, user=None): 
+        if not user: 
+            return 
+        if not self.created_by_user: 
+            return 
+        if self.created_by_user.company != user.company: 
+            return
+        if self.service_type: 
+            if self.service_type.name: 
+                self.service_type.name = decrypt(self.service_type.name) 
+        if self.manager_employee: 
+            self.manager_employee.decrypt_fields(user=user)  
+        for employee in self.assigned_employees.all(): 
+            employee.decrypt_fields(user=user)
     def __str__(self):
         return f"ServiceRequest {self.id}"
 
