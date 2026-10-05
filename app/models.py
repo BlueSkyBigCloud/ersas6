@@ -402,8 +402,7 @@ class ServiceRequest(models.Model):
                 self.service_type.name = decrypt(self.service_type.name) 
         if self.manager_employee: 
             self.manager_employee.decrypt_fields(user=user)  
-        for employee in self.assigned_employees.all(): 
-            employee.decrypt_fields(user=user)
+
     def __str__(self):
         return f"ServiceRequest {self.id}"
 
