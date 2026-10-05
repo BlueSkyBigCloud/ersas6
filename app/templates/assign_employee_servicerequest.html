@@ -1,37 +1,117 @@
-{% extends 'base2.html' %}
+{% extends "base2.html" %}
 
-{% block title %}Assign Employee to Service Request{% endblock %}
+{% block title %}Assign Employee{% endblock %}
 
 {% block content %}
 
-<h1>Assign Employee to Service Request</h1>
+<main>
 
-{% if messages %}
-    {% for message in messages %}
-        <div class="message {{ message.tags }}">
-            {{ message }}
-        </div>
-    {% endfor %}
-{% endif %}
+    <h1>Assign Employee</h1>
 
-<form action="" method="post">
-    {% csrf_token %}
+    <div class="section">
+        <h3>Service Request</h3>
 
-    <label for="employee">Select an employee:</label>
+        <p>
+            <strong>Service Request Number:</strong>
+            {{ service_request.service_request_number|default:"N/A" }}
+        </p>
 
-    <select id="employee" name="employee" required>
-        <option value="">-- Select Employee --</option>
+        <p>
+            <strong>Service Request:</strong>
+            {{ service_request.id }}
+        </p>
+    </div>
 
-        {% for employee in employees %}
-            <option value="{{ employee.id }}">
-                {{ employee.first_name }} {{ employee.last_name }}
-            </option>
+    <div class="section">
+        <h3>Select Employee</h3>
+
+        <form method="post">
+            {% csrf_token %}
+
+            <div class="form-group">
+
+                <label for="employee">
+                    Employee
+                </label>
+
+                <select
+                    name="employee"
+                    id="employee"
+                    required
+                >
+                    <option value="">-- Select Employee --</option>
+
+                    {% for employee in employees %}
+                        <option value="{{ employee.id }}">
+                            {{ employee.employee_number }}
+                            -
+                            {{ employee.first_name }}
+                            {{ employee.last_name }}
+                            {% if employee.callsign %}
+                                ({{ employee.callsign }})
+                            {% endif %}
+                        </option>
+                    {% empty %}
+                        <option value="" disabled>
+                            No employees available.
+                        </option>
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+            <div class="form-actions">
+
+                <button type="submit" class="button">
+                    Assign Employee
+                </button>
+
+                <a
+                    href="{% url 'servicerequest_detail' service_request.id %}"
+                    class="button"
+                >
+                    Cancel
+                </a>
+
+            </div>
+
+        </form>
+    </div>
+
+    <div class="section">
+        <h3>Currently Assigned Employees</h3>
+
+        {% for assignment in service_request.assigned_employees.all %}
+            <div class="content">
+
+                <p>
+                    <strong>
+                        {{ assignment.employee.first_name }}
+                        {{ assignment.employee.last_name }}
+                    </strong>
+                </p>
+
+                <p>
+                    <strong>Employee Number:</strong>
+                    {{ assignment.employee.employee_number }}
+                </p>
+
+                {% if assignment.employee.callsign %}
+                    <p>
+                        <strong>Call Sign:</strong>
+                        {{ assignment.employee.callsign }}
+                    </p>
+                {% endif %}
+
+            </div>
+        {% empty %}
+
+            <p>No employees assigned.</p>
+
         {% endfor %}
-    </select>
+    </div>
 
-    <button type="submit" class="button">
-        Assign Employee
-    </button>
-</form>
+</main>
 
 {% endblock %}

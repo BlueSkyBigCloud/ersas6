@@ -1,5 +1,6 @@
 import boto3
 from django.contrib.auth.decorators import login_required
+from django.core.serializers import python
 from django.shortcuts import redirect
 from django.contrib.auth import logout
 from .forms import LocationForm
@@ -907,7 +908,7 @@ def create_service_request(request):
         form.fields['customer'].queryset = Customer.objects.filter(company=user_company)
         form.fields['start_location'].queryset = Location.objects.filter(company=user_company)
         form.fields['end_location'].queryset = Location.objects.filter(company=user_company)
-        form.fields['employee'].queryset = Employee.objects.filter(company=user_company)
+        form.fields['manager_employee'].queryset = Employee.objects.filter(company=user_company)
         form.fields['equipment'].queryset = Equipment.objects.filter(company=user_company)
         form.fields['service_type'].queryset = ServiceType.objects.filter(company=user_company)
     
@@ -929,7 +930,7 @@ def edit_service_request(request, id):
         form.fields['customer'].queryset = Customer.objects.filter(company=user_company)
         form.fields['start_location'].queryset = Location.objects.filter(company=user_company)
         form.fields['end_location'].queryset = Location.objects.filter(company=user_company)
-        form.fields['employee'].queryset = Employee.objects.filter(company=user_company)
+        form.fields['manager_employee'].queryset = Employee.objects.filter(company=user_company)
         form.fields['equipment'].queryset = Equipment.objects.filter(company=user_company)
         form.fields['service_type'].queryset = ServiceType.objects.filter(company=user_company)
 
@@ -1130,26 +1131,48 @@ def assign_employee_servicerequest(request, id):
             company=request.user.company
         )
 
-        # Assign employee to the ServiceRequest
-        service_request.assigned_employees.add(employee)
-
-        # Verify assignment
-        if service_request.assigned_employees.filter(
-            id=employee.id
+        # Prevent duplicate assignments
+        if AssignedEmployee.objects.filter(
+            service_request=service_request,
+            employee=employee,
+            company=request.user.company
         ).exists():
 
-            messages.success(
+            messages.warning(
                 request,
                 f'Employee {employee.first_name} '
-                f'{employee.last_name} successfully assigned.'
+                f'{employee.last_name} is already assigned.'
             )
 
         else:
 
-            messages.error(
-                request,
-                'The employee could not be assigned.'
+            # Create the AssignedEmployee record
+            assigned_employee = AssignedEmployee.objects.create(
+                service_request=service_request,
+                employee=employee,
+                company=request.user.company
             )
+
+            # Verify assignment
+            if AssignedEmployee.objects.filter(
+                id=assigned_employee.id,
+                service_request=service_request,
+                employee=employee,
+                company=request.user.company
+            ).exists():
+
+                messages.success(
+                    request,
+                    f'Employee {employee.first_name} '
+                    f'{employee.last_name} successfully assigned.'
+                )
+
+            else:
+
+                messages.error(
+                    request,
+                    'The employee could not be assigned.'
+                )
 
         return redirect(
             'servicerequest_detail',
@@ -1166,9 +1189,6 @@ def assign_employee_servicerequest(request, id):
     )
 
 
-
-
-#SERVicE TYPES
 @onboarded()
 @login_required
 def create_servicetype(request):
@@ -1364,38 +1384,60 @@ def registration_view(request):
 
 from business.models import *
 
+
 @onboarded()
 @login_required
 def servicerequest_detail(request, id):
-    service_request = get_object_or_404(ServiceRequest, id=id)
+
+    service_request = get_object_or_404(
+        ServiceRequest.objects.select_related(
+            'company',
+            'service_type',
+            'manager_employee',
+            'customer',
+            'equipment',
+            'start_location',
+            'end_location',
+            'invoice',
+        ),
+        id=id,
+        company=request.user.company
+    )
+
+    # Decrypt ServiceRequest fields
     service_request.decrypt_fields(user=request.user)
-    if service_request.equipment:
-        equipment = service_request.equipment
-        # Decrypt only category and description for the equipment, not the name
-        equipment.decrypt_fields(user=request.user)
-        equipment_name = equipment.name  # This is the unencrypted name
 
-    
+    # Get AssignedEmployee records for this ServiceRequest
+    assigned_employees = (
+        AssignedEmployee.objects
+        .select_related('employee')
+        .filter(
+            service_request=service_request,
+            company=request.user.company
+        )
+        .order_by('employee__employee_number')
+    )
 
-    # Fetch notes and invoices associated with the service request
-    notes = Note.objects.filter(service_request=service_request)
-    invoices = Invoice.objects.filter(service_request=service_request)
+    # Decrypt each assigned employee for display
+    for assignment in assigned_employees:
+        if assignment.employee:
+            assignment.employee.decrypt_fields(
+                user=request.user
+            )
 
-    # Decrypt fields for each note
-    for note in notes:
-        note.decrypt_fields()
-    
-    # Pass all decrypted data to the template
+    # Get ServiceRequest notes
+    notes = service_request.get_notes()
+
     return render(
-        request, 
-        'servicerequest_detail.html', 
+        request,
+        'servicerequest_detail.html',
         {
             'service_request': service_request,
+            'assigned_employees': assigned_employees,
             'notes': notes,
-            'invoices': invoices,
-            'equipment_name': equipment_name,
         }
     )
+
 
 
 @onboarded()

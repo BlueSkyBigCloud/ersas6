@@ -324,13 +324,6 @@ class ServiceRequest(models.Model):
     related_name='manager_employee_service_requests', null=True, blank=True
     )
 
-    # Multiple employees assigned to the ServiceRequest
-    assigned_employees = models.ManyToManyField(
-        'Employee',
-        related_name='assigned_employee_service_requests',
-        blank=True
-    )
-
     service_type = models.ForeignKey(
         'ServiceType',
         on_delete=models.PROTECT
@@ -413,6 +406,54 @@ class ServiceRequest(models.Model):
             employee.decrypt_fields(user=user)
     def __str__(self):
         return f"ServiceRequest {self.id}"
+
+
+class AssignedEmployee(models.Model):
+    id = models.UUIDField(
+        primary_key=True,
+        default=uuid.uuid4,
+        editable=False
+    )
+
+    company = models.ForeignKey(
+        'app.Company',
+        on_delete=models.PROTECT,
+        related_name='assigned_employees'
+    )
+
+    service_request = models.ForeignKey(
+        'ServiceRequest',
+        on_delete=models.CASCADE,
+        related_name='assigned_employees'
+    )
+
+    employee = models.ForeignKey(
+        'Employee',
+        on_delete=models.PROTECT,
+        related_name='assigned_employee_service_requests'
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['service_request', 'employee'],
+                name='unique_assigned_employee_per_service_request'
+            )
+        ]
+
+    def save(self, *args, **kwargs):
+        if self.service_request:
+            self.company = self.service_request.company
+
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.service_request} - {self.employee}"
+
 
     
 from django.db.models.signals import pre_save
