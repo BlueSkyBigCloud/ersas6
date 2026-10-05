@@ -400,8 +400,8 @@ class ServiceRequest(models.Model):
     def decrypt_fields(self, user=None):
         if user and self.created_by_user == user:
             self.service_type.name = decrypt(self.service_type.name)
-            self.employee.first_name = decrypt(self.employee.first_name)
-            self.employee.last_name = decrypt(self.employee.last_name)
+            self.manager_employee.first_name = decrypt(self.manager_employee.first_name)
+            self.manager_employee.last_name = decrypt(self.manager_employee.last_name)
 
     def __str__(self):
         return f"ServiceRequest {self.id}"
