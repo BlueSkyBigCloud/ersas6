@@ -243,14 +243,14 @@ def reports1_view(request):
         # Create the HTTP response with CSV content type
         response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = 'attachment; filename="reports.csv"'
-
+        user_company = getattr(request.user, 'company', None) 
         # Create a CSV writer
         writer = csv.writer(response)
 
         # Write headers
         writer.writerow(['Location Name', 'Address', 'City', 'State', 'Country', 'Description'])
 
-        locations = Location.objects.filter(created_by_user=request.user)
+        locations = Location.objects.filter(company=user_company)
         for location in locations:
             location.decrypt_fields(request.user)
             writer.writerow([
@@ -265,7 +265,7 @@ def reports1_view(request):
         # Fetch and write Equipment data
         writer.writerow([])
         writer.writerow(['Equipment'])
-        equipments = Equipment.objects.filter(created_by_user=request.user)
+        equipments = Equipment.objects.filter(company=user_company)
         for equipment in equipments:
             equipment.decrypt_fields(request.user)
             writer.writerow([
@@ -279,7 +279,7 @@ def reports1_view(request):
         # Fetch and write Employee data
         writer.writerow([])
         writer.writerow(['Employees'])
-        employees = Employee.objects.filter(created_by_user=request.user)
+        employees = Employee.objects.filter(company=user_company)
 
         for employee in employees:
             employee.decrypt_fields(request.user)
@@ -321,6 +321,8 @@ def account_view(request):
     Also renders account dashboard with service request summaries.
     """
     user = request.user
+    user_company = getattr(request.user, 'company', None) 
+
 
     # Redirect if not onboarded or no company
     if not user.is_onboarded:
@@ -335,13 +337,13 @@ def account_view(request):
 
     # Service request counts
     service_requests_today = ServiceRequest.objects.filter(
-        created_by_user=user,
+        company=user_company,
         start_date__lte=today,
         end_date__gte=today
     ).count()
 
     service_requests_week = ServiceRequest.objects.filter(
-        created_by_user=user,
+        company=user_company,
         start_date__lte=week_end,
         end_date__gte=week_start
     ).count()
@@ -351,7 +353,7 @@ def account_view(request):
         'total_locations': user.company.locations.count(),
         'total_equipment': user.company.equipments.count(),
         'total_employees': user.company.employees.count(),
-        'total_service_requests': ServiceRequest.objects.filter(created_by_user=user).count(),
+        'total_service_requests': ServiceRequest.objects.filter(company=user_company).count(),
         'equipment_by_category': user.company.equipments.values('category').annotate(total=Count('id')),
         'employees_by_location': user.company.employees.values('location__name').annotate(count=Count('id')),
         'service_requests_today': service_requests_today,
@@ -420,7 +422,7 @@ def location_list(request):
 
     # Retrieve and order the QuerySet, filtered by company
     locations = Location.objects.filter(
-        created_by_user__company=user_company
+        company=user_company
     ).order_by('id')
 
     # Paginate the QuerySet
@@ -533,7 +535,7 @@ def equipment_list(request):
 
     # Retrieve and order the QuerySet, filtered by company
     equipments = Equipment.objects.filter(
-        created_by_user__company=user_company
+        company=user_company
     ).order_by('id')
 
     # Paginate the QuerySet
@@ -570,13 +572,14 @@ from cryptography.fernet import InvalidToken
 @onboarded()
 @login_required
 def equipment_create(request):
+    user_company = getattr(request.user, 'company', None) 
     if request.method == 'POST':
         form = EquipmentForm(request.POST)
         if form.is_valid():
             # Create the Equipment instance but don't save it yet
             equipment = form.save(commit=False)
             equipment.created_by_user = request.user  # Assign the user creating the equipment
-
+            equipment.company = user_company  # Assign the company to the equipment
             try:
                 # Encrypt fields like 'name', 'category', and 'description' if necessary
                 if equipment.location:
@@ -592,7 +595,7 @@ def equipment_create(request):
     else:
         form = EquipmentForm()
 
-    form.fields['location'].queryset = Location.objects.filter(created_by_user=request.user)
+    form.fields['location'].queryset = Location.objects.filter(company=user_company)
     
     # Pass the locations to the form context if needed
     return render(request, 'equipment_form.html', {'form': form})
@@ -602,6 +605,7 @@ def equipment_create(request):
 def equipment_edit(request, equipment_id):
     equipment = get_object_or_404(Equipment, id=equipment_id)
     equipment.decrypt_fields(user=request.user)  # Decrypt fields directly
+    user_company = getattr(request.user, 'company', None) 
     
     if request.method == 'POST':
         form = EquipmentForm(request.POST, instance=equipment)
@@ -610,7 +614,7 @@ def equipment_edit(request, equipment_id):
             return redirect('equipment_detail', equipment_id=equipment.id)  # Redirect to the equipment detail page
     else:
         form = EquipmentForm(instance=equipment)  # Pre-fill the form with existing equipment data
-        form.fields['location'].queryset = Location.objects.filter(company=request.user.company)
+        form.fields['location'].queryset = Location.objects.filter(company=user_company)
 
     return render(request, 'equipment_form.html', {'form': form, 'equipment': equipment})
 
