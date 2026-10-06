@@ -386,9 +386,19 @@ class ServiceRequest(models.Model):
         self.notes.add(note)
         self.save()
 
-    def get_notes(self):
-        """Retrieve all notes associated with the service request."""
-        return self.notes.all()
+    def get_notes(self, user=None):
+        if not user:
+            return self.notes.all()
+
+        if self.company != user.company:
+            return self.notes.none()
+
+        notes = self.notes.all()
+
+        for note in notes:
+            note.decrypt_fields(user=user)
+
+        return notes
 
     def decrypt_fields(self, user=None): 
         if not user: 
