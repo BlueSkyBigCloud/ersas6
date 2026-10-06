@@ -1405,7 +1405,9 @@ def servicerequest_detail(request, id):
     )
 
     # Decrypt ServiceRequest fields
-    service_request.decrypt_fields(user=request.user)
+    service_request.decrypt_fields(
+        user=request.user
+    )
 
     # Get AssignedEmployee records for this ServiceRequest
     assigned_employees = (
@@ -1425,8 +1427,12 @@ def servicerequest_detail(request, id):
                 user=request.user
             )
 
-    # Get ServiceRequest notes
-    notes = service_request.get_notes()
+    # Get and decrypt notes.
+    # Notes are decrypted only when:
+    # ServiceRequest.company == request.user.company
+    notes = service_request.get_notes(
+        user=request.user
+    )
 
     return render(
         request,

@@ -263,7 +263,6 @@ class ServiceType(models.Model):
     
 
 from datetime import time
-
 class ServiceRequest(models.Model):
     id = models.UUIDField(
         primary_key=True,
@@ -308,9 +307,7 @@ class ServiceRequest(models.Model):
 
     customer = models.ForeignKey(
         'business.Customer',
-        on_delete=models.PROTECT,
-        null=False,
-        blank=False
+        on_delete=models.PROTECT
     )
 
     equipment = models.ForeignKey(
@@ -319,9 +316,11 @@ class ServiceRequest(models.Model):
     )
 
     manager_employee = models.ForeignKey(
-    'Employee',
-    on_delete=models.PROTECT,
-    related_name='manager_employee_service_requests', null=True, blank=True
+        'Employee',
+        on_delete=models.PROTECT,
+        related_name='manager_employee_service_requests',
+        null=True,
+        blank=True
     )
 
     service_type = models.ForeignKey(
@@ -333,7 +332,8 @@ class ServiceRequest(models.Model):
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
-        blank=True
+        blank=True,
+        related_name='created_service_requests'
     )
 
     created_timestamp = models.DateTimeField(
@@ -380,15 +380,30 @@ class ServiceRequest(models.Model):
 
         super().save(*args, **kwargs)
 
-    def add_note(self, content):
-        """Add a note to the service request."""
-        note = Note.create(content)
-        self.notes.add(note)
-        self.save()
+    def add_note(self, content, user=None):
+        """
+        Add a note to the ServiceRequest and record
+        the user who created it.
+        """
+
+        note = Note(
+            text=content,
+            service_request=self,
+            created_by_user=user
+        )
+
+        note.save()
+
+        return note
 
     def get_notes(self, user=None):
+        """
+        Retrieve and decrypt notes only when the user's
+        company matches the ServiceRequest company.
+        """
+
         if not user:
-            return self.notes.all()
+            return self.notes.none()
 
         if self.company != user.company:
             return self.notes.none()
@@ -396,25 +411,37 @@ class ServiceRequest(models.Model):
         notes = self.notes.all()
 
         for note in notes:
-            note.decrypt_fields(user=user)
+            note.decrypt_fields()
 
         return notes
 
-    def decrypt_fields(self, user=None): 
-        if not user: 
-            return 
-        if not self.created_by_user: 
-            return 
-        if self.created_by_user.company != user.company: 
+    def decrypt_fields(self, user=None):
+        """
+        Decrypt ServiceRequest-related fields only when
+        the user's company matches the ServiceRequest company.
+        """
+
+        if not user:
             return
-        if self.service_type: 
-            if self.service_type.name: 
-                self.service_type.name = decrypt(self.service_type.name) 
-        if self.manager_employee: 
-            self.manager_employee.decrypt_fields(user=user)  
+
+        if self.company != user.company:
+            return
+
+        if self.service_type:
+            if self.service_type.name:
+                self.service_type.name = decrypt(
+                    self.service_type.name
+                )
+
+        if self.manager_employee:
+            self.manager_employee.decrypt_fields(
+                user=user
+            )
 
     def __str__(self):
         return f"ServiceRequest {self.id}"
+
+
 
 
 class AssignedEmployee(models.Model):
@@ -588,29 +615,44 @@ class Invitation(models.Model):
         return f"Invitation to {self.email} for {self.company.name}"
 
 
-
-
 class Note(models.Model):
     title = models.CharField(max_length=1000)
     text = models.TextField(max_length=2000)
+
+    service_request = models.ForeignKey(
+        'ServiceRequest',
+        related_name='notes',
+        on_delete=models.CASCADE
+    )
+
+    created_by_user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='created_notes'
+    )
+
     created_at = models.DateTimeField(auto_now_add=True)
-    service_request = models.ForeignKey('ServiceRequest', related_name='notes', on_delete=models.CASCADE)
 
     def save(self, *args, **kwargs):
         if self.title:
             self.title = encrypt(self.title)
+
         if self.text:
             self.text = encrypt(self.text)
+
         super().save(*args, **kwargs)
-    
+
     def decrypt_fields(self):
         if self.title:
             self.title = decrypt(self.title)
+
         if self.text:
             self.text = decrypt(self.text)
 
     def __str__(self):
-        return f"Note {(self.id)} created at {self.created_at}"
+        return f"Note {self.id} created at {self.created_at}"
 
 
 
