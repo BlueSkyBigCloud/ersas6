@@ -55,7 +55,7 @@
     <table>
         <thead>
             <tr>
-                <th>ID</th>
+                <th>Customer Number</th>
                 <th>Name</th>
                 <th>Address</th>
                 <th>Email</th>
@@ -70,7 +70,7 @@
         <tbody>
             {% for customer in customers %}
                 <tr>
-                    <td>{{ customer.id }}</td>
+                    <td>{{ customer.customer_number }}</td>
                     <td>{{ customer.name }}</td>
                     <td>{{ customer.address }}</td>
                     <td>{{ customer.email }}</td>
