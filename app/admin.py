@@ -25,10 +25,10 @@ class ServiceTypeAdmin(admin.ModelAdmin):
 # Admin configuration for ServiceRequest
 @admin.register(ServiceRequest)
 class ServiceRequestAdmin(admin.ModelAdmin):
-    list_display = ('id', 'start_date', 'end_date', 'start_location', 'end_location', 'service_type')
-    list_filter = ('service_type', 'start_date', 'end_date')
-    search_fields = ('id', 'start_location__name', 'end_location__name')  # Enable searching by location name
-    readonly_fields = ['status', 'invoice', 'created_timestamp', 'created_by_user', 'start_date', 'end_date', 'start_location', 'end_location', 'equipment', 'service_type']
+    list_display = ('service_request_number', 'id', 'start_date', 'end_date', 'start_location', 'end_location', 'service_type')
+    list_filter = ('service_request_number', 'service_type', 'start_date', 'end_date')
+    search_fields = ('id', 'service_request_number', 'start_location__name', 'end_location__name')  # Enable searching by location name
+    readonly_fields = ['service_request_number', 'status', 'invoice', 'created_timestamp', 'created_by_user', 'start_date', 'end_date', 'start_location', 'end_location', 'equipment', 'service_type']
 
     
 # Admin configuration for Employee
