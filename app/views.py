@@ -1383,7 +1383,7 @@ def registration_view(request):
     return render(request, 'setupuser.html')
 
 from business.models import *
-from business.models import Invoice
+from business.models import Invoice, Quote
 
 @onboarded()
 @login_required
@@ -1434,6 +1434,17 @@ def servicerequest_detail(request, id):
         user=request.user
     )
 
+    quotes = (
+        Quote.objects
+        .filter(
+            service_request=service_request,
+            service_request__company=request.user.company,
+        )
+        .select_related('customer', 'created_by_user')
+        .prefetch_related('quotelineitem_set')
+        .order_by('-created_at')
+    )
+
     invoices = (
         Invoice.objects
         .filter(
@@ -1451,6 +1462,7 @@ def servicerequest_detail(request, id):
             'assigned_employees': assigned_employees,
             'notes': notes,
             'invoices': invoices,
+            'quotes': quotes,
         }
     )
 
