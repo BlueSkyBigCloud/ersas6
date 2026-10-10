@@ -41,7 +41,7 @@ def reports_interactive(request):
         .filter(company=user_company)
         .select_related(
             "customer",
-            "employee",
+            "manager_employee",
             "equipment",
             "service_type",
             "start_location",
