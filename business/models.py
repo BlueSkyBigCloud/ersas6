@@ -354,7 +354,7 @@ class Quote(models.Model):
     @property
     def subtotal(self):
         """Sum of all line item totals."""
-        return sum(item.total_price for item in self.line_items)
+        return sum(item.total_price for item in self.line_items.all())
 
     @property
     def total(self):
