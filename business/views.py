@@ -12,6 +12,11 @@ import stripe
 from django.conf import settings
 from django.shortcuts import redirect
 
+from django.views.decorators.csrf import csrf_exempt
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 @login_required
 @onboarded()
@@ -49,45 +54,120 @@ def invoicecustomerlist_view(request, customer_id):
 
 
 from app.models import *
+from django.db import transaction
 
+@onboarded()
 @login_required
 def create_invoice(request, id):
-    # Get the actual ServiceRequest instance using the ID from the URL
-    service_request = get_object_or_404(ServiceRequest, id=id)
+
+    # Require the user to belong to a company.
+    if not request.user.company_id:
+        messages.error(request, "You must belong to a company to create an invoice.")
+        return redirect('invoice_list')
+
+    # Prevent access to another company's service requests.
+    service_request = get_object_or_404(
+        ServiceRequest.objects.select_related(
+            'company',
+            'customer',
+            'service_type',
+        ),
+        id=id,
+        company_id=request.user.company_id,
+    )
 
     if request.method == 'POST':
         form = InvoiceForm(request.POST)
+
         if form.is_valid():
-            invoice = form.save(commit=False)
-            invoice.created_by_user = request.user
+            try:
+                with transaction.atomic():
 
-            # Correctly link the ServiceRequest to the Invoice
-            invoice.service_request = service_request
-            invoice.customer = service_request.customer
-            invoice.save()  
+                    invoice = form.save(commit=False)
 
-            # Calculate days and create a line item
-            if service_request.start_date and service_request.end_date:
-                days_difference = (service_request.end_date - service_request.start_date).days
-                service_type = service_request.service_type
+                    # Assign ownership and relationships server-side.
+                    invoice.created_by_user = request.user
+                    invoice.company = request.user.company
+                    invoice.service_request = service_request
+                    invoice.customer = service_request.customer
 
-                if days_difference > 0 and service_type:
-                    LineItem.objects.create(
-                        invoice=invoice,
-                        description=f"{service_type.decrypt_fields(request.user)} ({days_difference} days)",
-                        quantity=days_difference,
-                        unit_price=service_type.daily_rate,
-                        total_price=days_difference * service_type.daily_rate
-                    )
+                    invoice.save()
 
-            return redirect('invoice_list')  
+                    # Generate the service line item.
+                    if (
+                        service_request.start_date
+                        and service_request.end_date
+                        and service_request.service_type
+                    ):
+                        days_difference = (
+                            service_request.end_date
+                            - service_request.start_date
+                        ).days
+
+                        if days_difference > 0:
+                            service_type = service_request.service_type
+
+                            service_type.decrypt_fields(request.user)
+
+                            daily_rate = service_type.daily_rate
+
+                            LineItem.objects.create(
+                                invoice=invoice,
+                                description=(
+                                    f"{service_type.name} "
+                                    f"({days_difference} days)"
+                                ),
+                                quantity=days_difference,
+                                unit_price=daily_rate,
+                                total_price=daily_rate * days_difference,
+                            )
+
+                messages.success(
+                    request,
+                    "Invoice created successfully.",
+                )
+
+                return redirect('invoice_list')
+
+            except Exception:
+                logger.exception(
+                    "Invoice creation failed: user_id=%s, "
+                    "service_request_id=%s",
+                    request.user.pk,
+                    service_request.pk,
+                )
+
+                messages.error(
+                    request,
+                    "Unable to create the invoice. Please try again.",
+                )
+
+        else:
+            # This is the key diagnostic for the HTTP 200 responses.
+            logger.warning(
+                "Invoice form validation failed: user_id=%s, "
+                "service_request_id=%s, errors=%s",
+                request.user.pk,
+                service_request.pk,
+                form.errors.as_json(),
+            )
+
+            messages.error(
+                request,
+                "Please correct the errors shown in the invoice form.",
+            )
+
     else:
         form = InvoiceForm()
 
-    return render(request, 'create_invoice.html', {
-        'form': form,
-        'servicerequest': service_request,
-    })
+    return render(
+        request,
+        'create_invoice.html',
+        {
+            'form': form,
+            'servicerequest': service_request,
+        },
+    )
 
 
 
@@ -326,10 +406,6 @@ def checkout_view(request, order_id):
 
 
 
-from django.views.decorators.csrf import csrf_exempt
-import logging
-
-logger = logging.getLogger(__name__)
 
 def sync_products_to_stripe():
     products = Product.objects.all()
