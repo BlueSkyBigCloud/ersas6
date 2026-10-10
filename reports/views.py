@@ -54,6 +54,14 @@ def reports_interactive(request):
     service_request_data = []
 
     for service_request in service_requests:
+
+        service_type_name = ""
+
+        if service_request.service_type:
+            service_type = service_request.service_type
+            service_type.decrypt_fields(user=request.user)
+            service_type_name = service_type.name or ""
+
         service_request_data.append({
             "id": str(service_request.id),
             "number": service_request.service_request_number or "",
@@ -69,8 +77,8 @@ def reports_interactive(request):
             ),
             "status": service_request.status or "",
             "service_type": (
-                service_request.service_type.name
-                if service_request.service_type
+                service_type_name
+                if service_type_name
                 else ""
             ),
             "customer": (
