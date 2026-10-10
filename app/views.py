@@ -1441,7 +1441,6 @@ def servicerequest_detail(request, id):
             service_request__company=request.user.company,
         )
         .select_related('customer', 'created_by_user')
-        .prefetch_related('quotelineitem_set')
         .order_by('-created_at')
     )
 
