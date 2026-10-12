@@ -383,32 +383,110 @@ def accountedit_view(request):
 @login_required
 @onboarded()
 def dashboard_view(request):
-    user_company = getattr(request.user, 'company', None) 
+    user_company = getattr(request.user, "company", None)
 
-    total_locations = Location.objects.filter(company=user_company).count()
-    total_equipment = Equipment.objects.filter(company=user_company).aggregate(total=Sum('quantity'))['total'] or 0
-    total_employees = Employee.objects.filter(company=user_company).count()
-    total_service_requests = ServiceRequest.objects.filter(company=user_company).count()
+    total_locations = 0
+    total_equipment = 0
+    total_employees = 0
+    total_service_requests = 0
 
+    equipment_by_category = []
+    employees_by_location = []
 
-    # Active employees grouped by location
-    employees_by_location = (
-        Employee.objects.filter(status='ACTIVE')
-        .values('location__name')
-        .annotate(count=Count('id'))
-        .order_by('-count')
-    )
+    if user_company:
+        # Account summary
+        total_locations = Location.objects.filter(
+            company=user_company
+        ).count()
 
-    # Context to pass to the template
+        total_equipment = (
+            Equipment.objects
+            .filter(company=user_company)
+            .aggregate(total=Sum("quantity"))["total"] or 0
+        )
+
+        total_employees = Employee.objects.filter(
+            company=user_company
+        ).count()
+
+        total_service_requests = ServiceRequest.objects.filter(
+            company=user_company
+        ).count()
+
+        # -------------------------------------------------
+        # Equipment by Category - decrypt before grouping
+        # -------------------------------------------------
+        equipment = Equipment.objects.filter(
+            company=user_company
+        )
+
+        category_totals = defaultdict(int)
+
+        for item in equipment:
+            # Use your Equipment model's existing decryption method.
+            item.decrypt_fields(user=request.user)
+
+            category_name = item.category or "Uncategorized"
+            category_totals[category_name] += item.quantity or 0
+
+        equipment_by_category = [
+            {
+                "category": category,
+                "total": total,
+            }
+            for category, total in sorted(category_totals.items())
+        ]
+
+        # -------------------------------------------------
+        # Active Employees by Location
+        # -------------------------------------------------
+        employees = Employee.objects.filter(
+            company=user_company,
+            status="ACTIVE",
+        ).select_related("location")
+
+        location_totals = defaultdict(int)
+
+        for employee in employees:
+            employee.decrypt_fields(user=request.user)
+
+            location_name = (
+                employee.location.name
+                if employee.location
+                else "Unassigned"
+            )
+
+            # If Location.name is encrypted, decrypt the Location
+            # using its own existing method before reading its name.
+            if employee.location:
+                employee.location.decrypt_fields(user=request.user)
+                location_name = employee.location.name or "Unassigned"
+
+            location_totals[location_name] += 1
+
+        employees_by_location = [
+            {
+                "location__name": location,
+                "count": count,
+            }
+            for location, count in sorted(
+                location_totals.items(),
+                key=lambda row: row[1],
+                reverse=True,
+            )
+        ]
+
     context = {
-        'total_locations': total_locations,
-        'total_equipment': total_equipment,
-        'total_employees': total_employees,
-        'total_service_requests': total_service_requests,
-        'employees_by_location': employees_by_location,
-        'user': request.user,  # Include the logged-in user
+        "total_locations": total_locations,
+        "total_equipment": total_equipment,
+        "total_employees": total_employees,
+        "total_service_requests": total_service_requests,
+        "equipment_by_category": equipment_by_category,
+        "employees_by_location": employees_by_location,
+        "user": request.user,
     }
-    return render(request, 'dashboard.html', context)
+
+    return render(request, "dashboard.html", context)
 
 @login_required
 @onboarded()
