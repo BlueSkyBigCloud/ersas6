@@ -186,15 +186,16 @@ def reports_interactive(request):
 
     equipment_data = []
 
-    for item in equipment:
+    for equipment in equipment:
+        equipment.decrypt_fields(user=request.user)
         equipment_data.append({
-            "id": str(item.id),
-            "name": item.name or "",
-            "category": item.category or "",
-            "make": item.make or "",
-            "model": item.model or "",
-            "stock_number": item.stock_number or "",
-            "quantity": item.quantity or 0,
+            "id": str(equipment.id),
+            "name": equipment.name or "",
+            "category": equipment.category or "",
+            "make": equipment.make or "",
+            "model": equipment.model or "",
+            "stock_number": equipment.stock_number or "",
+            "quantity": equipment.quantity or 0,
         })
 
     report_data = {
