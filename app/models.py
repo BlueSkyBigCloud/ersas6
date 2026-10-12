@@ -121,16 +121,33 @@ class Equipment(models.Model):
             self.description = encrypt(self.description) # Add this field to store encrypted location
         super().save(*args, **kwargs)
     
+
     def decrypt_fields(self, user=None):
-        if self.company == user.company:
-        
-            try:
+        if not user or not getattr(user, "is_authenticated", False):
+            return False
+
+        if not user.company_id or self.company_id != user.company_id:
+            return False
+
+        try:
+            if self.category:
                 self.category = decrypt(self.category)
+
+            if self.description:
                 self.description = decrypt(self.description)
+
+            if self.quantity:
                 self.quantity = (self.quantity)
-                return True
-            except Exception as e:
-                return False
+
+            return True
+
+        except Exception:
+            import logging
+            logging.getLogger(__name__).exception(
+                "Equipment decryption failed for equipment_id=%s",
+                self.pk,
+            )
+            return False
 
     def __str__(self):
         try:

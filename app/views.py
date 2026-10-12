@@ -426,11 +426,11 @@ def dashboard_view(request):
 
         category_totals = {}
 
-        for item in equipment:
-            item.decrypt_fields(user=request.user)
+        for equipment in equipment:
+            equipment.decrypt_fields(user=request.user)
 
-            category_name = item.category or "Uncategorized"
-            quantity = item.quantity or 0
+            category_name = equipment.category or "Uncategorized"
+            quantity = equipment.quantity or 0
 
             if category_name in category_totals:
                 category_totals[category_name] += quantity
@@ -500,7 +500,7 @@ def dashboard_view(request):
 
     return render(request, "dashboard.html", context)
 
-    
+
 @login_required
 @onboarded()
 def location_list(request):
