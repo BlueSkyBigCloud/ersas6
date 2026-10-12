@@ -394,7 +394,10 @@ def dashboard_view(request):
     employees_by_location = []
 
     if user_company:
-        # Account summary
+
+        # -------------------------------------------------
+        # Account Summary
+        # -------------------------------------------------
         total_locations = Location.objects.filter(
             company=user_company
         ).count()
@@ -414,20 +417,25 @@ def dashboard_view(request):
         ).count()
 
         # -------------------------------------------------
-        # Equipment by Category - decrypt before grouping
+        # Equipment by Category
+        # Decrypt before grouping
         # -------------------------------------------------
         equipment = Equipment.objects.filter(
             company=user_company
         )
 
-        category_totals = defaultdict(int)
+        category_totals = {}
 
         for item in equipment:
-            # Use your Equipment model's existing decryption method.
             item.decrypt_fields(user=request.user)
 
             category_name = item.category or "Uncategorized"
-            category_totals[category_name] += item.quantity or 0
+            quantity = item.quantity or 0
+
+            if category_name in category_totals:
+                category_totals[category_name] += quantity
+            else:
+                category_totals[category_name] = quantity
 
         equipment_by_category = [
             {
@@ -440,29 +448,30 @@ def dashboard_view(request):
         # -------------------------------------------------
         # Active Employees by Location
         # -------------------------------------------------
-        employees = Employee.objects.filter(
-            company=user_company,
-            status="ACTIVE",
-        ).select_related("location")
+        employees = (
+            Employee.objects
+            .filter(
+                company=user_company,
+                status="ACTIVE",
+            )
+            .select_related("location")
+        )
 
-        location_totals = defaultdict(int)
+        location_totals = {}
 
         for employee in employees:
             employee.decrypt_fields(user=request.user)
 
-            location_name = (
-                employee.location.name
-                if employee.location
-                else "Unassigned"
-            )
+            location_name = "Unassigned"
 
-            # If Location.name is encrypted, decrypt the Location
-            # using its own existing method before reading its name.
             if employee.location:
                 employee.location.decrypt_fields(user=request.user)
                 location_name = employee.location.name or "Unassigned"
 
-            location_totals[location_name] += 1
+            if location_name in location_totals:
+                location_totals[location_name] += 1
+            else:
+                location_totals[location_name] = 1
 
         employees_by_location = [
             {
@@ -476,6 +485,9 @@ def dashboard_view(request):
             )
         ]
 
+    # -------------------------------------------------
+    # Dashboard Context
+    # -------------------------------------------------
     context = {
         "total_locations": total_locations,
         "total_equipment": total_equipment,
@@ -488,6 +500,7 @@ def dashboard_view(request):
 
     return render(request, "dashboard.html", context)
 
+    
 @login_required
 @onboarded()
 def location_list(request):
