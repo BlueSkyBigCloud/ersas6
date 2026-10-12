@@ -426,24 +426,28 @@ def dashboard_view(request):
 
         category_totals = {}
 
-        for equipment in equipment:
+        equipments = Equipment.objects.filter(
+            company=user_company
+        )
+
+        category_totals = {}
+
+        for equipment in equipments:
             equipment.decrypt_fields(user=request.user)
 
             category_name = equipment.category or "Uncategorized"
             quantity = equipment.quantity or 0
 
-            if category_name in category_totals:
-                category_totals[category_name] += quantity
-            else:
-                category_totals[category_name] = quantity
+            category_totals[category_name] = (
+                category_totals.get(category_name, 0) + quantity
+            )
 
         equipment_by_category = [
             {
                 "category": category,
                 "total": total,
             }
-            for category, total in sorted(category_totals.items())
-        ]
+            for category, total in sorted(category_totals.items())]
 
         # -------------------------------------------------
         # Active Employees by Location
