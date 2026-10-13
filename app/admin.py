@@ -27,15 +27,16 @@ class ServiceTypeAdmin(admin.ModelAdmin):
 class ServiceRequestAdmin(admin.ModelAdmin):
     list_display = ('service_request_number', 'id', 'start_date', 'end_date', 'start_location', 'end_location', 'service_type')
     list_filter = ('service_request_number', 'service_type', 'start_date', 'end_date')
-    search_fields = ('id', 'service_request_number', 'start_location__name', 'end_location__name')  # Enable searching by location name
+    search_fields = ('id', 'service_request_number', 'start_location__name', 'end_location__name')
     readonly_fields = ['service_request_number', 'status', 'invoice', 'created_timestamp', 'created_by_user', 'start_date', 'end_date', 'start_location', 'end_location', 'equipment', 'service_type']
 
     
 # Admin configuration for Employee
 @admin.register(Employee)
 class EmployeeAdmin(admin.ModelAdmin):
-    list_display = ('first_name', 'last_name', 'phone_number')
-    search_fields = ('first_name', 'last_name')
+    list_display = ('employee_number', 'callsign', 'first_name', 'last_name', 'phone_number', 'position', 'department', 'location', 'status')
+    search_fields = ('employee_number', 'callsign', 'first_name', 'last_name', 'phone_number', 'position', 'department', 'location__name', 'status')
+    list_filter = ('employee_number', 'callsign', 'first_name', 'last_name', 'position', 'department', 'location__name', 'status')
     readonly_fields = ['company', 'employee_number', 'assigned_user', 'callsign', 'date_hired', 'group', 'created_timestamp', 'created_by_user', 'first_name', 'last_name', 'position', 'phone_number', 'department', 'location', 'status']
 
 # Admin configuration for Equipment
