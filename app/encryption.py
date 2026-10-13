@@ -22,7 +22,7 @@ def decrypt(encrypted_data: str) -> str:
         return decrypted_data.decode('utf-8')  # Convert bytes to string
     except cryptography.fernet.InvalidToken:
         # Handle the InvalidToken exception gracefully
-        return "Decryption failed - Invalid Token"
+        return "N/A"
     except Exception as e:
         # Handle any other exceptions
         return f"Decryption failed - {str(e)}"
