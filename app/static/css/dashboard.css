@@ -476,3 +476,253 @@ h3 {
   box-shadow: 0 4px 15px rgba(0,0,0,0.1);
   margin-top: 30px;
 }
+
+
+.interactive-reports {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.report-header {
+    margin-bottom: 20px;
+}
+
+.report-header h1 {
+    margin-bottom: 5px;
+}
+
+.report-header p {
+    color: #666;
+    margin-top: 0;
+}
+
+.report-controls {
+    background: #ffffff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.control-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 15px;
+    align-items: end;
+}
+
+.control-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.control-group label {
+    font-weight: bold;
+    margin-bottom: 6px;
+}
+
+.control-group input,
+.control-group select {
+    min-height: 40px;
+    padding: 8px 10px;
+    border: 1px solid #bbb;
+    border-radius: 5px;
+    background: #fff;
+    box-sizing: border-box;
+}
+
+.button-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 18px;
+}
+
+.report-button {
+    min-height: 40px;
+    padding: 8px 16px;
+    border: 1px solid #777;
+    border-radius: 5px;
+    cursor: pointer;
+    background: #f5f5f5;
+    font-weight: 600;
+}
+
+.report-button:hover {
+    background: #e8e8e8;
+}
+
+.report-button.primary {
+    background: #333;
+    color: #fff;
+    border-color: #333;
+}
+
+.report-button.primary:hover {
+    background: #222;
+}
+
+.summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.summary-card {
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 18px;
+}
+
+.summary-card .label {
+    color: #666;
+    font-size: 14px;
+}
+
+.summary-card .value {
+    font-size: 28px;
+    font-weight: bold;
+    margin-top: 5px;
+}
+
+.chart-panel,
+.table-panel {
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.panel-header {
+    padding: 15px 18px;
+    border-bottom: 1px solid #ddd;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.panel-header h2 {
+    margin: 0;
+    font-size: 20px;
+}
+
+.chart-container {
+    padding: 20px;
+    min-height: 350px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow-x: auto;
+}
+
+#reportChart {
+    width: 100%;
+    max-width: 1000px;
+    height: 350px;
+}
+
+.table-container {
+    overflow-x: auto;
+}
+
+.report-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 700px;
+}
+
+.report-table th,
+.report-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid #ddd;
+    text-align: left;
+    white-space: nowrap;
+}
+
+.report-table th {
+    background: #f5f5f5;
+    font-weight: bold;
+    position: sticky;
+    top: 0;
+}
+
+.report-table tbody tr:hover {
+    background: #f8f8f8;
+}
+
+.empty-message {
+    padding: 30px;
+    text-align: center;
+    color: #666;
+}
+
+.status-message {
+    margin-top: 10px;
+    color: #666;
+    font-size: 14px;
+}
+
+@media print {
+    body {
+        background: #fff !important;
+    }
+
+    .interactive-reports {
+        max-width: none;
+        padding: 0;
+    }
+
+    .report-header p {
+        display: none;
+    }
+
+    .report-controls,
+    .chart-panel {
+        display: none !important;
+    }
+
+    .summary-card,
+    .table-panel {
+        border: 1px solid #aaa;
+    }
+
+    .table-container {
+        overflow: visible;
+    }
+
+    .report-table {
+        min-width: 0;
+        font-size: 11px;
+    }
+
+    .report-table th {
+        position: static;
+    }
+}
+
+@media (max-width: 600px) {
+    .interactive-reports {
+        padding: 10px;
+    }
+
+    .control-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .button-row {
+        flex-direction: column;
+    }
+
+    .report-button {
+        width: 100%;
+    }
+
+    .chart-container {
+        padding: 10px;
+    }
+}
