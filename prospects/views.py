@@ -1,7 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
-
-from app.templates.allauth.conftest import user
 from .models import Prospect
 from .forms import ProspectForm, ActionForm, ConvertToCustomerForm
 from django.contrib import messages
