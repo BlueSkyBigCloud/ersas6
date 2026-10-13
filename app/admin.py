@@ -10,25 +10,25 @@ from .models import Stripe_Transaction, ServiceType, ServiceRequest, Employee, E
 
 @admin.register(Stripe_Transaction)
 class Stripe_TransactionAdmin(admin.ModelAdmin):
-    list_display = ('invoice_number',)  # Display the name in the admin list view
-    search_fields = ('invoice_number',)  # Allow searching by name
-    list_filter = ('invoice_number',)  # Filter by name in the sidebar
+    list_display = ('invoice_number', 'stripe_session_id', 'stripe_payment_intent', 'amount', 'currency', 'customer_email', 'payment_status')  # Display the name in the admin list view
+    search_fields = ('invoice_number', 'stripe_session_id', 'stripe_payment_intent', 'customer_email')  # Allow searching by name
+    list_filter = ('invoice_number', 'stripe_session_id', 'stripe_payment_intent', 'customer_email')  # Filter by name in the sidebar
     readonly_fields = ['stripe_session_id', 'invoice_number', 'amount', 'currency', 'customer_email', 'payment_status']
 
 @admin.register(ServiceType)
 class ServiceTypeAdmin(admin.ModelAdmin):
-    list_display = ('name',)  # Display the name in the admin list view
-    search_fields = ('name',)  # Allow searching by name
-    list_filter = ('name',)  # Filter by name in the sidebar
-    readonly_fields = ['daily_rate', 'name', 'description', 'created_by_user']
+    list_display = ('company', 'name', 'created_by_user', 'created_at', 'daily_rate')  # Display the name in the admin list view
+    search_fields = ('company', 'name', 'created_by_user', 'created_at', 'daily_rate')  # Allow searching by name
+    list_filter = ('company', 'name', 'created_by_user', 'created_at', 'daily_rate')  # Filter by name in the sidebar
+    readonly_fields = ['company', 'daily_rate', 'name', 'description', 'created_by_user']
 
 # Admin configuration for ServiceRequest
 @admin.register(ServiceRequest)
 class ServiceRequestAdmin(admin.ModelAdmin):
-    list_display = ('service_request_number', 'id', 'start_date', 'end_date', 'start_location', 'end_location', 'service_type')
-    list_filter = ('service_request_number', 'service_type', 'start_date', 'end_date')
-    search_fields = ('id', 'service_request_number', 'start_location__name', 'end_location__name')
-    readonly_fields = ['service_request_number', 'status', 'invoice', 'created_timestamp', 'created_by_user', 'start_date', 'end_date', 'start_location', 'end_location', 'equipment', 'service_type']
+    list_display = ('company', 'service_request_number', 'id', 'start_date', 'end_date', 'start_location', 'end_location', 'service_type')
+    list_filter = ('company', 'service_request_number', 'service_type', 'start_date', 'end_date')
+    search_fields = ('company', 'id', 'service_request_number', 'start_location__name', 'end_location__name')
+    readonly_fields = ['company', 'service_request_number', 'status', 'invoice', 'created_timestamp', 'created_by_user', 'start_date', 'end_date', 'start_location', 'end_location', 'equipment', 'service_type']
 
     
 # Admin configuration for Employee
@@ -42,10 +42,10 @@ class EmployeeAdmin(admin.ModelAdmin):
 # Admin configuration for Equipment
 @admin.register(Equipment)
 class EquipmentAdmin(admin.ModelAdmin):
-    list_display = ('stock_number', 'name', 'description','category', 'quantity', 'location', 'created_timestamp', 'created_by_user', 'make', 'model', 'year', 'serial_number', 'status')
-    search_fields = ('stock_number', 'name', 'description', 'category', 'location__name', 'created_by_user__username', 'make', 'model', 'year', 'serial_number', 'status')
-    list_filter = ('name', 'category','location', 'created_timestamp', 'created_by_user__username', 'make', 'model', 'year', 'serial_number', 'status')
-    readonly_fields = ['created_timestamp', 'created_by_user', 'name', 'description', 'category', 'quantity', 'location']
+    list_display = ('company', 'stock_number', 'name', 'description','category', 'quantity', 'location', 'created_timestamp', 'created_by_user', 'make', 'model', 'year', 'serial_number', 'status')
+    search_fields = ('company', 'stock_number', 'name', 'description', 'category', 'location__name', 'created_by_user__username', 'make', 'model', 'year', 'serial_number', 'status')
+    list_filter = ('company', 'name', 'category','location', 'created_timestamp', 'created_by_user__username', 'make', 'model', 'year', 'serial_number', 'status')
+    readonly_fields = ['company', 'created_timestamp', 'created_by_user', 'name', 'description', 'category', 'quantity', 'location']
 
 from django.utils.html import format_html
 
