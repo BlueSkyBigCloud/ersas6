@@ -162,7 +162,11 @@ def reports_interactive(request):
             "last_name": display_value(employee.last_name),
             "position": display_value(employee.position),
             "department": display_value(employee.department),
-            "status": display_value(employee.status),
+            "status": (
+                display_value(str(employee.status))
+                if employee.status
+                else "N/A"
+            ),
         })
 
     logger.info(
