@@ -680,7 +680,7 @@ def reports_interactive3(request):
 
     return render(
         request,
-        "reports_interactive3.html",
+        "reports/reports_interactive3.html",
         {
             "report_data": report_data,
         },
