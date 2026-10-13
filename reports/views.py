@@ -218,7 +218,7 @@ def reports_interactive(request):
 
     return render(
         request,
-        "reports/reports_interactive.html",
+        "reports_interactive.html",
         {
             "report_data": report_data,
         },
