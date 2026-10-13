@@ -1,5 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
+
+from app.templates.allauth.conftest import user
 from .models import Prospect
 from .forms import ProspectForm, ActionForm, ConvertToCustomerForm
 from django.contrib import messages
@@ -133,23 +135,47 @@ def edit_prospect(request, pk):
 def convert_prospect_to_customer(request, pk):
     prospect = get_object_or_404(Prospect, pk=pk)
 
-    if prospect.created_by_user.company != getattr(request.user, 'company', None):
+    user_company = getattr(request.user, "company", None)
+
+    # Ensure the prospect belongs to the user's company.
+    if prospect.created_by_user.company != user_company:
         raise PermissionDenied
 
     if prospect.converted_customer:
-        messages.warning(request, "This prospect has already been converted to a customer.")
+        messages.warning(
+            request,
+            "This prospect has already been converted to a customer."
+        )
         return redirect("prospect_profile", pk=prospect.pk)
 
     if request.method == "POST":
         form = ConvertToCustomerForm(request.POST)
+
         if form.is_valid():
             customer = prospect.convert_to_customer(
                 payment_terms=form.cleaned_data["payment_terms"],
                 payment_method=form.cleaned_data["payment_method"],
             )
-            messages.success(request, f"Prospect '{prospect.name}' converted to Customer.")
+
+            # Assign the customer's company.
+            customer.company = user_company
+            customer.save(update_fields=["company"])
+
+            messages.success(
+                request,
+                f"Prospect '{prospect.name}' converted to Customer."
+            )
+
             return redirect("prospect_profile", pk=prospect.pk)
+
     else:
         form = ConvertToCustomerForm()
 
-    return render(request, "convert_prospect.html", {"prospect": prospect, "form": form})
+    return render(
+        request,
+        "convert_prospect.html",
+        {
+            "prospect": prospect,
+            "form": form,
+        },
+    )
