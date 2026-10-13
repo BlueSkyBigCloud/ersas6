@@ -34,9 +34,9 @@ class ServiceRequestAdmin(admin.ModelAdmin):
 # Admin configuration for Employee
 @admin.register(Employee)
 class EmployeeAdmin(admin.ModelAdmin):
-    list_display = ('employee_number', 'callsign', 'first_name', 'last_name', 'phone_number', 'position', 'department', 'location', 'status')
-    search_fields = ('employee_number', 'callsign', 'first_name', 'last_name', 'phone_number', 'position', 'department', 'location__name', 'status')
-    list_filter = ('employee_number', 'callsign', 'first_name', 'last_name', 'position', 'department', 'location__name', 'status')
+    list_display = ('company', 'employee_number', 'callsign', 'first_name', 'last_name', 'phone_number', 'position', 'department', 'location', 'status')
+    search_fields = ('company', 'employee_number', 'callsign', 'first_name', 'last_name', 'phone_number', 'position', 'department', 'location__name', 'status')
+    list_filter = ('company', 'employee_number', 'callsign', 'first_name', 'last_name', 'position', 'department', 'location__name', 'status')
     readonly_fields = ['company', 'employee_number', 'assigned_user', 'callsign', 'date_hired', 'group', 'created_timestamp', 'created_by_user', 'first_name', 'last_name', 'position', 'phone_number', 'department', 'location', 'status']
 
 # Admin configuration for Equipment
