@@ -152,6 +152,9 @@ def reports_interactive(request):
         # Decrypt fields using the current logged-in user
         employee.decrypt_fields(user=request.user)
 
+        if not employee.decrypt_fields:
+            return render ("N/A")
+
         employee_data.append({
             "id": str(employee.id),
             "employee_number": employee.employee_number or "",
