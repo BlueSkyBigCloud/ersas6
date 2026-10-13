@@ -25,4 +25,4 @@ def decrypt(encrypted_data: str) -> str:
         return "N/A"
     except Exception as e:
         # Handle any other exceptions
-        return f"Decryption failed - {str(e)}"
+        return f"Decryption failed - Note - {str(e)}"
