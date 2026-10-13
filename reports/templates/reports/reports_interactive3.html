@@ -1,0 +1,242 @@
+{% extends "base2.html" %}
+{% load static %}
+
+{% block title %}Interactive Reports{% endblock %}
+
+{% block content %}
+
+
+
+<div class="interactive-reports">
+
+
+<div class="report-header">
+    <h1>Interactive Reports</h1>
+    <p>
+        Select a report, filter the results, view the graph,
+        export the report to CSV, or print the current report.
+    </p>
+</div>
+
+<!-- Controls -->
+<div class="report-controls">
+
+    <div class="control-grid">
+
+        <div class="control-group">
+            <label for="reportType">Report</label>
+
+            <select id="reportType">
+                <option value="service_requests">
+                    Service Requests
+                </option>
+
+                <option value="invoices">
+                    Invoices
+                </option>
+
+                <option value="employees">
+                    Employees
+                </option>
+
+                <option value="equipment">
+                    Equipment
+                </option>
+            </select>
+        </div>
+
+        <div class="control-group">
+            <label for="dateFrom">Date From</label>
+
+            <input
+                type="date"
+                id="dateFrom"
+            >
+        </div>
+
+        <div class="control-group">
+            <label for="dateTo">Date To</label>
+
+            <input
+                type="date"
+                id="dateTo"
+            >
+        </div>
+
+        <div class="control-group">
+            <label for="statusFilter">Status</label>
+
+            <select id="statusFilter">
+                <option value="">All Statuses</option>
+            </select>
+        </div>
+
+        <div class="control-group">
+            <label for="chartType">Chart</label>
+
+            <select id="chartType">
+                <option value="status">
+                    Status Distribution
+                </option>
+
+                <option value="monthly">
+                    Monthly Activity
+                </option>
+
+                <option value="category">
+                    Category / Type
+                </option>
+            </select>
+        </div>
+
+    </div>
+
+    <div class="button-row">
+
+        <button
+            type="button"
+            class="report-button primary"
+            id="applyFilters"
+        >
+            Apply Filters
+        </button>
+
+        <button
+            type="button"
+            class="report-button"
+            id="clearFilters"
+        >
+            Clear Filters
+        </button>
+
+        <button
+            type="button"
+            class="report-button"
+            id="exportCsv"
+        >
+            Export CSV
+        </button>
+
+        <button
+            type="button"
+            class="report-button"
+            id="printReport"
+        >
+            Print Report
+        </button>
+
+    </div>
+
+    <div
+        id="statusMessage"
+        class="status-message"
+        aria-live="polite"
+    ></div>
+
+</div>
+
+<!-- Summary -->
+<div class="summary-grid">
+
+    <div class="summary-card">
+        <div class="label">
+            Total Records
+        </div>
+
+        <div
+            class="value"
+            id="totalRecords"
+        >
+            0
+        </div>
+    </div>
+
+    <div class="summary-card">
+        <div class="label">
+            Filtered Records
+        </div>
+
+        <div
+            class="value"
+            id="filteredRecords"
+        >
+            0
+        </div>
+    </div>
+
+    <div class="summary-card">
+        <div class="label">
+            Report
+        </div>
+
+        <div
+            class="value"
+            id="summaryReport"
+            style="font-size: 20px;"
+        >
+            Service Requests
+        </div>
+    </div>
+
+</div>
+
+<!-- Chart -->
+<div class="chart-panel">
+
+    <div class="panel-header">
+        <h2 id="chartTitle">
+            Status Distribution
+        </h2>
+    </div>
+
+    <div class="chart-container">
+        <canvas id="reportChart"></canvas>
+    </div>
+
+</div>
+
+<!-- Table -->
+<div class="table-panel">
+
+    <div class="panel-header">
+        <h2 id="tableTitle">
+            Service Requests
+        </h2>
+
+        <span id="tableCount">
+            0 records
+        </span>
+    </div>
+
+    <div class="table-container">
+
+        <table class="report-table">
+
+            <thead id="reportTableHead">
+            </thead>
+
+            <tbody id="reportTableBody">
+            </tbody>
+
+        </table>
+
+        <div
+            id="emptyMessage"
+            class="empty-message"
+            style="display: none;"
+        >
+            No records match the selected filters.
+        </div>
+
+    </div>
+
+</div>
+
+
+</div>
+
+{{ report_data|json_script:"report-data" }}
+
+<script src="{% static 'reports/reports_interactive3.js' %}" defer></script>
+
+{% endblock %}
