@@ -42,9 +42,9 @@ class EmployeeAdmin(admin.ModelAdmin):
 # Admin configuration for Equipment
 @admin.register(Equipment)
 class EquipmentAdmin(admin.ModelAdmin):
-    list_display = ('name', 'description','category', 'quantity', 'location')
-    search_fields = ('name', 'description', 'category', 'location__name')
-    list_filter = ('name', 'category','location')
+    list_display = ('stock_number', 'name', 'description','category', 'quantity', 'location', 'created_timestamp', 'created_by_user', 'make', 'model', 'year', 'serial_number', 'status')
+    search_fields = ('stock_number', 'name', 'description', 'category', 'location__name', 'created_by_user__username', 'make', 'model', 'year', 'serial_number', 'status')
+    list_filter = ('name', 'category','location', 'created_timestamp', 'created_by_user__username', 'make', 'model', 'year', 'serial_number', 'status')
     readonly_fields = ['created_timestamp', 'created_by_user', 'name', 'description', 'category', 'quantity', 'location']
 
 from django.utils.html import format_html
