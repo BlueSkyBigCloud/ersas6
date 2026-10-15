@@ -383,6 +383,7 @@ def accountedit_view(request):
 @login_required
 @onboarded()
 def dashboard_view(request):
+    user = request.user
     user_company = getattr(request.user, "company", None)
 
     total_locations = 0
@@ -498,7 +499,7 @@ def dashboard_view(request):
         "total_employees": total_employees,
         "total_service_requests": total_service_requests,
         "equipment_by_category": equipment_by_category,
-        "employees_by_location": employees_by_location,
+        'employees_by_location': user.company.employees.values('location__name').annotate(count=Count('id')),
         "user": request.user,
     }
 
