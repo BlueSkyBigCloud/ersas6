@@ -1029,7 +1029,7 @@ def edit_service_request(request, id):
         form.fields['equipment'].queryset = Equipment.objects.filter(company=user_company)
         form.fields['service_type'].queryset = ServiceType.objects.filter(company=user_company)
 
-    return render(request, 'service_request_form.html', {'form': form, 'service_request': service_request})
+    return render(request, 'service_request_form_edit.html', {'form': form, 'service_request': service_request})
 
 from .models import ServiceRequest
 from django.http import JsonResponse
