@@ -63,13 +63,13 @@
     </ul>
 
     <h2>Service Requests</h2>
-    <div class="account-actions">
-        <a class="button" href="{% url 'calendar_view' %}">View Calendar</a> 
-    </div>
     <ul>
         <li>Today's Requests: {{ service_requests_today }}</li>
         <li>This Week's Requests: {{ service_requests_week }}</li>
     </ul>
+    <div class="account-actions">
+        <a class="button" href="{% url 'calendar_view' %}">View Calendar</a> 
+    </div>
 
 
 
