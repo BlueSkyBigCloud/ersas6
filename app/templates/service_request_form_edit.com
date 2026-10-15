@@ -1,0 +1,40 @@
+{% extends 'base2.html' %}
+
+{% block title %}Edit Service Request{% endblock %}
+
+{% block content %}
+<main>
+    <h2>Edit Service Request</h2>
+
+    <form method="post">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+        
+        {% for field in form %}
+        <div class="form-group">
+            {{ field.label_tag }}
+            <div style="display: flex; align-items: center;">
+                {{ field }}
+                {% if field.name == "start_location" %}
+                <a href="{% url 'location_create' %}" class="button small" style="margin-left: 10px;">Create New Location</a>
+                {% elif field.name == "end_location" %}
+                <a href="{% url 'location_create' %}" class="button small" style="margin-left: 10px;">Create New Location</a>
+                {% elif field.name == "equipment" %}
+                <a href="{% url 'equipment_create' %}" class="button small" style="margin-left: 10px;">Create New Equipment</a>
+                {% elif field.name == "employee" %}
+                <a href="{% url 'employee_create' %}" class="button small" style="margin-left: 10px;">Create New Employee</a>
+                {% elif field.name == "service_type" %}
+                <a href="{% url 'create_servicetype' %}" class="button small" style="margin-left: 10px;">Create New Service Type</a>
+                {% elif field.name == "customer" %}
+                <a href="{% url 'add_customer' %}" class="button small" style="margin-left: 10px;">Create Customer</a>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+        
+        <button type="submit" class="button">Submit</button>
+    </form>
+</main>
+{% endblock %}
+
+

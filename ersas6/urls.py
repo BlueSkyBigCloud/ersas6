@@ -115,15 +115,16 @@ urlpatterns = [
     path('config/', config_view, name='config'),
 
     path('fetch_service_requests/', fetch_service_requests, name='fetch_service_requests'),  # URL to fetch service requests
-    path('service-request/create/', create_service_request, name='create_service_request'),
     path('service_list/', service_request_list, name='service_list'),
     
-    path('service-request/detail/<uuid:id>/', servicerequest_detail, name='servicerequest_detail'),
     path('service-request/detail/<uuid:id>/', servicerequest_detail, name='servicerequest_detail'),
     path('service-request/update/<uuid:id>/assign_employee/', assign_employee_servicerequest, name='assign_employee_servicerequest'),
     path('service-request/detail/<uuid:id>/add-notes', add_note, name='add_note'),
     path('service-request/detail/<uuid:id>/delete/', servicerequest_delete, name='servicerequest_delete'),
     path('service-request/edit/<uuid:id>/', edit_service_request, name='servicerequest_edit'),
+    path('service-request/create/', create_service_request, name='create_service_request'),
+    path('service-request/detail/<uuid:id>/create_quote', create_quote, name='create_quote'),
+    path('service-request/detail/<uuid:id>/create_invoice', create_invoice, name='create_invoice'),
 
     path('cost-sheet/<uuid:service_request_id>/', cost_sheet_view, name='cost_sheet_view'),
     path('cost-sheet/<uuid:service_request_id>/edit/', cost_sheet_edit, name='cost_sheet_edit'),
@@ -131,13 +132,11 @@ urlpatterns = [
     path('invoices/', invoicelist_view, name='invoice_list'),
     path('invoice/<int:id>/', invoice_detail, name='invoice_detail'),
     path('invoices/<uuid:customer_id>/', invoicecustomerlist_view, name='invoice_customer_list'),
-    path('service-request/detail/<uuid:id>/create_invoice', create_invoice, name='create_invoice'),
     path('invoice/<int:invoice_id>/edit/', edit_invoice, name='edit_invoice'),
 
     path('quotes/', quotelist_view, name='quote_list'),
     path('quote/<int:id>/', quote_detail, name='quote_detail'),
     path('quotes/<uuid:customer_id>/', quotecustomerlist_view, name='quote_customer_list'),
-    path('service-request/detail/<uuid:id>/create_quote', create_quote, name='create_quote'),
     path('quote/<int:quote_id>/edit/', edit_quote, name='edit_quote'),
 
     path('locations/', location_list, name='location_list'),
@@ -237,8 +236,7 @@ urlpatterns = [
 
     path('geocode5/', geocode5_view, name='geocode5'),
 
-    path('sitemap.xml', sitemap, {'sitemaps': sitemaps},
-         name='django.contrib.sitemaps.views.sitemap'),
+    path('sitemap.xml', sitemap, {'sitemaps': sitemaps}, name='django.contrib.sitemaps.views.sitemap'),
 
     path("robots.txt", TemplateView.as_view(template_name="robots.txt", content_type="text/plain")),
 
