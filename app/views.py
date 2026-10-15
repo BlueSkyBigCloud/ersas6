@@ -317,10 +317,6 @@ def logout_view(request):
 @login_required
 @onboarded()
 def account_view(request):
-    """
-    Redirect users based on their onboarding status and company association.
-    Also renders account dashboard with service request summaries.
-    """
     user = request.user
     user_company = getattr(request.user, 'company', None) 
 
@@ -385,6 +381,10 @@ def accountedit_view(request):
 def dashboard_view(request):
     user = request.user
     user_company = getattr(request.user, "company", None)
+
+    today = timezone.now().date()
+    week_start = today - timedelta(days=today.weekday())  # Monday
+    week_end = week_start + timedelta(days=6)
 
     total_locations = 0
     total_equipment = 0
@@ -478,17 +478,17 @@ def dashboard_view(request):
             else:
                 location_totals[location_name] = 1
 
-        employees_by_location = [
-            {
-                "location__name": location,
-                "count": count,
-            }
-            for location, count in sorted(
-                location_totals.items(),
-                key=lambda row: row[1],
-                reverse=True,
-            )
-        ]
+        service_requests_today = ServiceRequest.objects.filter(
+                company=user_company,
+                start_date__lte=today,
+                end_date__gte=today
+            ).count()
+        
+        service_requests_week = ServiceRequest.objects.filter(
+                company=user_company,
+                start_date__lte=week_end,
+                end_date__gte=week_start
+            ).count()
 
     # -------------------------------------------------
     # Dashboard Context
@@ -501,6 +501,8 @@ def dashboard_view(request):
         "equipment_by_category": equipment_by_category,
         'employees_by_location': user.company.employees.values('location__name').annotate(count=Count('id')),
         "user": request.user,
+        'service_requests_today': service_requests_today,
+        'service_requests_week': service_requests_week,
     }
 
     return render(request, "dashboard.html", context)
