@@ -1163,10 +1163,11 @@ from .importers import read_import_rows
 from app.models import *
 
 def truncate_model_data(model, model_data):
-    """
-    Truncate string values to the max_length defined on the model fields.
-    Preserve foreign keys and non-string values.
-    """
+    if not isinstance(model_data, dict):
+        raise TypeError(
+            "model_data must be a dictionary."
+        )
+
     truncated_data = model_data.copy()
 
     for field_name, value in truncated_data.items():
@@ -1182,6 +1183,8 @@ def truncate_model_data(model, model_data):
 
         if max_length and len(value) > max_length:
             truncated_data[field_name] = value[:max_length]
+
+    return truncated_data
 
 
 @login_required
@@ -1517,10 +1520,12 @@ def integration_create_import_models(request, import_id):
                     model_data,
                 )
 
+                if not isinstance(model_data, dict):
+                    raise TypeError(
+                        "truncate_model_data() must return a dictionary."
+                    )
 
-                target_model.objects.create(
-                    **model_data
-                )
+                target_model.objects.create(**model_data)
 
         except IntegrityError as exc:
 
