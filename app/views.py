@@ -345,13 +345,41 @@ def account_view(request):
         end_date__gte=week_start
     ).count()
 
+    equipment = Equipment.objects.filter(
+                company=user_company
+            )
+    
+    category_totals = {}
+
+    equipments = Equipment.objects.filter(
+        company=user_company
+    )
+    
+
+    for equipment in equipments:
+                equipment.decrypt_fields(user=request.user)
+    
+                category_name = equipment.category or "Uncategorized"
+                quantity = equipment.quantity or 0
+    
+                category_totals[category_name] = (
+                    category_totals.get(category_name, 0) + quantity
+                )
+
+    equipment_by_category = [
+                {
+                    "category": category,
+                    "total": total,
+                }
+                for category, total in sorted(category_totals.items())]
+
     context = {
         'user': user,
         'total_locations': user.company.locations.count(),
         'total_equipment': user.company.equipments.count(),
         'total_employees': user.company.employees.count(),
         'total_service_requests': ServiceRequest.objects.filter(company=user_company).count(),
-        'equipment_by_category': user.company.equipments.values('category').annotate(total=Count('id')),
+        'equipment_by_category': equipment_by_category,
         'employees_by_location': user.company.employees.values('location__name').annotate(count=Count('id')),
         'service_requests_today': service_requests_today,
         'service_requests_week': service_requests_week,
