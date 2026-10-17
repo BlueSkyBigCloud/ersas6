@@ -1,0 +1,536 @@
+
+.pfo-marketing {
+    --pfo-navy: #10243a;
+    --pfo-navy-deep: #091827;
+    --pfo-green: #28a745;
+    --pfo-green-dark: #218838;
+    --pfo-text: #263648;
+    --pfo-muted: #667586;
+    --pfo-border: #e0e7ee;
+    --pfo-surface: #f4f7fa;
+    color: var(--pfo-text);
+    font-family: inherit;
+    line-height: 1.7;
+    overflow: hidden;
+}
+
+.pfo-marketing *,
+.pfo-marketing *::before,
+.pfo-marketing *::after {
+    box-sizing: border-box;
+}
+
+.pfo-marketing h1,
+.pfo-marketing h2,
+.pfo-marketing h3,
+.pfo-marketing p,
+.pfo-marketing figure {
+    margin-top: 0;
+}
+
+.pfo-marketing h1,
+.pfo-marketing h2,
+.pfo-marketing h3 {
+    line-height: 1.2;
+}
+
+.pfo-marketing h1,
+.pfo-marketing h2 {
+    letter-spacing: -0.035em;
+}
+
+.pfo-marketing a {
+    text-decoration: none;
+}
+
+.pfo-hero {
+    position: relative;
+    padding: 100px 24px 88px;
+    background: linear-gradient(
+        135deg,
+        var(--pfo-navy-deep) 0%,
+        var(--pfo-navy) 65%,
+        #183b51 100%
+    );
+    color: #fff;
+}
+
+.pfo-hero::after {
+    position: absolute;
+    right: -130px;
+    bottom: -230px;
+    width: 520px;
+    height: 520px;
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    border-radius: 50%;
+    content: "";
+    pointer-events: none;
+}
+
+.pfo-hero-content {
+    position: relative;
+    z-index: 1;
+    max-width: 1060px;
+    margin: 0 auto;
+}
+
+.pfo-eyebrow {
+    display: inline-block;
+    margin-bottom: 18px;
+    color: var(--pfo-green);
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.13em;
+    line-height: 1.5;
+}
+
+.pfo-hero h1 {
+    max-width: 850px;
+    margin-bottom: 24px;
+    font-size: clamp(2.5rem, 5.5vw, 4.5rem);
+    font-weight: 800;
+}
+
+.pfo-hero-description {
+    max-width: 740px;
+    margin-bottom: 30px;
+    color: #d4dfeb;
+    font-size: clamp(1.05rem, 2vw, 1.25rem);
+}
+
+.pfo-hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin-bottom: 38px;
+}
+
+.pfo-button {
+    display: inline-flex;
+    min-height: 50px;
+    align-items: center;
+    justify-content: center;
+    padding: 13px 24px;
+    border: 2px solid transparent;
+    border-radius: 7px;
+    font-size: 0.96rem;
+    font-weight: 750;
+    line-height: 1.3;
+    text-align: center;
+    transition: background-color 0.2s ease,
+                border-color 0.2s ease,
+                transform 0.2s ease;
+}
+
+.pfo-button:hover {
+    transform: translateY(-2px);
+}
+
+.pfo-button-primary {
+    background: var(--pfo-green);
+    color: #fff;
+}
+
+.pfo-button-primary:hover {
+    background: var(--pfo-green-dark);
+    color: #fff;
+}
+
+.pfo-button-secondary {
+    border-color: rgba(255, 255, 255, 0.45);
+    background: transparent;
+    color: #fff;
+}
+
+.pfo-button-secondary:hover {
+    border-color: #fff;
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+}
+
+.pfo-hero-highlights {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 28px;
+    color: #d4dfeb;
+    font-size: 0.9rem;
+}
+
+.pfo-hero-highlights span::before {
+    margin-right: 9px;
+    color: #52d878;
+    content: "✓";
+    font-weight: 800;
+}
+
+.pfo-introduction {
+    padding: 86px 24px;
+    background: #fff;
+}
+
+.pfo-section-heading {
+    max-width: 800px;
+    margin: 0 auto 46px;
+    text-align: center;
+}
+
+.pfo-section-heading h2,
+.pfo-showcase-content h2,
+.pfo-pricing-content > h2 {
+    margin-bottom: 18px;
+    color: var(--pfo-navy);
+    font-size: clamp(1.9rem, 4vw, 2.8rem);
+    font-weight: 800;
+}
+
+.pfo-section-heading > p,
+.pfo-showcase-content > p,
+.pfo-pricing-content > p {
+    color: var(--pfo-muted);
+    font-size: 1.05rem;
+}
+
+.pfo-feature-grid {
+    display: grid;
+    max-width: 1100px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 24px;
+    margin: 0 auto;
+}
+
+.pfo-feature-card {
+    padding: 30px;
+    border: 1px solid var(--pfo-border);
+    border-radius: 12px;
+    background: #fff;
+    box-shadow: 0 8px 24px rgba(16, 36, 58, 0.04);
+}
+
+.pfo-feature-number {
+    display: flex;
+    width: 44px;
+    height: 44px;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 24px;
+    border-radius: 9px;
+    background: #e7f6eb;
+    color: var(--pfo-green-dark);
+    font-weight: 800;
+}
+
+.pfo-feature-card h3 {
+    margin-bottom: 12px;
+    color: var(--pfo-navy);
+    font-size: 1.25rem;
+}
+
+.pfo-feature-card p {
+    margin-bottom: 0;
+    color: var(--pfo-muted);
+}
+
+.pfo-showcase {
+    display: grid;
+    grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+    align-items: center;
+    gap: 56px;
+    padding: 82px max(24px, calc((100% - 1180px) / 2));
+}
+
+.pfo-showcase-light {
+    background: var(--pfo-surface);
+}
+
+.pfo-showcase-reverse {
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+    background: #fff;
+}
+
+.pfo-showcase-reverse .pfo-showcase-content {
+    order: 2;
+}
+
+.pfo-showcase-reverse .pfo-showcase-image {
+    order: 1;
+}
+
+.pfo-showcase-content h2 {
+    font-size: clamp(1.8rem, 3.5vw, 2.65rem);
+}
+
+.pfo-showcase-content > p {
+    margin-bottom: 20px;
+}
+
+.pfo-showcase-image {
+    min-width: 0;
+    margin-bottom: 0;
+}
+
+.pfo-showcase-image img {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: 520px;
+    border: 1px solid var(--pfo-border);
+    border-radius: 12px;
+    background: #fff;
+    box-shadow: 0 14px 38px rgba(16, 36, 58, 0.12);
+    object-fit: contain;
+}
+
+.pfo-map-image img {
+    max-height: 520px;
+}
+
+.pfo-analysis-image img {
+    max-height: 460px;
+}
+
+.pfo-service-image img {
+    max-width: 620px;
+    max-height: 520px;
+    margin: 0 auto;
+}
+
+.pfo-showcase-image figcaption {
+    margin-top: 13px;
+    color: var(--pfo-muted);
+    font-size: 0.88rem;
+    text-align: center;
+}
+
+.pfo-benefit-list {
+    display: grid;
+    gap: 10px;
+    padding-left: 0;
+    list-style: none;
+}
+
+.pfo-benefit-list li {
+    position: relative;
+    padding-left: 28px;
+}
+
+.pfo-benefit-list li::before {
+    position: absolute;
+    left: 0;
+    color: var(--pfo-green-dark);
+    content: "✓";
+    font-weight: 800;
+}
+
+.pfo-pricing-section {
+    padding: 88px 24px;
+    background: #edf2f6;
+    text-align: center;
+}
+
+.pfo-pricing-content {
+    max-width: 850px;
+    margin: 0 auto;
+}
+
+.pfo-pricing-content > p {
+    max-width: 650px;
+    margin: 0 auto 35px;
+}
+
+.pfo-pricing-card {
+    max-width: 540px;
+    margin: 0 auto;
+    padding: 38px;
+    border: 1px solid var(--pfo-border);
+    border-radius: 14px;
+    background: #fff;
+    box-shadow: 0 15px 45px rgba(16, 36, 58, 0.08);
+    text-align: left;
+}
+
+.pfo-pricing-card h3 {
+    margin-bottom: 10px;
+    color: var(--pfo-navy);
+    font-size: 1.5rem;
+}
+
+.pfo-pricing-description {
+    margin-bottom: 28px;
+    color: var(--pfo-muted);
+}
+
+.pfo-price {
+    display: flex;
+    align-items: flex-start;
+    color: var(--pfo-green-dark);
+    line-height: 1;
+}
+
+.pfo-price-currency {
+    padding-top: 9px;
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.pfo-price-amount {
+    font-size: 4.5rem;
+    font-weight: 850;
+    letter-spacing: -0.06em;
+}
+
+.pfo-price-unit {
+    margin: 8px 0 26px;
+    color: var(--pfo-muted);
+}
+
+.pfo-pricing-benefits {
+    display: grid;
+    gap: 12px;
+    margin: 0 0 30px;
+    padding: 24px 0 0;
+    border-top: 1px solid var(--pfo-border);
+    list-style: none;
+}
+
+.pfo-pricing-benefits li {
+    position: relative;
+    padding-left: 28px;
+}
+
+.pfo-pricing-benefits li::before {
+    position: absolute;
+    left: 0;
+    color: var(--pfo-green-dark);
+    content: "✓";
+    font-weight: 800;
+}
+
+.pfo-pricing-button {
+    width: 100%;
+}
+
+.pfo-pricing-note {
+    margin: 17px 0 0;
+    color: var(--pfo-muted);
+    font-size: 0.85rem;
+    text-align: center;
+}
+
+.pfo-final-cta {
+    padding: 75px 24px;
+    background: var(--pfo-navy);
+    color: #fff;
+    text-align: center;
+}
+
+.pfo-final-cta h2 {
+    margin-bottom: 18px;
+    font-size: clamp(1.8rem, 4vw, 2.7rem);
+}
+
+.pfo-final-cta p {
+    max-width: 700px;
+    margin: 0 auto 28px;
+    color: #d4dfeb;
+    font-size: 1.05rem;
+}
+
+.pfo-button-light {
+    background: #fff;
+    color: var(--pfo-navy);
+}
+
+.pfo-button-light:hover {
+    background: #e7edf3;
+    color: var(--pfo-navy);
+}
+
+.pfo-marketing a:focus-visible {
+    outline: 3px solid #70d98b;
+    outline-offset: 4px;
+}
+
+@media (max-width: 900px) {
+    .pfo-hero {
+        padding: 76px 24px;
+    }
+
+    .pfo-feature-grid {
+        grid-template-columns: 1fr;
+        max-width: 620px;
+    }
+
+    .pfo-showcase,
+    .pfo-showcase-reverse {
+        grid-template-columns: 1fr;
+        gap: 32px;
+        padding: 65px 24px;
+    }
+
+    .pfo-showcase-reverse .pfo-showcase-content,
+    .pfo-showcase-reverse .pfo-showcase-image {
+        order: initial;
+    }
+
+    .pfo-showcase-image {
+        width: 100%;
+        max-width: 720px;
+        margin: 0 auto;
+    }
+}
+
+@media (max-width: 560px) {
+    .pfo-hero {
+        padding: 60px 20px;
+    }
+
+    .pfo-hero h1 {
+        font-size: 2.45rem;
+    }
+
+    .pfo-hero-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .pfo-hero-highlights {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .pfo-introduction,
+    .pfo-pricing-section {
+        padding: 60px 20px;
+    }
+
+    .pfo-showcase,
+    .pfo-showcase-reverse {
+        padding: 55px 20px;
+    }
+
+    .pfo-feature-card {
+        padding: 24px;
+    }
+
+    .pfo-pricing-card {
+        padding: 26px 22px;
+    }
+
+    .pfo-price-amount {
+        font-size: 3.8rem;
+    }
+
+    .pfo-final-cta {
+        padding: 60px 20px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .pfo-button {
+        transition: none;
+    }
+
+    .pfo-button:hover {
+        transform: none;
+    }
+}

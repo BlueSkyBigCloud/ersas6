@@ -126,6 +126,35 @@ def products1_view(request):
     return render(request, 'products2.html', {'apk': apk})
 
 
+
+def products3_view(request):
+    apk = APKFile.objects.all()
+    if request.method == 'POST':
+        price_id = request.POST.get('price_id', None)
+
+        if price_id:
+            try:
+                # Create a Stripe Checkout Session for subscriptions
+                checkout_session = stripe.checkout.Session.create(
+                    payment_method_types=['card'],
+                    mode='subscription',  # <-- FIX: subscription mode
+                    line_items=[{
+                        'price': price_id,
+                        'quantity': 1,
+                    }],
+                    success_url=request.build_absolute_uri('/success/') + '?session_id={CHECKOUT_SESSION_ID}',
+                    cancel_url=request.build_absolute_uri('/cancel/'),
+                )
+
+                return redirect(checkout_session.url, code=303)
+
+            except Exception as e:
+                print(f"Stripe error: {e}")
+                return redirect('products')
+
+    return render(request, 'products3.html', {'apk': apk})
+
+
 def store1_view(request):
     if request.method == "POST":
         # Get user-entered amount (convert dollars to cents)

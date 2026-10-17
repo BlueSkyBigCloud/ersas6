@@ -177,6 +177,7 @@ urlpatterns = [
 
     path('products1', products1_view, name='products1'),
     path('digitalsolutions', products1_view, name='digitalsolutions'),
+    path('digitalsolutions3', products3_view, name='digitalsolutions3'),
 
     path('products/', products_view, name='products'),
     path('stripe_webhook/', stripe_webhook, name ='stripe_webhook'),

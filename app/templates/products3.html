@@ -1,0 +1,211 @@
+
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}PROFOROPS | Security Operations & Pricing Intelligence{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/products2.css' %}">
+
+<main class="pfo-marketing">
+
+    <section class="pfo-hero">
+        <div class="pfo-hero-content">
+            <span class="pfo-eyebrow">SECURITY OPERATIONS PLATFORM</span>
+
+            <h1>Run Smarter. Price Better. Operate with Confidence.</h1>
+
+            <p class="pfo-hero-description">
+                PROFOROPS brings security logistics, resource management,
+                service coordination, and pricing intelligence together
+                in one enterprise platform.
+            </p>
+
+            <div class="pfo-hero-actions">
+                <a href="{% url 'contact_us' %}" class="pfo-button pfo-button-primary">
+                    Get Started
+                </a>
+                <a href="#platform-features" class="pfo-button pfo-button-secondary">
+                    Explore the Platform
+                </a>
+            </div>
+
+            <div class="pfo-hero-highlights">
+                <span>Operations Management</span>
+                <span>Pricing Intelligence</span>
+                <span>Business Analytics</span>
+            </div>
+        </div>
+    </section>
+
+    <section class="pfo-introduction" id="platform-features">
+        <div class="pfo-section-heading">
+            <span class="pfo-eyebrow">ONE CONNECTED PLATFORM</span>
+            <h2>Built for the Demands of Security Operations</h2>
+            <p>
+                Manage your people, equipment, service requests, and customer
+                billing while using pricing insights to support more informed
+                business decisions.
+            </p>
+        </div>
+
+        <div class="pfo-feature-grid">
+            <article class="pfo-feature-card">
+                <div class="pfo-feature-number">01</div>
+                <h3>Pricing Intelligence</h3>
+                <p>
+                    Evaluate service pricing in your area and use available
+                    market insights to inform your pricing strategy.
+                </p>
+            </article>
+
+            <article class="pfo-feature-card">
+                <div class="pfo-feature-number">02</div>
+                <h3>Resource Management</h3>
+                <p>
+                    Organize employee information, equipment, locations,
+                    and operational resources in one place.
+                </p>
+            </article>
+
+            <article class="pfo-feature-card">
+                <div class="pfo-feature-number">03</div>
+                <h3>Service Coordination</h3>
+                <p>
+                    Coordinate service requests, track assignments,
+                    and connect operational activity with customer billing.
+                </p>
+            </article>
+        </div>
+    </section>
+
+    <section class="pfo-showcase pfo-showcase-light">
+        <div class="pfo-showcase-content">
+            <span class="pfo-eyebrow">MAKE INFORMED PRICING DECISIONS</span>
+            <h2>Understand Your Competitive Landscape</h2>
+            <p>
+                Use geographic pricing insights to evaluate comparable
+                services in your area. Make more informed decisions when
+                developing pricing strategies and responding to client needs.
+            </p>
+        </div>
+
+        <figure class="pfo-showcase-image pfo-map-image">
+            <img
+                src="{% static 'images/ts_map_view.jpg' %}"
+                alt="PROFOROPS geographic pricing comparison map"
+                loading="lazy"
+            >
+            <figcaption>
+                Geographic pricing insights for security services.
+            </figcaption>
+        </figure>
+    </section>
+
+    <section class="pfo-showcase pfo-showcase-reverse">
+        <div class="pfo-showcase-content">
+            <span class="pfo-eyebrow">ANALYTICS FOR BETTER BIDS</span>
+            <h2>Turn Pricing Data into Business Decisions</h2>
+            <p>
+                Apply analytical methods to evaluate pricing, understand
+                distributions, and support the development of competitive
+                proposals for your clients.
+            </p>
+        </div>
+
+        <figure class="pfo-showcase-image pfo-analysis-image">
+            <img
+                src="{% static 'images/normalcurve.jpg' %}"
+                alt="Statistical distribution analysis for pricing decisions"
+                loading="lazy"
+            >
+            <figcaption>
+                Analytical tools to support pricing and bid evaluation.
+            </figcaption>
+        </figure>
+    </section>
+
+    <section class="pfo-showcase pfo-showcase-light">
+        <div class="pfo-showcase-content">
+            <span class="pfo-eyebrow">STREAMLINE DAILY OPERATIONS</span>
+            <h2>Connect Service Delivery with Customer Billing</h2>
+            <p>
+                Coordinate service requests, organize assignments, schedule
+                work, and connect service activity with invoices and customer
+                billing.
+            </p>
+
+            <ul class="pfo-benefit-list">
+                <li>Service request coordination</li>
+                <li>Employee and equipment organization</li>
+                <li>Invoice and customer billing workflows</li>
+            </ul>
+        </div>
+
+        <figure class="pfo-showcase-image pfo-service-image">
+            <img
+                src="{% static 'images/ts_defined_servicerequest1.jpg' %}"
+                alt="PROFOROPS service request management interface"
+                loading="lazy"
+            >
+            <figcaption>
+                Service coordination and billing workflows.
+            </figcaption>
+        </figure>
+    </section>
+
+    <section class="pfo-pricing-section" id="pricing">
+        <div class="pfo-pricing-content">
+            <span class="pfo-eyebrow">PROFOROPS ENTERPRISE PLATFORM</span>
+            <h2>Bring Your Operations Together</h2>
+            <p>
+                Get a connected platform for security logistics,
+                operational coordination, and pricing intelligence.
+            </p>
+
+            <div class="pfo-pricing-card">
+                <h3>PROFOROPS Digital Solutions</h3>
+                <p class="pfo-pricing-description">
+                    Security Logistics, CRM, and Operations Analysis
+                </p>
+
+                <div class="pfo-price">
+                    <span class="pfo-price-currency">$</span>
+                    <span class="pfo-price-amount">590</span>
+                </div>
+
+                <p class="pfo-price-unit">Per organization</p>
+
+                <ul class="pfo-pricing-benefits">
+                    <li>Operational resource management</li>
+                    <li>Service request coordination</li>
+                    <li>Customer and invoice workflows</li>
+                    <li>Pricing intelligence and analysis</li>
+                </ul>
+
+                <a href="{% url 'contact_us' %}"
+                   class="pfo-button pfo-button-primary pfo-pricing-button">
+                    Contact Us to Get Started
+                </a>
+
+                <p class="pfo-pricing-note">
+                    Contact our team for platform and subscription details.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <section class="pfo-final-cta">
+        <h2>Ready to Improve How You Operate?</h2>
+        <p>
+            Discover how PROFOROPS can help your organization coordinate
+            resources, manage service delivery, and make more informed
+            business decisions.
+        </p>
+        <a href="{% url 'contact_us' %}" class="pfo-button pfo-button-light">
+            Talk to Our Team
+        </a>
+    </section>
+
+</main>
+{% endblock %}
