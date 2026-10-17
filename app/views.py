@@ -666,14 +666,11 @@ def equipment_list(request):
     ).order_by('id')
 
     # Paginate the QuerySet
-    paginator = Paginator(equipments, 50)  # Show 10 equipments per page
-    page_number = request.GET.get('page')  # Get the current page number from the query string
-    page_obj = paginator.get_page(page_number)  # Get the equipments for the current page
-
-    # Decrypt fields for each equipment only if the company matches
+    paginator = Paginator(equipments, 50)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
     for equipment in page_obj.object_list:
-        created_by_company = getattr(equipment.created_by_user, 'company', None)
-        if created_by_company == user_company:
+        if equipment.company == user_company:
             equipment.decrypt_fields(user=request.user)
 
     # Check if no equipment exists
