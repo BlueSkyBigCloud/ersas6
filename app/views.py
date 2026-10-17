@@ -666,7 +666,7 @@ def equipment_list(request):
     ).order_by('id')
 
     # Paginate the QuerySet
-    paginator = Paginator(equipments, 10)  # Show 10 equipments per page
+    paginator = Paginator(equipments, 50)  # Show 10 equipments per page
     page_number = request.GET.get('page')  # Get the current page number from the query string
     page_obj = paginator.get_page(page_number)  # Get the equipments for the current page
 
