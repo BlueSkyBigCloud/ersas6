@@ -176,7 +176,7 @@ urlpatterns = [
     path('company/createinvite/', create_invite, name='create_invite'),
 
     path('products1', products1_view, name='products1'),
-    path('digitalsolutions', products1_view, name='digitalsolutions'),
+    path('digitalsolutions', products3_view, name='digitalsolutions'),
     path('digitalsolutions3', products3_view, name='digitalsolutions3'),
 
     path('products/', products_view, name='products'),
