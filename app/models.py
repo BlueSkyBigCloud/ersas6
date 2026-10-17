@@ -101,6 +101,8 @@ class Equipment(models.Model):
     latitude = models.FloatField(null=True, blank=True)
     longitude = models.FloatField(null=True, blank=True)
     loc_last_updated = models.DateTimeField(null=True, blank=True)
+    serial_number = models.CharField(max_length=255, blank=True, null=True)
+    status = models.CharField(max_length=100, default='Available')  # Example status field
     
     company = models.ForeignKey(
         'app.Company', 
