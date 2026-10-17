@@ -95,7 +95,7 @@ class Equipment(models.Model):
     year = models.PositiveIntegerField(default=1990)
     miles_hours = models.PositiveIntegerField(default=0000)
     quantity = models.PositiveIntegerField(default=0)
-    location = models.ForeignKey('Location', on_delete=models.CASCADE)  # Assuming Location model exists
+    location = models.ForeignKey('Location', on_delete=models.CASCADE, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     latitude = models.FloatField(null=True, blank=True)
