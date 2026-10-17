@@ -1162,6 +1162,27 @@ from django.views.decorators.http import require_POST
 from .importers import read_import_rows
 from app.models import *
 
+def truncate_model_data(model, model_data):
+    """
+    Truncate string values to the max_length defined on the model fields.
+    Preserve foreign keys and non-string values.
+    """
+    truncated_data = model_data.copy()
+
+    for field_name, value in truncated_data.items():
+        if value is None or not isinstance(value, str):
+            continue
+
+        try:
+            field = model._meta.get_field(field_name)
+        except Exception:
+            continue
+
+        max_length = getattr(field, "max_length", None)
+
+        if max_length and len(value) > max_length:
+            truncated_data[field_name] = value[:max_length]
+
 
 @login_required
 @require_POST
@@ -1490,6 +1511,12 @@ def integration_create_import_models(request, import_id):
         try:
 
             with transaction.atomic():
+
+                model_data = truncate_model_data(
+                    target_model,
+                    model_data,
+                )
+
 
                 target_model.objects.create(
                     **model_data
